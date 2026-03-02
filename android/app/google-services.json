@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "954417312512",
+    "project_id": "coresync-e7fb5",
+    "storage_bucket": "coresync-e7fb5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:954417312512:android:81fceb96075cf33f3079e5",
+        "android_client_info": {
+          "package_name": "com.example.coresync"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHCdbgJrhKau9OWs6pjflGFlc8oD3CtFs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
