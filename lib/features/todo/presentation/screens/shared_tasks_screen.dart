@@ -121,7 +121,7 @@ class _SharedTaskTile extends StatelessWidget {
               ),
             const SizedBox(height: 4),
             Text(
-              'Owner: ${task.ownerPhone}',
+              'Owner: ${task.ownerEmail}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                   ),

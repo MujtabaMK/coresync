@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/utils/date_helpers.dart';
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../../core/widgets/confirm_dialog.dart';
-import '../../../../core/widgets/loading_widget.dart';
 import '../../domain/task_model.dart';
 import '../../domain/task_status.dart';
 import '../providers/todo_provider.dart';
@@ -22,39 +21,21 @@ class TaskDetailScreen extends StatefulWidget {
 }
 
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
-  TaskModel? _task;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTask();
-  }
-
-  Future<void> _loadTask() async {
-    setState(() => _isLoading = true);
-    final repo = context.read<TodoCubit>().repository;
-    final task = await repo.getTaskById(widget.taskId);
-    if (mounted) {
-      setState(() {
-        _task = task;
-        _isLoading = false;
-      });
+  TaskModel? _findTask(TodoState state) {
+    for (final t in state.myTasks) {
+      if (t.id == widget.taskId) return t;
     }
-  }
-
-  bool get _isOwner {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    return uid != null && _task != null && _task!.ownerId == uid;
+    for (final t in state.sharedTasks) {
+      if (t.id == widget.taskId) return t;
+    }
+    return null;
   }
 
   Future<void> _changeStatus(TaskStatus newStatus) async {
     try {
-      final repo = context.read<TodoCubit>().repository;
-      await repo.updateTaskStatus(widget.taskId, newStatus);
+      await context.read<TodoCubit>().updateTaskStatus(widget.taskId, newStatus);
       if (mounted) {
         showSuccessSnackBar(context, 'Status updated to ${newStatus.label}');
-        _loadTask();
       }
     } catch (e) {
       if (mounted) showErrorSnackBar(context, e.toString());
@@ -62,7 +43,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   Future<void> _deleteTask() async {
-    final repo = context.read<TodoCubit>().repository;
     final confirmed = await showConfirmDialog(
       context,
       title: 'Delete Task',
@@ -72,7 +52,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     if (!confirmed || !mounted) return;
 
     try {
-      await repo.deleteTask(widget.taskId);
+      await context.read<TodoCubit>().deleteTask(widget.taskId);
       if (mounted) {
         showSuccessSnackBar(context, 'Task deleted');
         context.pop();
@@ -84,156 +64,160 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Task Details')),
-        body: const LoadingWidget(message: 'Loading task...'),
-      );
-    }
+    return BlocSelector<TodoCubit, TodoState, TaskModel?>(
+      selector: (state) => _findTask(state),
+      builder: (context, task) {
+        if (task == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Task Details')),
+            body: const Center(child: Text('Task not found.')),
+          );
+        }
 
-    if (_task == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Task Details')),
-        body: const Center(child: Text('Task not found.')),
-      );
-    }
+        final theme = Theme.of(context);
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        final isOwner = uid != null && task.ownerId == uid;
 
-    final task = _task!;
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Task Details'),
-        actions: [
-          if (_isOwner) ...[
-            IconButton(
-              icon: const Icon(Icons.edit),
-              tooltip: 'Edit',
-              onPressed: () async {
-                await context.push('/todo/edit/${task.id}');
-                _loadTask();
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.share),
-              tooltip: 'Share',
-              onPressed: () => context.push('/todo/share/${task.id}'),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: 'Delete',
-              onPressed: _deleteTask,
-            ),
-          ],
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title
-            Text(
-              task.title,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Status badge
-            Row(
-              children: [
-                const Text('Status: '),
-                StatusBadge(status: task.status),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Status change dropdown
-            DropdownButtonFormField<TaskStatus>(
-              initialValue: task.status,
-              decoration: const InputDecoration(
-                labelText: 'Change Status',
-                border: OutlineInputBorder(),
-              ),
-              items: TaskStatus.values
-                  .map((s) => DropdownMenuItem(
-                        value: s,
-                        child: Text(s.label),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null && value != task.status) {
-                  _changeStatus(value);
-                }
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // Description
-            if (task.description.isNotEmpty) ...[
-              Text(
-                'Description',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Task Details'),
+            actions: [
+              if (isOwner) ...[
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  tooltip: 'Edit',
+                  onPressed: () => context.push('/todo/edit/${task.id}'),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                task.description,
-                style: theme.textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 20),
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  tooltip: 'Share',
+                  onPressed: () => context.push('/todo/share/${task.id}'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'Delete',
+                  onPressed: _deleteTask,
+                ),
+              ],
             ],
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Text(
+                  task.title,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
 
-            const Divider(),
-            const SizedBox(height: 12),
+                // Status badge
+                Row(
+                  children: [
+                    const Text('Status: '),
+                    StatusBadge(status: task.status),
+                  ],
+                ),
+                const SizedBox(height: 16),
 
-            // Dates
-            _buildInfoRow(
-              context,
-              icon: Icons.calendar_today,
-              label: 'Created',
-              value: DateHelpers.formatDateTime(task.createdAt),
-            ),
-            const SizedBox(height: 8),
-            _buildInfoRow(
-              context,
-              icon: Icons.update,
-              label: 'Updated',
-              value: DateHelpers.formatDateTime(task.updatedAt),
-            ),
-            if (task.completedAt != null) ...[
-              const SizedBox(height: 8),
-              _buildInfoRow(
-                context,
-                icon: Icons.check_circle_outline,
-                label: 'Completed',
-                value: DateHelpers.formatDateTime(task.completedAt!),
-              ),
-            ],
+                // Status change dropdown (key forces recreation on status change)
+                DropdownButtonFormField<TaskStatus>(
+                  key: ValueKey(task.status),
+                  initialValue: task.status,
+                  decoration: const InputDecoration(
+                    labelText: 'Change Status',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: TaskStatus.values
+                      .map((s) => DropdownMenuItem(
+                            value: s,
+                            child: Text(s.label),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null && value != task.status) {
+                      _changeStatus(value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 20),
 
-            // Shared info
-            if (task.sharedWith.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              const Divider(),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Icon(Icons.people, size: 20),
-                  const SizedBox(width: 8),
+                // Description
+                if (task.description.isNotEmpty) ...[
                   Text(
-                    'Shared with ${task.sharedWith.length} '
-                    '${task.sharedWith.length == 1 ? 'person' : 'people'}',
+                    'Description',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    task.description,
                     style: theme.textTheme.bodyLarge,
                   ),
+                  const SizedBox(height: 20),
                 ],
-              ),
-            ],
-          ],
-        ),
-      ),
+
+                const Divider(),
+                const SizedBox(height: 12),
+
+                // Dates
+                _buildInfoRow(
+                  context,
+                  icon: Icons.event,
+                  label: 'Due Date',
+                  value: DateHelpers.formatDate(task.dueDate),
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  context,
+                  icon: Icons.calendar_today,
+                  label: 'Created',
+                  value: DateHelpers.formatDateTime(task.createdAt),
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  context,
+                  icon: Icons.update,
+                  label: 'Updated',
+                  value: DateHelpers.formatDateTime(task.updatedAt),
+                ),
+                if (task.completedAt != null) ...[
+                  const SizedBox(height: 8),
+                  _buildInfoRow(
+                    context,
+                    icon: Icons.check_circle_outline,
+                    label: 'Completed',
+                    value: DateHelpers.formatDateTime(task.completedAt!),
+                  ),
+                ],
+
+                // Shared info
+                if (task.sharedWith.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.people, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Shared with ${task.sharedWith.length} '
+                        '${task.sharedWith.length == 1 ? 'person' : 'people'}',
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

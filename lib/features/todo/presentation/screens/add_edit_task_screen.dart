@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../../core/utils/validators.dart';
@@ -23,7 +24,9 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _phoneShareController = TextEditingController();
   TaskStatus _status = TaskStatus.notStarted;
+  DateTime _dueDate = DateTime.now();
   bool _isLoading = false;
   bool _isEditing = false;
   TaskModel? _existingTask;
@@ -39,18 +42,44 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
 
   Future<void> _loadTask() async {
     setState(() => _isLoading = true);
+    // Try Cubit state first for instant load
+    final cubitState = context.read<TodoCubit>().state;
+    for (final t in cubitState.myTasks) {
+      if (t.id == widget.taskId) {
+        _populateFields(t);
+        return;
+      }
+    }
+    // Fallback: fetch from Firestore
     final repo = context.read<TodoCubit>().repository;
     final task = await repo.getTaskById(widget.taskId!);
     if (task != null && mounted) {
-      setState(() {
-        _existingTask = task;
-        _titleController.text = task.title;
-        _descriptionController.text = task.description;
-        _status = task.status;
-        _isLoading = false;
-      });
+      _populateFields(task);
     } else if (mounted) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  void _populateFields(TaskModel task) {
+    setState(() {
+      _existingTask = task;
+      _titleController.text = task.title;
+      _descriptionController.text = task.description;
+      _status = task.status;
+      _dueDate = task.dueDate;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() => _dueDate = picked);
     }
   }
 
@@ -58,6 +87,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _phoneShareController.dispose();
     super.dispose();
   }
 
@@ -67,7 +97,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final repo = context.read<TodoCubit>().repository;
+      final cubit = context.read<TodoCubit>();
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
@@ -80,8 +110,9 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           status: _status,
+          dueDate: _dueDate,
         );
-        await repo.updateTask(updatedTask);
+        await cubit.updateTask(updatedTask);
         if (mounted) {
           showSuccessSnackBar(context, 'Task updated');
           context.pop();
@@ -93,11 +124,28 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
           description: _descriptionController.text.trim(),
           status: _status,
           ownerId: user.uid,
-          ownerPhone: user.phoneNumber ?? '',
+          ownerEmail: user.email ?? '',
+          dueDate: _dueDate,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        await repo.addTask(newTask);
+        final taskId = await cubit.addTask(newTask);
+
+        // Share with phone if provided
+        final phone = _phoneShareController.text.trim();
+        if (phone.isNotEmpty && mounted) {
+          final shareRepo = cubit.shareRepository;
+          final foundUser = await shareRepo.findUserByPhone(phone);
+          if (foundUser != null) {
+            await shareRepo.shareTask(taskId, foundUser['uid']);
+            if (mounted) {
+              showSuccessSnackBar(context, 'Task created and shared');
+              context.pop();
+              return;
+            }
+          }
+        }
+
         if (mounted) {
           showSuccessSnackBar(context, 'Task created');
           context.pop();
@@ -147,6 +195,20 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                       textInputAction: TextInputAction.newline,
                     ),
                     const SizedBox(height: 16),
+                    GestureDetector(
+                      onTap: _pickDate,
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Due Date',
+                          border: OutlineInputBorder(),
+                          suffixIcon: Icon(Icons.calendar_today),
+                        ),
+                        child: Text(
+                          DateFormat('MMM dd, yyyy').format(_dueDate),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     DropdownButtonFormField<TaskStatus>(
                       initialValue: _status,
                       decoration: const InputDecoration(
@@ -163,6 +225,19 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                         if (value != null) setState(() => _status = value);
                       },
                     ),
+                    if (!_isEditing) ...[
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _phoneShareController,
+                        decoration: const InputDecoration(
+                          labelText: 'Share with (phone)',
+                          hintText: 'Enter phone number (optional)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.phone_outlined),
+                        ),
+                        keyboardType: TextInputType.phone,
+                      ),
+                    ],
                     const SizedBox(height: 32),
                     FilledButton(
                       onPressed: _isLoading ? null : _save,

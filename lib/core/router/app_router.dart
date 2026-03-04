@@ -5,13 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
-import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/profile_screen.dart';
-import '../../features/gym/presentation/screens/attendance_screen.dart';
+import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/gym/presentation/screens/exercise_category_screen.dart';
+import '../../features/gym/presentation/screens/add_edit_medicine_screen.dart';
 import '../../features/gym/presentation/screens/exercises_screen.dart';
-import '../../features/gym/presentation/screens/gym_home_screen.dart';
-import '../../features/gym/presentation/screens/membership_screen.dart';
+import '../../features/gym/presentation/screens/gym_shell_screen.dart';
+import '../../features/gym/presentation/screens/medicine_cabinet_screen.dart';
+import '../../features/gym/presentation/screens/meal_reminder_screen.dart';
+import '../../features/gym/presentation/screens/reminder_settings_screen.dart';
+import '../../features/gym/presentation/screens/reminders_hub_screen.dart';
+import '../../features/gym/presentation/screens/water_reminder_screen.dart';
+import '../../features/gym/domain/reminder_type.dart';
 import '../../features/passwords/presentation/screens/add_password_screen.dart';
 import '../../features/passwords/presentation/screens/password_detail_screen.dart';
 import '../../features/passwords/presentation/screens/password_list_screen.dart';
@@ -55,7 +60,7 @@ GoRouter createRouter() {
     redirect: (context, state) {
       final isLoggedIn = FirebaseAuth.instance.currentUser != null;
       final isLoggingIn = state.matchedLocation == '/login' ||
-          state.matchedLocation == '/otp';
+          state.matchedLocation == '/signup';
 
       if (!isLoggedIn && !isLoggingIn) return '/login';
       if (isLoggedIn && isLoggingIn) return '/todo';
@@ -67,14 +72,8 @@ GoRouter createRouter() {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
-        path: '/otp',
-        builder: (context, state) {
-          final extras = state.extra as Map<String, dynamic>;
-          return OtpScreen(
-            verificationId: extras['verificationId'] as String,
-            phoneNumber: extras['phoneNumber'] as String,
-          );
-        },
+        path: '/signup',
+        builder: (context, state) => const SignupScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -151,7 +150,7 @@ GoRouter createRouter() {
             routes: [
               GoRoute(
                 path: '/gym',
-                builder: (context, state) => const GymHomeScreen(),
+                builder: (context, state) => const GymShellScreen(),
                 routes: [
                   GoRoute(
                     path: 'exercises',
@@ -166,12 +165,48 @@ GoRouter createRouter() {
                     ],
                   ),
                   GoRoute(
-                    path: 'membership',
-                    builder: (context, state) => const MembershipScreen(),
+                    path: 'reminders',
+                    builder: (context, state) => const RemindersHubScreen(),
+                    routes: [
+                      GoRoute(
+                        path: ':type',
+                        builder: (context, state) {
+                          final typeName = state.pathParameters['type']!;
+                          // Custom screens for food and water
+                          if (typeName == 'food') {
+                            return const MealReminderScreen();
+                          }
+                          if (typeName == 'water') {
+                            return const WaterReminderScreen();
+                          }
+                          final reminderType = ReminderType.values.firstWhere(
+                            (e) => e.name == typeName,
+                            orElse: () => ReminderType.workout,
+                          );
+                          return ReminderSettingsScreen(
+                            reminderType: reminderType,
+                          );
+                        },
+                      ),
+                    ],
                   ),
                   GoRoute(
-                    path: 'attendance',
-                    builder: (context, state) => const AttendanceScreen(),
+                    path: 'medicines',
+                    builder: (context, state) =>
+                        const MedicineCabinetScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'add',
+                        builder: (context, state) =>
+                            const AddEditMedicineScreen(),
+                      ),
+                      GoRoute(
+                        path: 'edit/:medicineId',
+                        builder: (context, state) => AddEditMedicineScreen(
+                          medicineId: state.pathParameters['medicineId'],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

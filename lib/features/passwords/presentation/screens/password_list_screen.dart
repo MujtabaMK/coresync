@@ -104,6 +104,7 @@ class PasswordListScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'passwordFab',
         onPressed: () => context.go('/passwords/add'),
         child: const Icon(Icons.add),
       ),

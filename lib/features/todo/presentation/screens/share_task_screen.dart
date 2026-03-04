@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/services/push_notification_service.dart';
 import '../../../../core/utils/snackbar_utils.dart';
-import '../../../../core/utils/validators.dart';
 import '../providers/todo_provider.dart';
 
 class ShareTaskScreen extends StatefulWidget {
@@ -48,9 +50,15 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
         setState(() {
           _isSearching = false;
           if (user != null) {
-            _foundUser = user;
+            // Don't allow sharing with yourself
+            final currentUid = FirebaseAuth.instance.currentUser?.uid;
+            if (user['uid'] == currentUid) {
+              _searchError = 'You cannot share a task with yourself.';
+            } else {
+              _foundUser = user;
+            }
           } else {
-            _searchError = 'No user found with this phone number.';
+            _searchError = 'This phone number or email is not registered in CoreSync.';
           }
         });
       }
@@ -71,7 +79,27 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
 
     try {
       final shareRepo = context.read<TodoCubit>().shareRepository;
-      await shareRepo.shareTask(widget.taskId, _foundUser!['uid']);
+      final targetUid = _foundUser!['uid'] as String;
+      debugPrint('Sharing task ${widget.taskId} with uid: $targetUid');
+      await shareRepo.shareTask(widget.taskId, targetUid);
+      debugPrint('Task shared successfully, now sending notification...');
+
+      // Send push notification to the target user
+      try {
+        final currentUser = FirebaseAuth.instance.currentUser;
+        final senderName = currentUser?.displayName ?? 'Someone';
+        await PushNotificationService.sendNotification(
+          targetUid: targetUid,
+          title: 'Task Shared',
+          body: '$senderName shared a task with you',
+        );
+        debugPrint('Notification sent to $targetUid');
+      } catch (e) {
+        debugPrint('Failed to send notification: $e');
+        if (mounted) {
+          showErrorSnackBar(context, 'Shared but notification failed: $e');
+        }
+      }
 
       if (mounted) {
         showSuccessSnackBar(context, 'Task shared successfully');
@@ -95,7 +123,7 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Find a user by phone number to share this task with them.',
+              'Find a user by phone number or email to share this task.',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 16),
@@ -104,8 +132,8 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
               child: TextFormField(
                 controller: _phoneController,
                 decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                  hintText: 'Enter phone number',
+                  labelText: 'Phone Number or Email',
+                  hintText: 'Enter phone number or email',
                   border: const OutlineInputBorder(),
                   suffixIcon: _isSearching
                       ? const Padding(
@@ -121,8 +149,22 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
                           onPressed: _searchUser,
                         ),
                 ),
-                keyboardType: TextInputType.phone,
-                validator: Validators.phoneNumber,
+                keyboardType: TextInputType.emailAddress,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Please enter a phone number or email';
+                  }
+                  return null;
+                },
+                onChanged: (_) {
+                  // Clear previous results when input changes
+                  if (_foundUser != null || _searchError != null) {
+                    setState(() {
+                      _foundUser = null;
+                      _searchError = null;
+                    });
+                  }
+                },
                 onFieldSubmitted: (_) => _searchUser(),
               ),
             ),
@@ -144,8 +186,9 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
                         child: Text(
                           _searchError!,
                           style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onErrorContainer,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onErrorContainer,
                           ),
                         ),
                       ),
@@ -163,16 +206,15 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
                     children: [
                       Text(
                         'User Found',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 12),
                       Row(
                         children: [
                           CircleAvatar(
                             child: Text(
-                              (_foundUser!['name'] as String? ?? '?')
+                              (_foundUser!['displayName'] as String? ?? '?')
                                   .characters
                                   .first
                                   .toUpperCase(),
@@ -184,16 +226,22 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  _foundUser!['name'] ?? 'Unknown',
+                                  _foundUser!['displayName'] ?? 'Unknown',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16,
                                   ),
                                 ),
                                 Text(
-                                  _foundUser!['phone'] ?? '',
+                                  _foundUser!['email'] ?? '',
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
+                                if (_foundUser!['phoneNumber'] != null &&
+                                    (_foundUser!['phoneNumber'] as String).isNotEmpty)
+                                  Text(
+                                    _foundUser!['phoneNumber'],
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  ),
                               ],
                             ),
                           ),
@@ -214,8 +262,7 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
                                   ),
                                 )
                               : const Icon(Icons.share),
-                          label: Text(
-                              _isSharing ? 'Sharing...' : 'Share Task'),
+                          label: Text(_isSharing ? 'Sharing...' : 'Share Task'),
                         ),
                       ),
                     ],

@@ -43,9 +43,22 @@ class TodoState extends Equatable {
     );
   }
 
+  List<TaskModel> get allTasks {
+    final ids = <String>{};
+    final combined = <TaskModel>[];
+    for (final t in myTasks) {
+      if (ids.add(t.id)) combined.add(t);
+    }
+    for (final t in sharedTasks) {
+      if (ids.add(t.id)) combined.add(t);
+    }
+    combined.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    return combined;
+  }
+
   List<TaskModel> get filteredTasks {
-    if (filter == null) return myTasks;
-    return myTasks.where((t) => t.status == filter).toList();
+    if (filter == null) return allTasks;
+    return allTasks.where((t) => t.status == filter).toList();
   }
 
   @override
@@ -106,6 +119,47 @@ class TodoCubit extends Cubit<TodoState> {
   /// Set / clear the task‐status filter applied to myTasks.
   void setFilter(TaskStatus? status) {
     emit(state.copyWith(filter: () => status));
+  }
+
+  /// Add a new task. The real-time stream from [loadMyTasks] will
+  /// automatically update the UI when Firestore confirms the write.
+  Future<String> addTask(TaskModel task) async {
+    return await _todoRepository.addTask(task);
+  }
+
+  /// Update an existing task and update local state immediately.
+  Future<void> updateTask(TaskModel task) async {
+    final updated = task.copyWith(updatedAt: DateTime.now());
+    await _todoRepository.updateTask(updated);
+    final newMyList =
+        state.myTasks.map((t) => t.id == task.id ? updated : t).toList();
+    final newSharedList =
+        state.sharedTasks.map((t) => t.id == task.id ? updated : t).toList();
+    emit(state.copyWith(myTasks: newMyList, sharedTasks: newSharedList));
+  }
+
+  /// Delete a task and update local state immediately.
+  Future<void> deleteTask(String taskId) async {
+    await _todoRepository.deleteTask(taskId);
+    emit(state.copyWith(
+      myTasks: state.myTasks.where((t) => t.id != taskId).toList(),
+      sharedTasks: state.sharedTasks.where((t) => t.id != taskId).toList(),
+    ));
+  }
+
+  /// Update task status and update local state immediately.
+  Future<void> updateTaskStatus(String taskId, TaskStatus status) async {
+    await _todoRepository.updateTaskStatus(taskId, status);
+    TaskModel updater(TaskModel t) {
+      if (t.id == taskId) {
+        return t.copyWith(status: status, updatedAt: DateTime.now());
+      }
+      return t;
+    }
+    emit(state.copyWith(
+      myTasks: state.myTasks.map(updater).toList(),
+      sharedTasks: state.sharedTasks.map(updater).toList(),
+    ));
   }
 
   @override

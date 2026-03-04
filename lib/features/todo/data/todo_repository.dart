@@ -43,10 +43,13 @@ class TodoRepository {
   Stream<List<TaskModel>> watchMyTasks(String uid) {
     return _tasksCollection
         .where('ownerId', isEqualTo: uid)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList());
+        .map((snapshot) {
+      final tasks =
+          snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();
+      tasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+      return tasks;
+    });
   }
 
   Stream<List<TaskModel>> watchSharedTasks(String uid) {

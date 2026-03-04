@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/widgets/error_widget.dart';
 import '../../../../core/widgets/loading_widget.dart';
+import '../../domain/task_model.dart';
 import '../../domain/task_status.dart';
 import '../providers/todo_provider.dart';
 import '../widgets/task_tile.dart';
@@ -49,6 +51,12 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: SegmentedButton<TaskStatus?>(
+                  showSelectedIcon: false,
+                  style: ButtonStyle(
+                    textStyle: WidgetStatePropertyAll(
+                      Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ),
                   segments: const [
                     ButtonSegment(value: null, label: Text('All')),
                     ButtonSegment(
@@ -77,6 +85,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
             ],
           ),
           floatingActionButton: FloatingActionButton(
+            heroTag: 'todoFab',
             onPressed: () => context.push('/todo/add'),
             child: const Icon(Icons.add),
           ),
@@ -127,10 +136,55 @@ class _TodoListScreenState extends State<TodoListScreen> {
       );
     }
 
+    final grouped = _groupByDate(filtered);
+    final sortedDates = grouped.keys.toList()..sort();
+
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 80),
-      itemCount: filtered.length,
-      itemBuilder: (context, index) => TaskTile(task: filtered[index]),
+      itemCount: sortedDates.length,
+      itemBuilder: (context, index) {
+        final date = sortedDates[index];
+        final tasks = grouped[date]!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Text(
+                _formatDateHeader(date),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
+            ...tasks.map((task) => TaskTile(task: task)),
+          ],
+        );
+      },
     );
+  }
+
+  Map<DateTime, List<TaskModel>> _groupByDate(List<TaskModel> tasks) {
+    final map = <DateTime, List<TaskModel>>{};
+    for (final task in tasks) {
+      final dateOnly = DateTime(
+        task.dueDate.year,
+        task.dueDate.month,
+        task.dueDate.day,
+      );
+      map.putIfAbsent(dateOnly, () => []).add(task);
+    }
+    return map;
+  }
+
+  String _formatDateHeader(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+
+    if (date == today) return 'Today';
+    if (date == tomorrow) return 'Tomorrow';
+    return DateFormat('MMM d, yyyy').format(date);
   }
 }

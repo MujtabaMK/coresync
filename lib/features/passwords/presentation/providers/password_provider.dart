@@ -53,10 +53,18 @@ class PasswordCubit extends Cubit<PasswordState> {
   Future<void> loadPasswords() async {
     emit(state.copyWith(isLoading: true));
     try {
+      // Sync from cloud first, then load from Hive
+      await _repository.syncFromCloud();
       final passwords = await _repository.getAllPasswords();
       emit(state.copyWith(passwords: passwords, isLoading: false));
     } catch (e) {
-      emit(state.copyWith(isLoading: false, error: e.toString()));
+      // Fallback: load from Hive without sync
+      try {
+        final passwords = await _repository.getAllPasswords();
+        emit(state.copyWith(passwords: passwords, isLoading: false));
+      } catch (e2) {
+        emit(state.copyWith(isLoading: false, error: e2.toString()));
+      }
     }
   }
 

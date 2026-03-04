@@ -18,60 +18,57 @@ class AuthRepository {
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  Future<void> verifyPhoneNumber({
+  Future<UserCredential> signUp({
+    required String email,
+    required String password,
+  }) async {
+    return _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  Future<UserCredential> signIn({
+    required String email,
+    required String password,
+  }) async {
+    return _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  Future<void> createUserDocument(
+    User user, {
+    String? firstName,
+    String? lastName,
     required String phoneNumber,
-    required void Function(PhoneAuthCredential) onVerificationCompleted,
-    required void Function(FirebaseAuthException) onVerificationFailed,
-    required void Function(String verificationId, int? resendToken) onCodeSent,
-    required void Function(String verificationId) onCodeAutoRetrievalTimeout,
-    int? resendToken,
   }) async {
-    await _auth.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: onVerificationCompleted,
-      verificationFailed: onVerificationFailed,
-      codeSent: onCodeSent,
-      codeAutoRetrievalTimeout: onCodeAutoRetrievalTimeout,
-      forceResendingToken: resendToken,
-    );
-  }
-
-  Future<UserCredential> signInWithCredential(
-    PhoneAuthCredential credential,
-  ) async {
-    return _auth.signInWithCredential(credential);
-  }
-
-  Future<UserCredential> verifyOtp({
-    required String verificationId,
-    required String otp,
-  }) async {
-    final credential = PhoneAuthProvider.credential(
-      verificationId: verificationId,
-      smsCode: otp,
-    );
-    return signInWithCredential(credential);
-  }
-
-  Future<void> createUserDocument(User user) async {
     final docRef = _firestore
         .collection(AppConstants.usersCollection)
         .doc(user.uid);
     final doc = await docRef.get();
     if (!doc.exists) {
+      final displayName = [firstName, lastName]
+          .where((s) => s != null && s.isNotEmpty)
+          .join(' ');
       final userModel = UserModel(
         uid: user.uid,
-        phoneNumber: user.phoneNumber ?? '',
+        email: user.email ?? '',
+        firstName: firstName,
+        lastName: lastName,
+        phoneNumber: phoneNumber,
+        displayName: displayName.isNotEmpty ? displayName : null,
         createdAt: DateTime.now(),
       );
       await docRef.set(userModel.toFirestore());
     }
   }
 
-  Future<UserModel?> getUserByPhone(String phoneNumber) async {
+  Future<UserModel?> getUserByEmail(String email) async {
     final query = await _firestore
         .collection(AppConstants.usersCollection)
-        .where('phoneNumber', isEqualTo: phoneNumber)
+        .where('email', isEqualTo: email)
         .limit(1)
         .get();
     if (query.docs.isEmpty) return null;

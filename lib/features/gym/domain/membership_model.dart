@@ -43,22 +43,34 @@ class MembershipModel extends HiveObject {
     );
   }
 
+  static const Map<String, int> planPrices = {
+    '1month': 500,
+    '3months': 1200,
+    '6months': 2000,
+    '1year': 3500,
+  };
+
+  static const Map<String, int> planDurations = {
+    '1month': 30,
+    '3months': 90,
+    '6months': 180,
+    '1year': 365,
+  };
+
+  static const Map<String, String> planLabels = {
+    '1month': '1 Month',
+    '3months': '3 Months',
+    '6months': '6 Months',
+    '1year': '1 Year',
+  };
+
   bool get isExpired => DateTime.now().isAfter(endDate);
 
-  String get planLabel {
-    switch (plan) {
-      case '1month':
-        return '1 Month';
-      case '3months':
-        return '3 Months';
-      case '6months':
-        return '6 Months';
-      case '1year':
-        return '1 Year';
-      default:
-        return plan;
-    }
-  }
+  String get planLabel => planLabels[plan] ?? plan;
+
+  int get price => planPrices[plan] ?? 0;
+
+  int get durationDays => planDurations[plan] ?? 0;
 
   int get daysRemaining => endDate.difference(DateTime.now()).inDays;
 }

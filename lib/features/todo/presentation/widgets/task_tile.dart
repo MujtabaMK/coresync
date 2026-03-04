@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../domain/task_model.dart';
 import '../../domain/task_status.dart';
@@ -44,13 +45,25 @@ class TaskTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
-        subtitle: task.description.isNotEmpty
-            ? Text(
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (task.description.isNotEmpty)
+              Text(
                 task.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-              )
-            : null,
+              ),
+            const SizedBox(height: 2),
+            Text(
+              DateFormat('MMM d').format(task.dueDate),
+              style: TextStyle(
+                fontSize: 12,
+                color: _statusColor,
+              ),
+            ),
+          ],
+        ),
         leading: StatusBadge(status: task.status),
         trailing: Icon(
           _statusIcon,
