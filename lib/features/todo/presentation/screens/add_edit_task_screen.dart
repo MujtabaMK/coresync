@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/constants/notification_ids.dart';
+import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/push_notification_service.dart';
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/loading_widget.dart';
@@ -27,9 +30,11 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
   final _phoneShareController = TextEditingController();
   TaskStatus _status = TaskStatus.notStarted;
   DateTime _dueDate = DateTime.now();
+  TimeOfDay _reminderTime = const TimeOfDay(hour: 9, minute: 0);
   bool _isLoading = false;
   bool _isEditing = false;
   TaskModel? _existingTask;
+  String? _phoneError;
 
   @override
   void initState() {
@@ -67,6 +72,10 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
       _descriptionController.text = task.description;
       _status = task.status;
       _dueDate = task.dueDate;
+      _reminderTime = TimeOfDay(
+        hour: task.dueDate.hour,
+        minute: task.dueDate.minute,
+      );
       _isLoading = false;
     });
   }
@@ -83,6 +92,16 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
     }
   }
 
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _reminderTime,
+    );
+    if (picked != null) {
+      setState(() => _reminderTime = picked);
+    }
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -91,10 +110,62 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
     super.dispose();
   }
 
+  DateTime get _combinedDueDateTime => DateTime(
+        _dueDate.year,
+        _dueDate.month,
+        _dueDate.day,
+        _reminderTime.hour,
+        _reminderTime.minute,
+      );
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    // Validate phone number if provided
+    final phone = _phoneShareController.text.trim();
+    if (!_isEditing && phone.isNotEmpty) {
+      final cleaned = phone.replaceAll(RegExp(r'[^\d+]'), '');
+      if (cleaned.length < 10) {
+        setState(() => _phoneError = 'Enter a valid phone number (min 10 digits)');
+        return;
+      }
+
+      setState(() {
+        _isLoading = true;
+        _phoneError = null;
+      });
+
+      // Check if user is registered
+      final shareRepo = context.read<TodoCubit>().shareRepository;
+      final foundUser = await shareRepo.findUserByPhone(phone);
+      if (foundUser == null) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _phoneError =
+                'This phone number is not registered in CoreSync.';
+          });
+        }
+        return;
+      }
+
+      // Check self-sharing
+      final currentUid = FirebaseAuth.instance.currentUser?.uid;
+      if (foundUser['uid'] == currentUid) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _phoneError = 'You cannot share a task with yourself.';
+          });
+        }
+        return;
+      }
+    }
+
+    setState(() {
+      _isLoading = true;
+      _phoneError = null;
+    });
 
     try {
       final cubit = context.read<TodoCubit>();
@@ -105,14 +176,27 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
         return;
       }
 
+      final dueDateTime = _combinedDueDateTime;
+
       if (_isEditing && _existingTask != null) {
         final updatedTask = _existingTask!.copyWith(
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           status: _status,
-          dueDate: _dueDate,
+          dueDate: dueDateTime,
         );
         await cubit.updateTask(updatedTask);
+
+        // Reschedule alarm for the updated due date
+        final alarmId = NotificationIds.taskAlarm(updatedTask.id);
+        await NotificationService.cancel(alarmId);
+        await NotificationService.scheduleOnceAlarm(
+          id: alarmId,
+          title: 'Task Reminder',
+          body: _titleController.text.trim(),
+          scheduledDate: dueDateTime,
+        );
+
         if (mounted) {
           showSuccessSnackBar(context, 'Task updated');
           context.pop();
@@ -125,19 +209,38 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
           status: _status,
           ownerId: user.uid,
           ownerEmail: user.email ?? '',
-          dueDate: _dueDate,
+          dueDate: dueDateTime,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
         final taskId = await cubit.addTask(newTask);
 
+        // Schedule alarm for the due date
+        await NotificationService.scheduleOnceAlarm(
+          id: NotificationIds.taskAlarm(taskId),
+          title: 'Task Reminder',
+          body: _titleController.text.trim(),
+          scheduledDate: dueDateTime,
+        );
+
         // Share with phone if provided
-        final phone = _phoneShareController.text.trim();
         if (phone.isNotEmpty && mounted) {
           final shareRepo = cubit.shareRepository;
           final foundUser = await shareRepo.findUserByPhone(phone);
           if (foundUser != null) {
-            await shareRepo.shareTask(taskId, foundUser['uid']);
+            final targetUid = foundUser['uid'] as String;
+            await shareRepo.shareTask(taskId, targetUid);
+
+            // Send push notification to the target user
+            try {
+              final senderName = user.displayName ?? 'Someone';
+              await PushNotificationService.sendNotification(
+                targetUid: targetUid,
+                title: 'Task Shared',
+                body: '$senderName shared a task with you',
+              );
+            } catch (_) {}
+
             if (mounted) {
               showSuccessSnackBar(context, 'Task created and shared');
               context.pop();
@@ -209,6 +312,20 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    GestureDetector(
+                      onTap: _pickTime,
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Reminder Time',
+                          border: OutlineInputBorder(),
+                          suffixIcon: Icon(Icons.alarm),
+                        ),
+                        child: Text(
+                          _reminderTime.format(context),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     DropdownButtonFormField<TaskStatus>(
                       initialValue: _status,
                       decoration: const InputDecoration(
@@ -229,13 +346,19 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _phoneShareController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Share with (phone)',
                           hintText: 'Enter phone number (optional)',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.phone_outlined),
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.phone_outlined),
+                          errorText: _phoneError,
                         ),
                         keyboardType: TextInputType.phone,
+                        onChanged: (_) {
+                          if (_phoneError != null) {
+                            setState(() => _phoneError = null);
+                          }
+                        },
                       ),
                     ],
                     const SizedBox(height: 32),

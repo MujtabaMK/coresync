@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -11,7 +13,7 @@ class NotificationService {
 
   static bool _initialized = false;
 
-  /// Alarm-style notification details for reminders
+  /// Notification details for scheduled reminders (gym, meals, water, etc.)
   static const _alarmAndroidDetails = AndroidNotificationDetails(
     'reminders_alarm_v2',
     'Reminders',
@@ -29,6 +31,34 @@ class NotificationService {
   static const _alarmDetails = NotificationDetails(
     android: _alarmAndroidDetails,
     iOS: DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    ),
+  );
+
+  /// Task alarm details - rings like an alarm clock until dismissed
+  static final _taskAlarmAndroidDetails = AndroidNotificationDetails(
+    'task_alarm_v1',
+    'Task Alarms',
+    channelDescription: 'Alarm-clock style task reminders',
+    importance: Importance.max,
+    priority: Priority.max,
+    playSound: true,
+    enableVibration: true,
+    vibrationPattern: Int64List.fromList([0, 1000, 500, 1000, 500, 1000]),
+    fullScreenIntent: true,
+    ongoing: true,
+    autoCancel: false,
+    category: AndroidNotificationCategory.alarm,
+    visibility: NotificationVisibility.public,
+    audioAttributesUsage: AudioAttributesUsage.alarm,
+    additionalFlags: Int32List.fromList(<int>[4]), // FLAG_INSISTENT - repeats sound until dismissed
+  );
+
+  static final _taskAlarmDetails = NotificationDetails(
+    android: _taskAlarmAndroidDetails,
+    iOS: const DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
@@ -101,7 +131,11 @@ class NotificationService {
           importance: Importance.high,
           priority: Priority.high,
         ),
-        iOS: const DarwinNotificationDetails(),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
       ),
     );
   }
@@ -165,6 +199,38 @@ class NotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
+    );
+  }
+
+  /// Schedule a one-time alarm at a specific date and time (no repeat).
+  static Future<void> scheduleOnceAlarm({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduled = tz.TZDateTime(
+      tz.local,
+      scheduledDate.year,
+      scheduledDate.month,
+      scheduledDate.day,
+      scheduledDate.hour,
+      scheduledDate.minute,
+    );
+
+    // Don't schedule if the time is in the past
+    if (scheduled.isBefore(now)) return;
+
+    await _plugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduled,
+      _taskAlarmDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 

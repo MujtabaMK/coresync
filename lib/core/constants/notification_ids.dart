@@ -25,4 +25,9 @@ class NotificationIds {
   static int medicineDose(String medicineId, int doseIndex) {
     return 2000 + (medicineId.hashCode.abs() % 10000) * 10 + doseIndex;
   }
+
+  // Task alarms (3000+ range)
+  static int taskAlarm(String taskId) {
+    return 3000 + (taskId.hashCode.abs() % 10000);
+  }
 }
