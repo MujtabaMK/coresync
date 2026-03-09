@@ -1,12 +1,62 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../data/step_counter_service.dart';
 import '../providers/gym_provider.dart';
 import '../widgets/membership_card.dart';
 
-class GymHomeScreen extends StatelessWidget {
+class GymHomeScreen extends StatefulWidget {
   const GymHomeScreen({super.key});
+
+  @override
+  State<GymHomeScreen> createState() => _GymHomeScreenState();
+}
+
+class _GymHomeScreenState extends State<GymHomeScreen> {
+  final _stepService = StepCounterService.instance;
+  StreamSubscription<int>? _stepSub;
+  int _liveSteps = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initSteps();
+  }
+
+  Future<void> _initSteps() async {
+    // Load saved steps from Firestore
+    final gymCubit = context.read<GymCubit>();
+    try {
+      final saved = await gymCubit.repository.getStepsForDate(DateTime.now());
+      if (mounted) setState(() => _liveSteps = saved);
+      _stepService.setMinSteps(saved);
+    } catch (_) {}
+
+    // Initialize the sensor (no-op if already initialized)
+    await _stepService.initialize();
+
+    // Use current value from service
+    if (_stepService.currentSteps > 0 && mounted) {
+      setState(() => _liveSteps = _stepService.currentSteps);
+    }
+
+    // Listen for live updates
+    _stepSub = _stepService.stepsStream.listen((steps) {
+      if (mounted) {
+        setState(() => _liveSteps = steps);
+        gymCubit.saveSteps(DateTime.now(), steps);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _stepSub?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,19 +175,16 @@ class GymHomeScreen extends StatelessWidget {
                             Expanded(
                               child: Builder(
                                 builder: (context) {
-                                  final now = DateTime.now();
-                                  final today = DateTime(now.year, now.month, now.day);
-                                  final todaySteps = state.stepsHistory[today] ?? 0;
                                   const stepsGoal = 10000;
-                                  final stepsColor = todaySteps == 0
+                                  final stepsColor = _liveSteps == 0
                                       ? Colors.red
-                                      : todaySteps >= stepsGoal
+                                      : _liveSteps >= stepsGoal
                                           ? Colors.green
                                           : Colors.amber.shade700;
                                   return _QuickStatCard(
                                     icon: Icons.directions_walk,
                                     label: 'Steps',
-                                    value: '$todaySteps',
+                                    value: '$_liveSteps',
                                     color: stepsColor,
                                   );
                                 },
