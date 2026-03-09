@@ -29,17 +29,24 @@ class ReportsScreen extends StatelessWidget {
 
             return Scaffold(
               appBar: AppBar(title: const Text('Reports')),
-              body: SingleChildScrollView(
+              body: Center(
+                child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: Column(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Period selector
                     SegmentedButton<ReportPeriod>(
+                      showSelectedIcon: false,
                       segments: ReportPeriod.values
                           .map((p) => ButtonSegment(
                                 value: p,
-                                label: Text(p.label),
+                                label: Text(
+                                  p.label,
+                                  style: const TextStyle(fontSize: 13),
+                                ),
                               ))
                           .toList(),
                       selected: {period},
@@ -80,7 +87,7 @@ class ReportsScreen extends StatelessWidget {
                     Text(
                       'Task Breakdown',
                       style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
+                          Theme.of(context).textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                     ),
@@ -88,6 +95,8 @@ class ReportsScreen extends StatelessWidget {
                     ReportChart(data: report),
                   ],
                 ),
+                ),
+              ),
               ),
             );
           },
@@ -118,7 +127,7 @@ class _SummaryCard extends StatelessWidget {
             children: [
               Text(
                 count.toString(),
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: color,
                     ),
@@ -126,7 +135,7 @@ class _SummaryCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.labelSmall,
               ),
             ],
           ),

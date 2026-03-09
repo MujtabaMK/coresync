@@ -1,12 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/providers/theme_provider.dart';
-import '../../../../core/services/notification_service.dart';
-import '../../../../core/services/push_notification_service.dart';
-import '../../../../core/utils/snackbar_utils.dart';
 import '../../domain/user_model.dart';
 import '../providers/auth_provider.dart';
 
@@ -47,9 +43,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             title: const Text('Profile'),
           ),
-          body: SingleChildScrollView(
+          body: Center(
+            child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: Column(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
               children: [
                 Card(
                   child: Padding(
@@ -163,73 +162,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 16),
-
-                // Test notifications
-                Card(
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.notifications_active),
-                        title: const Text('Test Local Notification'),
-                        subtitle: const Text('Direct notification (no Firestore)'),
-                        trailing: const Icon(Icons.send),
-                        onTap: () async {
-                          try {
-                            await NotificationService.showInstantNotification(
-                              id: 9999,
-                              title: 'Local Test',
-                              body: 'Direct local notification works!',
-                              channelId: 'shared_tasks',
-                              channelName: 'Shared Tasks',
-                            );
-                            if (context.mounted) {
-                              showSuccessSnackBar(context, 'Local notification fired!');
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              showErrorSnackBar(context, 'Local notification failed: $e');
-                            }
-                          }
-                        },
-                      ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.cloud),
-                        title: const Text('Test Firestore Notification'),
-                        subtitle: const Text('Write to Firestore + listener'),
-                        trailing: const Icon(Icons.send),
-                        onTap: () async {
-                          try {
-                            final uid = FirebaseAuth.instance.currentUser?.uid;
-                            if (uid == null) {
-                              if (context.mounted) {
-                                showErrorSnackBar(context, 'Not logged in');
-                              }
-                              return;
-                            }
-                            // Restart listener first
-                            PushNotificationService.dispose();
-                            PushNotificationService.listenForNotifications();
-
-                            await PushNotificationService.sendNotification(
-                              targetUid: uid,
-                              title: 'Firestore Test',
-                              body: 'Firestore listener notification works!',
-                            );
-                            if (context.mounted) {
-                              showSuccessSnackBar(context, 'Firestore notification sent!');
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              showErrorSnackBar(context, 'Failed: $e');
-                            }
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
                 const SizedBox(height: 24),
 
                 SizedBox(
@@ -248,6 +180,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 16),
               ],
             ),
+            ),
+          ),
           ),
         );
       },

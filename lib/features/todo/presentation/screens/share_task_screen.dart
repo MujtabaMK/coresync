@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/services/push_notification_service.dart';
@@ -29,6 +30,73 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
   void dispose() {
     _phoneController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickContact() async {
+    try {
+      final hasPermission = await FlutterContacts.requestPermission();
+      if (!hasPermission) {
+        if (mounted) {
+          showErrorSnackBar(context, 'Contacts permission denied');
+        }
+        return;
+      }
+
+      final contact = await FlutterContacts.openExternalPick();
+      if (contact == null) return;
+
+      // Fetch full contact to get phone numbers
+      final fullContact = await FlutterContacts.getContact(contact.id,
+          withProperties: true);
+      if (fullContact == null || fullContact.phones.isEmpty) {
+        if (mounted) {
+          showErrorSnackBar(context, 'Selected contact has no phone number');
+        }
+        return;
+      }
+
+      String phone;
+      if (fullContact.phones.length == 1) {
+        phone = fullContact.phones.first.number;
+      } else {
+        // Show a dialog to pick which number
+        phone = await showDialog<String>(
+              context: context,
+              builder: (ctx) => SimpleDialog(
+                title: Text('Pick a number for ${fullContact.displayName}'),
+                children: fullContact.phones
+                    .map(
+                      (p) => SimpleDialogOption(
+                        onPressed: () => Navigator.pop(ctx, p.number),
+                        child: Text(
+                          '${p.label.name}: ${p.number}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ) ??
+            '';
+        if (phone.isEmpty) return;
+      }
+
+      // Clean the phone number (remove spaces, dashes, etc.)
+      phone = phone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+
+      setState(() {
+        _phoneController.text = phone;
+        _foundUser = null;
+        _searchError = null;
+      });
+
+      // Auto-search after picking
+      _searchUser();
+    } catch (e) {
+      if (mounted) {
+        showErrorSnackBar(context, 'Failed to pick contact: $e');
+      }
+    }
   }
 
   Future<void> _searchUser() async {
@@ -117,9 +185,12 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Share Task')),
-      body: SingleChildScrollView(
+      body: Center(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
@@ -129,43 +200,55 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
             const SizedBox(height: 16),
             Form(
               key: _formKey,
-              child: TextFormField(
-                controller: _phoneController,
-                decoration: InputDecoration(
-                  labelText: 'Phone Number or Email',
-                  hintText: 'Enter phone number or email',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: _isSearching
-                      ? const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        )
-                      : IconButton(
-                          icon: const Icon(Icons.search),
-                          onPressed: _searchUser,
-                        ),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return 'Please enter a phone number or email';
-                  }
-                  return null;
-                },
-                onChanged: (_) {
-                  // Clear previous results when input changes
-                  if (_foundUser != null || _searchError != null) {
-                    setState(() {
-                      _foundUser = null;
-                      _searchError = null;
-                    });
-                  }
-                },
-                onFieldSubmitted: (_) => _searchUser(),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        labelText: 'Phone Number or Email',
+                        hintText: 'Enter phone number or email',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: _isSearching
+                            ? const Padding(
+                                padding: EdgeInsets.all(12),
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              )
+                            : IconButton(
+                                icon: const Icon(Icons.search),
+                                onPressed: _searchUser,
+                              ),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return 'Please enter a phone number or email';
+                        }
+                        return null;
+                      },
+                      onChanged: (_) {
+                        // Clear previous results when input changes
+                        if (_foundUser != null || _searchError != null) {
+                          setState(() {
+                            _foundUser = null;
+                            _searchError = null;
+                          });
+                        }
+                      },
+                      onFieldSubmitted: (_) => _searchUser(),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.contacts),
+                    tooltip: 'Pick from contacts',
+                    onPressed: _pickContact,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
@@ -272,6 +355,8 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
             ],
           ],
         ),
+        ),
+      ),
       ),
     );
   }

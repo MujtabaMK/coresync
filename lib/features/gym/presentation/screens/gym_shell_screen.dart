@@ -57,7 +57,7 @@ class _GymShellScreenState extends State<GymShellScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
-            onPressed: () => context.go('/profile'),
+            onPressed: () => context.push('/profile'),
           ),
         ],
         bottom: TabBar(

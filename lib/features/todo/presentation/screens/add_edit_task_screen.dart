@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
@@ -117,6 +118,61 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
         _reminderTime.hour,
         _reminderTime.minute,
       );
+
+  Future<void> _pickContact() async {
+    try {
+      final hasPermission = await FlutterContacts.requestPermission();
+      if (!hasPermission) {
+        if (mounted) showErrorSnackBar(context, 'Contacts permission denied');
+        return;
+      }
+
+      final contact = await FlutterContacts.openExternalPick();
+      if (contact == null) return;
+
+      final fullContact = await FlutterContacts.getContact(contact.id,
+          withProperties: true);
+      if (fullContact == null || fullContact.phones.isEmpty) {
+        if (mounted) {
+          showErrorSnackBar(context, 'Selected contact has no phone number');
+        }
+        return;
+      }
+
+      String phone;
+      if (fullContact.phones.length == 1) {
+        phone = fullContact.phones.first.number;
+      } else {
+        phone = await showDialog<String>(
+              context: context,
+              builder: (ctx) => SimpleDialog(
+                title: Text('Pick a number for ${fullContact.displayName}'),
+                children: fullContact.phones
+                    .map(
+                      (p) => SimpleDialogOption(
+                        onPressed: () => Navigator.pop(ctx, p.number),
+                        child: Text(
+                          '${p.label.name}: ${p.number}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ) ??
+            '';
+        if (phone.isEmpty) return;
+      }
+
+      phone = phone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+      setState(() {
+        _phoneShareController.text = phone;
+        _phoneError = null;
+      });
+    } catch (e) {
+      if (mounted) showErrorSnackBar(context, 'Failed to pick contact: $e');
+    }
+  }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
@@ -269,9 +325,12 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
       ),
       body: _isLoading && _isEditing && _existingTask == null
           ? const LoadingWidget(message: 'Loading task...')
-          : SingleChildScrollView(
+          : Center(
+              child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
-              child: Form(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -344,21 +403,33 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                     ),
                     if (!_isEditing) ...[
                       const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _phoneShareController,
-                        decoration: InputDecoration(
-                          labelText: 'Share with (phone)',
-                          hintText: 'Enter phone number (optional)',
-                          border: const OutlineInputBorder(),
-                          prefixIcon: const Icon(Icons.phone_outlined),
-                          errorText: _phoneError,
-                        ),
-                        keyboardType: TextInputType.phone,
-                        onChanged: (_) {
-                          if (_phoneError != null) {
-                            setState(() => _phoneError = null);
-                          }
-                        },
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _phoneShareController,
+                              decoration: InputDecoration(
+                                labelText: 'Share with (phone)',
+                                hintText: 'Enter phone number (optional)',
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(Icons.phone_outlined),
+                                errorText: _phoneError,
+                              ),
+                              keyboardType: TextInputType.phone,
+                              onChanged: (_) {
+                                if (_phoneError != null) {
+                                  setState(() => _phoneError = null);
+                                }
+                              },
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.contacts),
+                            tooltip: 'Pick from contacts',
+                            onPressed: _pickContact,
+                          ),
+                        ],
                       ),
                     ],
                     const SizedBox(height: 32),
@@ -378,6 +449,8 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                   ],
                 ),
               ),
+              ),
+            ),
             ),
     );
   }

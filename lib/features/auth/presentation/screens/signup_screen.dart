@@ -69,7 +69,9 @@ class _SignupScreenState extends State<SignupScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Form(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Form(
               key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -187,6 +189,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ),
