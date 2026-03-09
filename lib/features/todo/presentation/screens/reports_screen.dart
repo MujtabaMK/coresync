@@ -12,6 +12,13 @@ class ReportsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<TodoCubit, TodoState>(
       builder: (context, todoState) {
+        if (todoState.isLoading) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Reports')),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
         // Ensure the ReportCubit is recomputed whenever myTasks change.
         final reportCubit = context.read<ReportCubit>();
         // We call computeReport here so that any new task data flowing
@@ -29,8 +36,7 @@ class ReportsScreen extends StatelessWidget {
 
             return Scaffold(
               appBar: AppBar(title: const Text('Reports')),
-              body: Center(
-                child: SingleChildScrollView(
+              body: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 480),
@@ -96,7 +102,6 @@ class ReportsScreen extends StatelessWidget {
                   ],
                 ),
                 ),
-              ),
               ),
             );
           },

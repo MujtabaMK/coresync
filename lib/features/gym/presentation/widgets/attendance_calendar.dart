@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 class AttendanceCalendar extends StatelessWidget {
   final Map<DateTime, bool> attendanceMap;
+  final DateTime? membershipStartDate;
   final DateTime focusedDay;
   final DateTime? selectedDay;
   final void Function(DateTime selectedDay, DateTime focusedDay) onDaySelected;
@@ -10,6 +11,7 @@ class AttendanceCalendar extends StatelessWidget {
   const AttendanceCalendar({
     super.key,
     required this.attendanceMap,
+    this.membershipStartDate,
     required this.focusedDay,
     required this.selectedDay,
     required this.onDaySelected,
@@ -48,19 +50,48 @@ class AttendanceCalendar extends StatelessWidget {
           final normalizedDate = DateTime(date.year, date.month, date.day);
           final isPresent = attendanceMap[normalizedDate];
 
-          if (isPresent == null) return null;
-
-          return Positioned(
-            bottom: 1,
-            child: Container(
-              width: 7,
-              height: 7,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isPresent ? Colors.green : Colors.red,
+          // Explicitly marked in the map
+          if (isPresent != null) {
+            return Positioned(
+              bottom: 1,
+              child: Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isPresent ? Colors.green : Colors.red,
+                ),
               ),
-            ),
-          );
+            );
+          }
+
+          // Auto-absent: within membership period, before today, not marked
+          if (membershipStartDate != null) {
+            final start = DateTime(
+              membershipStartDate!.year,
+              membershipStartDate!.month,
+              membershipStartDate!.day,
+            );
+            final today = DateTime.now();
+            final todayNormalized = DateTime(today.year, today.month, today.day);
+
+            if (!normalizedDate.isBefore(start) &&
+                normalizedDate.isBefore(todayNormalized)) {
+              return Positioned(
+                bottom: 1,
+                child: Container(
+                  width: 7,
+                  height: 7,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red,
+                  ),
+                ),
+              );
+            }
+          }
+
+          return null;
         },
       ),
     );

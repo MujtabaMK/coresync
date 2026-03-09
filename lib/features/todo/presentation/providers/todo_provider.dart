@@ -147,6 +147,21 @@ class TodoCubit extends Cubit<TodoState> {
     ));
   }
 
+  /// Delete multiple tasks and update local state immediately.
+  Future<void> deleteTasks(List<String> taskIds) async {
+    final idSet = taskIds.toSet();
+    // Optimistically remove from local state
+    emit(state.copyWith(
+      myTasks: state.myTasks.where((t) => !idSet.contains(t.id)).toList(),
+      sharedTasks:
+          state.sharedTasks.where((t) => !idSet.contains(t.id)).toList(),
+    ));
+    // Delete from Firestore
+    for (final id in taskIds) {
+      await _todoRepository.deleteTask(id);
+    }
+  }
+
   /// Update task status and update local state immediately.
   Future<void> updateTaskStatus(String taskId, TaskStatus status) async {
     await _todoRepository.updateTaskStatus(taskId, status);

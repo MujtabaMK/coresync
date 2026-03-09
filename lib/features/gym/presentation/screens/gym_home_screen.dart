@@ -84,35 +84,68 @@ class GymHomeScreen extends StatelessWidget {
                 if (membership != null)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _QuickStatCard(
-                            icon: Icons.check_circle,
-                            label: 'Present',
-                            value: '${state.presentCount}',
-                            color: Colors.green,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _QuickStatCard(
-                            icon: Icons.cancel,
-                            label: 'Absent',
-                            value: '${state.absentCount}',
-                            color: Colors.red,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _QuickStatCard(
-                            icon: Icons.water_drop,
-                            label: 'Water',
-                            value: '${state.waterGlasses}',
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ],
+                    child: Builder(
+                      builder: (context) {
+                        final today = DateTime.now();
+                        final start = membership.startDate;
+                        final daysSinceStart =
+                            today.difference(start).inDays + 1;
+                        final absentCount =
+                            (daysSinceStart - state.presentCount)
+                                .clamp(0, daysSinceStart);
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: _QuickStatCard(
+                                icon: Icons.check_circle,
+                                label: 'Present',
+                                value: '${state.presentCount}',
+                                color: Colors.green,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _QuickStatCard(
+                                icon: Icons.cancel,
+                                label: 'Absent',
+                                value: '$absentCount',
+                                color: Colors.red,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _QuickStatCard(
+                                icon: Icons.water_drop,
+                                label: 'Water',
+                                value: '${state.waterGlasses}',
+                                color: Colors.blue,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Builder(
+                                builder: (context) {
+                                  final now = DateTime.now();
+                                  final today = DateTime(now.year, now.month, now.day);
+                                  final todaySteps = state.stepsHistory[today] ?? 0;
+                                  const stepsGoal = 10000;
+                                  final stepsColor = todaySteps == 0
+                                      ? Colors.red
+                                      : todaySteps >= stepsGoal
+                                          ? Colors.green
+                                          : Colors.amber.shade700;
+                                  return _QuickStatCard(
+                                    icon: Icons.directions_walk,
+                                    label: 'Steps',
+                                    value: '$todaySteps',
+                                    color: stepsColor,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
 

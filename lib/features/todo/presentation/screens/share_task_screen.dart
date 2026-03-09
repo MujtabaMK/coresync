@@ -10,9 +10,9 @@ import '../../../../core/utils/snackbar_utils.dart';
 import '../providers/todo_provider.dart';
 
 class ShareTaskScreen extends StatefulWidget {
-  const ShareTaskScreen({super.key, required this.taskId});
+  const ShareTaskScreen({super.key, required this.taskIds});
 
-  final String taskId;
+  final List<String> taskIds;
 
   @override
   State<ShareTaskScreen> createState() => _ShareTaskScreenState();
@@ -25,6 +25,8 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
   bool _isSharing = false;
   Map<String, dynamic>? _foundUser;
   String? _searchError;
+
+  bool get _isMultiple => widget.taskIds.length > 1;
 
   @override
   void dispose() {
@@ -148,18 +150,24 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
     try {
       final shareRepo = context.read<TodoCubit>().shareRepository;
       final targetUid = _foundUser!['uid'] as String;
-      debugPrint('Sharing task ${widget.taskId} with uid: $targetUid');
-      await shareRepo.shareTask(widget.taskId, targetUid);
-      debugPrint('Task shared successfully, now sending notification...');
+
+      for (final taskId in widget.taskIds) {
+        debugPrint('Sharing task $taskId with uid: $targetUid');
+        await shareRepo.shareTask(taskId, targetUid);
+      }
+      debugPrint('All tasks shared successfully, now sending notification...');
 
       // Send push notification to the target user
       try {
         final currentUser = FirebaseAuth.instance.currentUser;
         final senderName = currentUser?.displayName ?? 'Someone';
+        final body = _isMultiple
+            ? '$senderName shared ${widget.taskIds.length} tasks with you'
+            : '$senderName shared a task with you';
         await PushNotificationService.sendNotification(
           targetUid: targetUid,
           title: 'Task Shared',
-          body: '$senderName shared a task with you',
+          body: body,
         );
         debugPrint('Notification sent to $targetUid');
       } catch (e) {
@@ -170,7 +178,10 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
       }
 
       if (mounted) {
-        showSuccessSnackBar(context, 'Task shared successfully');
+        final msg = _isMultiple
+            ? '${widget.taskIds.length} tasks shared successfully'
+            : 'Task shared successfully';
+        showSuccessSnackBar(context, msg);
         context.pop();
       }
     } catch (e) {
@@ -183,10 +194,21 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final title = _isMultiple
+        ? 'Share ${widget.taskIds.length} Tasks'
+        : 'Share Task';
+    final description = _isMultiple
+        ? 'Find a user by phone number or email to share ${widget.taskIds.length} tasks.'
+        : 'Find a user by phone number or email to share this task.';
+    final shareLabel = _isSharing
+        ? 'Sharing...'
+        : (_isMultiple
+            ? 'Share ${widget.taskIds.length} Tasks'
+            : 'Share Task');
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Share Task')),
-      body: Center(
-        child: SingleChildScrollView(
+      appBar: AppBar(title: Text(title)),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
@@ -194,7 +216,7 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Find a user by phone number or email to share this task.',
+              description,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 16),
@@ -345,7 +367,7 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
                                   ),
                                 )
                               : const Icon(Icons.share),
-                          label: Text(_isSharing ? 'Sharing...' : 'Share Task'),
+                          label: Text(shareLabel),
                         ),
                       ),
                     ],
@@ -356,7 +378,6 @@ class _ShareTaskScreenState extends State<ShareTaskScreen> {
           ],
         ),
         ),
-      ),
       ),
     );
   }

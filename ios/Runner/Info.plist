@@ -63,6 +63,8 @@
 		</array>
 		<key>FirebaseAppDelegateProxyEnabled</key>
 		<false/>
+		<key>NSMotionUsageDescription</key>
+		<string>This app uses motion sensors to count your steps.</string>
 		<key>NSContactsUsageDescription</key>
 		<string>CoreSync needs access to your contacts to share tasks with people from your phonebook.</string>
 		<key>UIStatusBarHidden</key>

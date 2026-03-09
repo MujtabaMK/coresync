@@ -17,19 +17,29 @@ class _MembershipScreenState extends State<MembershipScreen> {
   String? _selectedPlan;
   bool _isSaving = false;
 
-  Future<void> _saveMembership() async {
-    if (_selectedPlan == null) return;
+  Future<void> _onPlanTapped(String planKey) async {
+    // Show date picker to select membership start date
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: today,
+      firstDate: DateTime(today.year - 1),
+      lastDate: today,
+      helpText: 'When did your membership start?',
+    );
+
+    if (pickedDate == null || !mounted) return;
 
     setState(() => _isSaving = true);
 
-    final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day);
-    final days = MembershipModel.planDurations[_selectedPlan]!;
+    final startDate = DateTime(pickedDate.year, pickedDate.month, pickedDate.day);
+    final days = MembershipModel.planDurations[planKey]!;
     final endDate = startDate.add(Duration(days: days));
 
     final membership = MembershipModel(
       id: const Uuid().v4(),
-      plan: _selectedPlan!,
+      plan: planKey,
       startDate: startDate,
       endDate: endDate,
       isActive: true,
@@ -154,7 +164,6 @@ class _MembershipScreenState extends State<MembershipScreen> {
                 final planKey = entry.key;
                 final planName = entry.value;
                 final duration = MembershipModel.planDurations[planKey]!;
-                final price = MembershipModel.planPrices[planKey]!;
                 final isActive = activePlan == planKey;
                 final isSelected = _selectedPlan == planKey;
 
@@ -174,9 +183,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
                       ),
                     ),
                     child: InkWell(
-                      onTap: () {
-                        setState(() => _selectedPlan = planKey);
-                      },
+                      onTap: _isSaving ? null : () => _onPlanTapped(planKey),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Row(
@@ -232,37 +239,11 @@ class _MembershipScreenState extends State<MembershipScreen> {
                                 ],
                               ),
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  'Rs. $price',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                                Text(
-                                  'Rs. ${(price / (duration / 30)).round()}/mo',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (isSelected) ...[
-                              const SizedBox(width: 12),
+                            if (isSelected)
                               Icon(
-                                Icons.radio_button_checked,
+                                Icons.check_circle,
                                 color: theme.colorScheme.primary,
                               ),
-                            ] else ...[
-                              const SizedBox(width: 12),
-                              Icon(
-                                Icons.radio_button_off,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ],
                           ],
                         ),
                       ),
@@ -271,28 +252,6 @@ class _MembershipScreenState extends State<MembershipScreen> {
                 );
               }),
 
-              const SizedBox(height: 16),
-
-              // Activate button
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: FilledButton(
-                  onPressed: _selectedPlan != null && !_isSaving
-                      ? _saveMembership
-                      : null,
-                  child: _isSaving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Activate Membership'),
-                ),
-              ),
               const SizedBox(height: 32),
             ],
           ),

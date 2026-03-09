@@ -13,6 +13,8 @@ class GymState {
     this.absentDates = const [],
     this.waterGlasses = 0,
     this.dailyWaterGoalMl = 0,
+    this.waterHistory = const {},
+    this.stepsHistory = const {},
     this.userHeight,
     this.userWeight,
     this.isLoading = false,
@@ -27,6 +29,8 @@ class GymState {
   final List<DateTime> absentDates;
   final int waterGlasses;
   final int dailyWaterGoalMl;
+  final Map<DateTime, int> waterHistory;
+  final Map<DateTime, int> stepsHistory;
   final double? userHeight;
   final double? userWeight;
   final bool isLoading;
@@ -42,6 +46,8 @@ class GymState {
     List<DateTime>? absentDates,
     int? waterGlasses,
     int? dailyWaterGoalMl,
+    Map<DateTime, int>? waterHistory,
+    Map<DateTime, int>? stepsHistory,
     double? userHeight,
     bool clearHeight = false,
     double? userWeight,
@@ -60,6 +66,8 @@ class GymState {
       absentDates: absentDates ?? this.absentDates,
       waterGlasses: waterGlasses ?? this.waterGlasses,
       dailyWaterGoalMl: dailyWaterGoalMl ?? this.dailyWaterGoalMl,
+      waterHistory: waterHistory ?? this.waterHistory,
+      stepsHistory: stepsHistory ?? this.stepsHistory,
       userHeight: clearHeight ? null : (userHeight ?? this.userHeight),
       userWeight: clearWeight ? null : (userWeight ?? this.userWeight),
       isLoading: isLoading ?? this.isLoading,
@@ -85,6 +93,7 @@ class GymCubit extends Cubit<GymState> {
         loadAttendance(),
         loadWaterIntake(),
         loadUserMetrics(),
+        loadStepsHistory(),
       ]);
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
@@ -173,7 +182,8 @@ class GymCubit extends Cubit<GymState> {
   Future<void> loadWaterIntake() async {
     try {
       final glasses = await _repository.getWaterIntakeForDate(DateTime.now());
-      emit(state.copyWith(waterGlasses: glasses));
+      final history = await _repository.getWaterIntakeHistory();
+      emit(state.copyWith(waterGlasses: glasses, waterHistory: history));
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
@@ -182,6 +192,15 @@ class GymCubit extends Cubit<GymState> {
   Future<void> addWaterGlass() async {
     try {
       await _repository.addWaterGlass(DateTime.now());
+      await loadWaterIntake();
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  Future<void> removeWaterGlass() async {
+    try {
+      await _repository.removeWaterGlass(DateTime.now());
       await loadWaterIntake();
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
@@ -222,6 +241,27 @@ class GymCubit extends Cubit<GymState> {
     try {
       await _repository.saveUserMetrics(height: height, weight: weight);
       await loadUserMetrics();
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  Future<void> loadStepsHistory() async {
+    try {
+      final history = await _repository.getStepsHistory();
+      emit(state.copyWith(stepsHistory: history));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  Future<void> saveSteps(DateTime date, int steps) async {
+    try {
+      final normalized = DateTime(date.year, date.month, date.day);
+      await _repository.saveStepsForDate(normalized, steps);
+      final newHistory = Map<DateTime, int>.from(state.stepsHistory);
+      newHistory[normalized] = steps;
+      emit(state.copyWith(stepsHistory: newHistory));
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }

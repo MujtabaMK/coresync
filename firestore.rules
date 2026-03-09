@@ -23,6 +23,9 @@ service cloud.firestore {
       match /gym_water/{docId} {
         allow read, write: if request.auth.uid == userId;
       }
+      match /gym_steps/{docId} {
+        allow read, write: if request.auth.uid == userId;
+      }
       match /medicines/{docId} {
         allow read, write: if request.auth.uid == userId;
       }

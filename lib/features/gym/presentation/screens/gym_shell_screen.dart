@@ -5,6 +5,7 @@ import 'attendance_screen.dart';
 import 'gym_home_screen.dart';
 import 'membership_screen.dart';
 import 'report_screen.dart';
+import 'steps_screen.dart';
 import 'water_intake_screen.dart';
 
 class GymShellScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _GymShellScreenState extends State<GymShellScreen>
     Tab(icon: Icon(Icons.card_membership_rounded), text: 'Plans'),
     Tab(icon: Icon(Icons.calendar_month_rounded), text: 'Attendance'),
     Tab(icon: Icon(Icons.water_drop_rounded), text: 'Water'),
+    Tab(icon: Icon(Icons.directions_walk_rounded), text: 'Steps'),
     Tab(icon: Icon(Icons.bar_chart_rounded), text: 'Report'),
   ];
 
@@ -31,6 +33,7 @@ class _GymShellScreenState extends State<GymShellScreen>
     MembershipScreen(),
     AttendanceScreen(),
     WaterIntakeScreen(),
+    StepsScreen(),
     ReportScreen(),
   ];
 

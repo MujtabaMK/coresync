@@ -3,42 +3,33 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/task_model.dart';
-import '../../domain/task_status.dart';
 import 'status_badge.dart';
 
 class TaskTile extends StatelessWidget {
-  const TaskTile({super.key, required this.task});
+  const TaskTile({
+    super.key,
+    required this.task,
+    this.isSelectionMode = false,
+    this.isSelected = false,
+    this.onLongPress,
+    this.onSelect,
+  });
 
   final TaskModel task;
-
-  IconData get _statusIcon {
-    switch (task.status) {
-      case TaskStatus.notStarted:
-        return Icons.circle_outlined;
-      case TaskStatus.working:
-        return Icons.timelapse;
-      case TaskStatus.completed:
-        return Icons.check_circle;
-    }
-  }
-
-  Color get _statusColor {
-    switch (task.status) {
-      case TaskStatus.notStarted:
-        return Colors.grey;
-      case TaskStatus.working:
-        return Colors.orange;
-      case TaskStatus.completed:
-        return Colors.green;
-    }
-  }
+  final bool isSelectionMode;
+  final bool isSelected;
+  final VoidCallback? onLongPress;
+  final VoidCallback? onSelect;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
-        onTap: () => context.push('/todo/detail/${task.id}'),
+        onTap: isSelectionMode
+            ? onSelect
+            : () => context.push('/todo/detail/${task.id}'),
+        onLongPress: isSelectionMode ? null : onLongPress,
         title: Text(
           task.title,
           maxLines: 1,
@@ -59,16 +50,17 @@ class TaskTile extends StatelessWidget {
               DateFormat('MMM d').format(task.dueDate),
               style: TextStyle(
                 fontSize: 12,
-                color: _statusColor,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
         ),
-        leading: StatusBadge(status: task.status),
-        trailing: Icon(
-          _statusIcon,
-          color: _statusColor,
-        ),
+        leading: isSelectionMode
+            ? Checkbox(
+                value: isSelected,
+                onChanged: (_) => onSelect?.call(),
+              )
+            : StatusBadge(status: task.status),
       ),
     );
   }

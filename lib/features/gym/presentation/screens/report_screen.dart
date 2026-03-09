@@ -20,6 +20,27 @@ class ReportScreen extends StatelessWidget {
 
         final membership = state.activeMembership;
 
+        // Auto-calculate absent dates from membership start to today
+        List<DateTime> absentDates = [];
+        if (membership != null) {
+          final start = DateTime(
+            membership.startDate.year,
+            membership.startDate.month,
+            membership.startDate.day,
+          );
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final presentSet = state.presentDates
+              .map((d) => DateTime(d.year, d.month, d.day))
+              .toSet();
+
+          for (var d = start; d.isBefore(today); d = d.add(const Duration(days: 1))) {
+            if (!presentSet.contains(d)) {
+              absentDates.add(d);
+            }
+          }
+        }
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -40,7 +61,7 @@ class ReportScreen extends StatelessWidget {
                   Expanded(
                     child: _CountCard(
                       label: 'ABSENT',
-                      count: state.absentCount,
+                      count: absentDates.length,
                       color: Colors.red,
                       icon: Icons.cancel,
                     ),
@@ -69,11 +90,6 @@ class ReportScreen extends StatelessWidget {
                         _DetailRow(
                           label: 'Duration',
                           value: '${membership.durationDays} days',
-                        ),
-                        const Divider(height: 20),
-                        _DetailRow(
-                          label: 'Price',
-                          value: 'Rs. ${membership.price}',
                         ),
                         const Divider(height: 20),
                         _DetailRow(
@@ -108,21 +124,38 @@ class ReportScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Card(
+                  clipBehavior: Clip.antiAlias,
                   child: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: state.presentDates.length,
                     separatorBuilder: (_, _) => const Divider(height: 1),
                     itemBuilder: (context, index) {
-                      return ListTile(
-                        dense: true,
-                        leading: const Icon(
-                          Icons.check_circle,
-                          color: Colors.green,
-                          size: 20,
+                      final date = state.presentDates[index];
+                      return Dismissible(
+                        key: ValueKey(date),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20),
+                          color: Colors.red,
+                          child: const Text(
+                            'Delete',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        title: Text(
-                          dateFormat.format(state.presentDates[index]),
+                        confirmDismiss: (_) => _confirmDelete(context, date),
+                        child: ListTile(
+                          dense: true,
+                          leading: const Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                            size: 20,
+                          ),
+                          title: Text(dateFormat.format(date)),
                         ),
                       );
                     },
@@ -132,7 +165,7 @@ class ReportScreen extends StatelessWidget {
               ],
 
               // Absent dates
-              if (state.absentDates.isNotEmpty) ...[
+              if (absentDates.isNotEmpty) ...[
                 Text(
                   'ABSENT DATES',
                   style: theme.textTheme.labelLarge?.copyWith(
@@ -145,7 +178,7 @@ class ReportScreen extends StatelessWidget {
                   child: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: state.absentDates.length,
+                    itemCount: absentDates.length,
                     separatorBuilder: (_, _) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       return ListTile(
@@ -156,7 +189,7 @@ class ReportScreen extends StatelessWidget {
                           size: 20,
                         ),
                         title: Text(
-                          dateFormat.format(state.absentDates[index]),
+                          dateFormat.format(absentDates[index]),
                           style: const TextStyle(color: Colors.red),
                         ),
                       );
@@ -165,11 +198,180 @@ class ReportScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
               ],
+
+              // Water intake - monthly (1st of month to today)
+              Builder(
+                builder: (context) {
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  final firstOfMonth = DateTime(now.year, now.month, 1);
+                  final days = <DateTime>[];
+                  for (var d = today;
+                      !d.isBefore(firstOfMonth);
+                      d = d.subtract(const Duration(days: 1))) {
+                    days.add(d);
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'WATER INTAKE',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Card(
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: days.length,
+                          separatorBuilder: (_, _) =>
+                              const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final date = days[index];
+                            final glasses =
+                                state.waterHistory[date] ?? 0;
+                            final goalMl = state.dailyWaterGoalMl;
+                            final currentMl = glasses * 250;
+                            final waterColor = glasses == 0
+                                ? Colors.red
+                                : currentMl >= goalMl
+                                    ? Colors.green
+                                    : Colors.amber.shade700;
+                            return ListTile(
+                              dense: true,
+                              leading: Icon(
+                                Icons.water_drop,
+                                color: waterColor,
+                                size: 20,
+                              ),
+                              title: Text(dateFormat.format(date)),
+                              trailing: Text(
+                                '$glasses ${glasses == 1 ? 'glass' : 'glasses'}',
+                                style:
+                                    theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: waterColor,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                },
+              ),
+
+              // Steps - monthly (1st of month to today)
+              Builder(
+                builder: (context) {
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  final firstOfMonth = DateTime(now.year, now.month, 1);
+                  final days = <DateTime>[];
+                  for (var d = today;
+                      !d.isBefore(firstOfMonth);
+                      d = d.subtract(const Duration(days: 1))) {
+                    days.add(d);
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'STEPS',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Card(
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: days.length,
+                          separatorBuilder: (_, _) =>
+                              const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final date = days[index];
+                            final steps =
+                                state.stepsHistory[date] ?? 0;
+                            const stepsGoal = 10000;
+                            final stepsColor = steps == 0
+                                ? Colors.red
+                                : steps >= stepsGoal
+                                    ? Colors.green
+                                    : Colors.amber.shade700;
+                            return ListTile(
+                              dense: true,
+                              leading: Icon(
+                                Icons.directions_walk,
+                                color: stepsColor,
+                                size: 20,
+                              ),
+                              title: Text(dateFormat.format(date)),
+                              trailing: Text(
+                                '$steps ${steps == 1 ? 'step' : 'steps'}',
+                                style:
+                                    theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: stepsColor,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
         );
       },
     );
+  }
+
+  Future<bool> _confirmDelete(BuildContext context, DateTime date) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Attendance'),
+        content: const Text(
+          'Are you sure you want to delete this attendance record?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await context.read<GymCubit>().deleteAttendance(date);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Attendance record deleted')),
+        );
+      }
+      return true;
+    }
+    return false;
   }
 }
 

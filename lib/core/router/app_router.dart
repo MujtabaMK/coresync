@@ -114,7 +114,13 @@ GoRouter createRouter() {
                   GoRoute(
                     path: 'share/:taskId',
                     builder: (context, state) => ShareTaskScreen(
-                      taskId: state.pathParameters['taskId']!,
+                      taskIds: [state.pathParameters['taskId']!],
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'share-multiple',
+                    builder: (context, state) => ShareTaskScreen(
+                      taskIds: state.extra as List<String>,
                     ),
                   ),
                   GoRoute(

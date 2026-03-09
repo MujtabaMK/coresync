@@ -15,6 +15,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   UserModel? _userModel;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -24,7 +25,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadUserModel() async {
     final model = await context.read<AuthCubit>().repository.getCurrentUserModel();
-    if (mounted) setState(() => _userModel = model);
+    if (mounted) {
+      setState(() {
+        _userModel = model;
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -35,6 +41,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context, authState) {
         final currentUser = authState.user;
 
+        if (_isLoading) {
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => context.pop(),
+              ),
+              title: const Text('Profile'),
+            ),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
@@ -43,8 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             title: const Text('Profile'),
           ),
-          body: Center(
-            child: SingleChildScrollView(
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
@@ -181,7 +199,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
             ),
-          ),
           ),
         );
       },

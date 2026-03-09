@@ -57,6 +57,10 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
 
     return BlocBuilder<GymCubit, GymState>(
       builder: (context, state) {
+        if (state.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         final needsSetup = state.userHeight == null || state.userWeight == null;
 
         if (needsSetup || _showSetup) {
@@ -152,6 +156,13 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
     final goalMl = state.dailyWaterGoalMl;
     final progress = goalMl > 0 ? (currentMl / goalMl).clamp(0.0, 1.0) : 0.0;
 
+    // Color: red if 0, green if goal reached, amber if in progress
+    final progressColor = state.waterGlasses == 0
+        ? Colors.red
+        : currentMl >= goalMl
+            ? Colors.green
+            : Colors.amber.shade700;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -172,7 +183,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
             child: CustomPaint(
               painter: _WaterProgressPainter(
                 progress: progress,
-                color: theme.colorScheme.primary,
+                color: progressColor,
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
               ),
               child: Center(
@@ -183,7 +194,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
                       '$currentMl',
                       style: theme.textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
+                        color: progressColor,
                       ),
                     ),
                     Text(
@@ -212,17 +223,33 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
             ),
           ),
           const SizedBox(height: 32),
-          // Add glass button
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () => context.read<GymCubit>().addWaterGlass(),
-              icon: const Icon(Icons.add),
-              label: const Text('Add Glass'),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+          // Add / Remove glass buttons
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: state.waterGlasses > 0
+                      ? () => context.read<GymCubit>().removeWaterGlass()
+                      : null,
+                  icon: const Icon(Icons.remove),
+                  label: const Text('Remove'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => context.read<GymCubit>().addWaterGlass(),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Glass'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           // Reset button

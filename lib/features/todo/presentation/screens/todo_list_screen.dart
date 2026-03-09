@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/utils/snackbar_utils.dart';
+import '../../../../core/widgets/confirm_dialog.dart';
 import '../../../../core/widgets/error_widget.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../domain/task_model.dart';
@@ -19,32 +22,117 @@ class TodoListScreen extends StatefulWidget {
 
 class _TodoListScreenState extends State<TodoListScreen> {
   TaskStatus? _selectedFilter;
+  bool _isSelectionMode = false;
+  final Set<String> _selectedTaskIds = {};
+
+  String? get _currentUid => FirebaseAuth.instance.currentUser?.uid;
+
+  void _enterSelectionMode(String taskId) {
+    setState(() {
+      _isSelectionMode = true;
+      _selectedTaskIds.add(taskId);
+    });
+  }
+
+  void _toggleSelection(String taskId) {
+    setState(() {
+      if (_selectedTaskIds.contains(taskId)) {
+        _selectedTaskIds.remove(taskId);
+        if (_selectedTaskIds.isEmpty) {
+          _isSelectionMode = false;
+        }
+      } else {
+        _selectedTaskIds.add(taskId);
+      }
+    });
+  }
+
+  void _exitSelectionMode() {
+    setState(() {
+      _isSelectionMode = false;
+      _selectedTaskIds.clear();
+    });
+  }
+
+  Future<void> _deleteSelected() async {
+    final count = _selectedTaskIds.length;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Delete $count ${count == 1 ? 'task' : 'tasks'}?',
+      content: 'This action cannot be undone.',
+    );
+    if (!confirmed || !mounted) return;
+
+    final ids = _selectedTaskIds.toList();
+    _exitSelectionMode();
+    try {
+      await context.read<TodoCubit>().deleteTasks(ids);
+      if (mounted) {
+        showSuccessSnackBar(
+          context,
+          '$count ${count == 1 ? 'task' : 'tasks'} deleted',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        showErrorSnackBar(context, 'Failed to delete: $e');
+      }
+    }
+  }
+
+  void _shareSelected() {
+    final ids = _selectedTaskIds.toList();
+    _exitSelectionMode();
+    context.push('/todo/share-multiple', extra: ids);
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TodoCubit, TodoState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Todo'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.people_outline),
-                tooltip: 'Shared Tasks',
-                onPressed: () => context.push('/todo/shared'),
-              ),
-              IconButton(
-                icon: const Icon(Icons.bar_chart),
-                tooltip: 'Reports',
-                onPressed: () => context.push('/todo/reports'),
-              ),
-              IconButton(
-                icon: const Icon(Icons.person_outline),
-                tooltip: 'Profile',
-                onPressed: () => context.push('/profile'),
-              ),
-            ],
-          ),
+          appBar: _isSelectionMode
+              ? AppBar(
+                  leading: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: _exitSelectionMode,
+                  ),
+                  title: Text('${_selectedTaskIds.length} selected'),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.share),
+                      tooltip: 'Share selected',
+                      onPressed:
+                          _selectedTaskIds.isEmpty ? null : _shareSelected,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      tooltip: 'Delete selected',
+                      onPressed:
+                          _selectedTaskIds.isEmpty ? null : _deleteSelected,
+                    ),
+                  ],
+                )
+              : AppBar(
+                  title: const Text('Todo'),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.people_outline),
+                      tooltip: 'Shared Tasks',
+                      onPressed: () => context.push('/todo/shared'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.bar_chart),
+                      tooltip: 'Reports',
+                      onPressed: () => context.push('/todo/reports'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.person_outline),
+                      tooltip: 'Profile',
+                      onPressed: () => context.push('/profile'),
+                    ),
+                  ],
+                ),
           body: Column(
             children: [
               Padding(
@@ -79,16 +167,31 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   },
                 ),
               ),
+              if (!_isSelectionMode && state.filteredTasks.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    'Long press a task to select multiple',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.5),
+                        ),
+                  ),
+                ),
               Expanded(
                 child: _buildBody(context, state),
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton(
-            heroTag: 'todoFab',
-            onPressed: () => context.push('/todo/add'),
-            child: const Icon(Icons.add),
-          ),
+          floatingActionButton: _isSelectionMode
+              ? null
+              : FloatingActionButton(
+                  heroTag: 'todoFab',
+                  onPressed: () => context.push('/todo/add'),
+                  child: const Icon(Icons.add),
+                ),
         );
       },
     );
@@ -158,7 +261,20 @@ class _TodoListScreenState extends State<TodoListScreen> {
                     ),
               ),
             ),
-            ...tasks.map((task) => TaskTile(task: task)),
+            ...tasks.map((task) {
+              final isOwned = task.ownerId == _currentUid;
+              return TaskTile(
+                task: task,
+                isSelectionMode: _isSelectionMode,
+                isSelected: _selectedTaskIds.contains(task.id),
+                onLongPress: isOwned
+                    ? () => _enterSelectionMode(task.id)
+                    : null,
+                onSelect: isOwned
+                    ? () => _toggleSelection(task.id)
+                    : null,
+              );
+            }),
           ],
         );
       },

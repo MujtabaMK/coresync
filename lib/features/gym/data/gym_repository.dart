@@ -18,6 +18,7 @@ class GymRepository {
   CollectionReference get _attendanceCol => _userDoc.collection('gym_attendance');
   CollectionReference get _membershipCol => _userDoc.collection('gym_memberships');
   CollectionReference get _waterCol => _userDoc.collection('gym_water');
+  CollectionReference get _stepsCol => _userDoc.collection('gym_steps');
 
   // Local settings box (reminders are device-specific)
   Box? _gymSettingsBox;
@@ -178,9 +179,64 @@ class GymRepository {
     await doc.set({'glasses': current + 1});
   }
 
+  Future<void> removeWaterGlass(DateTime date) async {
+    final key = DateFormat('yyyy-MM-dd').format(date);
+    final doc = _waterCol.doc(key);
+    final snapshot = await doc.get();
+    final current = snapshot.exists
+        ? ((snapshot.data() as Map<String, dynamic>?)?['glasses'] as int? ?? 0)
+        : 0;
+    if (current > 0) {
+      await doc.set({'glasses': current - 1});
+    }
+  }
+
   Future<void> resetWaterIntake(DateTime date) async {
     final key = DateFormat('yyyy-MM-dd').format(date);
     await _waterCol.doc(key).set({'glasses': 0});
+  }
+
+  Future<Map<DateTime, int>> getWaterIntakeHistory() async {
+    final snapshot = await _waterCol.get();
+    final map = <DateTime, int>{};
+    for (final doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final glasses = data['glasses'] as int? ?? 0;
+      if (glasses > 0) {
+        final date = DateFormat('yyyy-MM-dd').parse(doc.id);
+        map[DateTime(date.year, date.month, date.day)] = glasses;
+      }
+    }
+    return map;
+  }
+
+  // ── Steps ──
+
+  Future<int> getStepsForDate(DateTime date) async {
+    final key = DateFormat('yyyy-MM-dd').format(date);
+    final doc = await _stepsCol.doc(key).get();
+    if (!doc.exists) return 0;
+    final data = doc.data() as Map<String, dynamic>?;
+    return data?['steps'] as int? ?? 0;
+  }
+
+  Future<void> saveStepsForDate(DateTime date, int steps) async {
+    final key = DateFormat('yyyy-MM-dd').format(date);
+    await _stepsCol.doc(key).set({'steps': steps});
+  }
+
+  Future<Map<DateTime, int>> getStepsHistory() async {
+    final snapshot = await _stepsCol.get();
+    final map = <DateTime, int>{};
+    for (final doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final steps = data['steps'] as int? ?? 0;
+      if (steps > 0) {
+        final date = DateFormat('yyyy-MM-dd').parse(doc.id);
+        map[DateTime(date.year, date.month, date.day)] = steps;
+      }
+    }
+    return map;
   }
 
   // ── User Metrics ──
