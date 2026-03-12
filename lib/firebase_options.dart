@@ -67,7 +67,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '954417312512',
     projectId: 'coresync-e7fb5',
     storageBucket: 'coresync-e7fb5.firebasestorage.app',
-    iosBundleId: 'com.example.coresync',
+    iosBundleId: 'com.mujtaba.coresync',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -76,6 +76,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '954417312512',
     projectId: 'coresync-e7fb5',
     storageBucket: 'coresync-e7fb5.firebasestorage.app',
-    iosBundleId: 'com.example.coresync',
+    iosBundleId: 'com.mujtaba.coresync',
   );
 }

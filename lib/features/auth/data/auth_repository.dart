@@ -47,22 +47,19 @@ class AuthRepository {
     final docRef = _firestore
         .collection(AppConstants.usersCollection)
         .doc(user.uid);
-    final doc = await docRef.get();
-    if (!doc.exists) {
-      final displayName = [firstName, lastName]
-          .where((s) => s != null && s.isNotEmpty)
-          .join(' ');
-      final userModel = UserModel(
-        uid: user.uid,
-        email: user.email ?? '',
-        firstName: firstName,
-        lastName: lastName,
-        phoneNumber: phoneNumber,
-        displayName: displayName.isNotEmpty ? displayName : null,
-        createdAt: DateTime.now(),
-      );
-      await docRef.set(userModel.toFirestore());
-    }
+    final displayName = [firstName, lastName]
+        .where((s) => s != null && s.isNotEmpty)
+        .join(' ');
+    final userModel = UserModel(
+      uid: user.uid,
+      email: user.email ?? '',
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: phoneNumber,
+      displayName: displayName.isNotEmpty ? displayName : null,
+      createdAt: DateTime.now(),
+    );
+    await docRef.set(userModel.toFirestore(), SetOptions(merge: true));
   }
 
   Future<UserModel?> getUserByEmail(String email) async {

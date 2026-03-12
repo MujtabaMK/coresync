@@ -2,86 +2,78 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/exercise_data.dart';
+import '../../data/workout_program_data.dart';
+import '../widgets/workout_program_card.dart';
 
-class ExercisesScreen extends StatelessWidget {
+class ExercisesScreen extends StatefulWidget {
   const ExercisesScreen({super.key});
 
-  static const Map<String, IconData> _categoryIcons = {
-    'Chest': Icons.expand,
-    'Back': Icons.airline_seat_flat,
-    'Shoulders': Icons.accessibility_new,
-    'Arms': Icons.sports_martial_arts,
-    'Legs': Icons.directions_walk,
-    'Core': Icons.circle_outlined,
-    'Cardio': Icons.directions_run,
-  };
+  @override
+  State<ExercisesScreen> createState() => _ExercisesScreenState();
+}
 
-  static const Map<String, Color> _categoryColors = {
-    'Chest': Colors.red,
-    'Back': Colors.blue,
-    'Shoulders': Colors.purple,
-    'Arms': Colors.orange,
-    'Legs': Colors.green,
-    'Core': Colors.teal,
-    'Cardio': Colors.pink,
-  };
+class _ExercisesScreenState extends State<ExercisesScreen> {
+  String _selectedCategory = 'Chest';
 
   @override
   Widget build(BuildContext context) {
     final categories = ExerciseData.categories;
-    final theme = Theme.of(context);
+    final programs = WorkoutProgramData.getByBodyFocus(_selectedCategory);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Exercises'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 1.2,
-          ),
-          itemCount: categories.length,
-          itemBuilder: (context, index) {
-            final category = categories[index];
-            final icon = _categoryIcons[category] ?? Icons.fitness_center;
-            final color = _categoryColors[category] ?? theme.colorScheme.primary;
-
-            return Card(
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: () => context.go('/gym/exercises/$category'),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(icon, size: 40, color: color),
-                      const SizedBox(height: 12),
-                      Text(
-                        category,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${ExerciseData.getByCategory(category).length} exercises',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text(
+              'Body Focus',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                ),
-              ),
-            );
-          },
-        ),
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: categories.map((cat) {
+                final isSelected = _selectedCategory == cat;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ChoiceChip(
+                    label: Text(cat),
+                    selected: isSelected,
+                    onSelected: (_) {
+                      setState(() => _selectedCategory = cat);
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: programs.isEmpty
+                ? const Center(child: Text('No programs available'))
+                : ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    itemCount: programs.length,
+                    itemBuilder: (context, index) {
+                      final program = programs[index];
+                      return WorkoutProgramCard(
+                        program: program,
+                        onTap: () => context.push(
+                          '/gym/exercises/workout/${program.id}',
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }

@@ -143,52 +143,78 @@ class _GymHomeScreenState extends State<GymHomeScreen> {
                         final absentCount =
                             (daysSinceStart - state.presentCount)
                                 .clamp(0, daysSinceStart);
-                        return Row(
+                        const stepsGoal = 10000;
+                        final stepsColor = _liveSteps == 0
+                            ? Colors.red
+                            : _liveSteps >= stepsGoal
+                                ? Colors.green
+                                : Colors.amber.shade700;
+                        final weight = state.userWeight ?? 70.0;
+                        final calories =
+                            (_liveSteps * 0.04 * weight / 70).round();
+                        final minutes = (_liveSteps / 100).round();
+                        return Column(
                           children: [
-                            Expanded(
-                              child: _QuickStatCard(
-                                icon: Icons.check_circle,
-                                label: 'Present',
-                                value: '${state.presentCount}',
-                                color: Colors.green,
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _QuickStatCard(
+                                    icon: Icons.check_circle,
+                                    label: 'Present',
+                                    value: '${state.presentCount}',
+                                    color: Colors.green,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _QuickStatCard(
+                                    icon: Icons.cancel,
+                                    label: 'Absent',
+                                    value: '$absentCount',
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _QuickStatCard(
+                                    icon: Icons.water_drop,
+                                    label: 'Water',
+                                    value: '${state.waterGlasses}',
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _QuickStatCard(
-                                icon: Icons.cancel,
-                                label: 'Absent',
-                                value: '$absentCount',
-                                color: Colors.red,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _QuickStatCard(
-                                icon: Icons.water_drop,
-                                label: 'Water',
-                                value: '${state.waterGlasses}',
-                                color: Colors.blue,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Builder(
-                                builder: (context) {
-                                  const stepsGoal = 10000;
-                                  final stepsColor = _liveSteps == 0
-                                      ? Colors.red
-                                      : _liveSteps >= stepsGoal
-                                          ? Colors.green
-                                          : Colors.amber.shade700;
-                                  return _QuickStatCard(
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _QuickStatCard(
                                     icon: Icons.directions_walk,
                                     label: 'Steps',
                                     value: '$_liveSteps',
                                     color: stepsColor,
-                                  );
-                                },
-                              ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _QuickStatCard(
+                                    icon: Icons.timer_outlined,
+                                    label: 'Minutes',
+                                    value: '$minutes',
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _QuickStatCard(
+                                    icon: Icons.local_fire_department,
+                                    label: 'Calories',
+                                    value: '$calories',
+                                    color: Colors.orange,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         );
@@ -271,11 +297,15 @@ class _QuickStatCard extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 24),
             const SizedBox(height: 6),
-            Text(
-              value,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                maxLines: 1,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ),
             const SizedBox(height: 2),

@@ -9,9 +9,14 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/profile_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/gym/presentation/screens/exercise_category_screen.dart';
+import '../../features/gym/presentation/screens/exercise_detail_screen.dart';
+import '../../features/gym/domain/exercise_model.dart';
+import '../../features/gym/data/workout_program_data.dart';
 import '../../features/gym/presentation/screens/add_edit_medicine_screen.dart';
 import '../../features/gym/presentation/screens/exercises_screen.dart';
 import '../../features/gym/presentation/screens/gym_shell_screen.dart';
+import '../../features/gym/presentation/screens/workout_detail_screen.dart';
+import '../../features/gym/presentation/screens/workout_execution_screen.dart';
 import '../../features/gym/presentation/screens/medicine_cabinet_screen.dart';
 import '../../features/gym/presentation/screens/meal_reminder_screen.dart';
 import '../../features/gym/presentation/screens/reminder_settings_screen.dart';
@@ -170,10 +175,27 @@ GoRouter createRouter() {
                     builder: (context, state) => const ExercisesScreen(),
                     routes: [
                       GoRoute(
+                        path: 'workout/:programId',
+                        builder: (context, state) {
+                          final program = WorkoutProgramData.getById(
+                            state.pathParameters['programId']!,
+                          );
+                          return WorkoutDetailScreen(program: program!);
+                        },
+                      ),
+                      GoRoute(
                         path: ':category',
                         builder: (context, state) => ExerciseCategoryScreen(
                           category: state.pathParameters['category']!,
                         ),
+                        routes: [
+                          GoRoute(
+                            path: 'detail',
+                            builder: (context, state) => ExerciseDetailScreen(
+                              exercise: state.extra! as ExerciseModel,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -231,6 +253,16 @@ GoRouter createRouter() {
         path: '/profile',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/gym/exercises/workout/:programId/execute',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final program = WorkoutProgramData.getById(
+            state.pathParameters['programId']!,
+          );
+          return WorkoutExecutionScreen(program: program!);
+        },
       ),
     ],
   );

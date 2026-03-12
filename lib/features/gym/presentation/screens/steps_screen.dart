@@ -96,14 +96,14 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final progress = (_steps / _goal).clamp(0.0, 1.0);
+    final gymState = context.watch<GymCubit>().state;
+    final weight = gymState.userWeight ?? 70.0;
+    final calories = (_steps * 0.04 * weight / 70).round();
+    final minutes = (_steps / 100).round();
 
-    // Color: red if 0, green if goal reached, amber if in progress
-    final progressColor = _steps == 0
-        ? Colors.red
-        : _steps >= _goal
-            ? Colors.green
-            : Colors.amber.shade700;
+    final stepsProgress = (_steps / _goal).clamp(0.0, 1.0);
+    final minutesProgress = (minutes / 60).clamp(0.0, 1.0); // 60 min goal
+    final caloriesProgress = (calories / 500).clamp(0.0, 1.0); // 500 kcal goal
 
     if (_permissionDenied) {
       return Center(
@@ -148,39 +148,71 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
       child: Column(
         children: [
           const SizedBox(height: 20),
-          // Circular progress ring
+          // 3-ring activity progress (Samsung Health style)
           SizedBox(
-            width: 200,
-            height: 200,
+            width: 280,
+            height: 280,
             child: CustomPaint(
-              painter: _StepsProgressPainter(
-                progress: progress,
-                color: progressColor,
+              painter: _ActivityRingsPainter(
+                stepsProgress: stepsProgress,
+                minutesProgress: minutesProgress,
+                caloriesProgress: caloriesProgress,
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
               ),
               child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$_steps',
-                      style: theme.textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: progressColor,
-                      ),
+                child: Padding(
+                  padding: const EdgeInsets.all(60),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '$_steps',
+                          style: theme.textTheme.headlineLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                        Text(
+                          '/ $_goal steps',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      '/ $_goal steps',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-            ),
+              ),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+          // Stats row: Steps, Minutes, Calories (Samsung Health style)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _HealthStatColumn(
+                icon: Icons.directions_walk,
+                value: '$_steps',
+                label: 'steps',
+                color: Colors.green,
+              ),
+              _HealthStatColumn(
+                icon: Icons.timer_outlined,
+                value: '$minutes',
+                label: 'mins',
+                color: Colors.blue,
+              ),
+              _HealthStatColumn(
+                icon: Icons.local_fire_department,
+                value: '$calories',
+                label: 'kcal',
+                color: Colors.pinkAccent,
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
           // Pedestrian status
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -242,22 +274,77 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
   }
 }
 
-class _StepsProgressPainter extends CustomPainter {
-  final double progress;
+class _HealthStatColumn extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
   final Color color;
+
+  const _HealthStatColumn({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActivityRingsPainter extends CustomPainter {
+  final double stepsProgress;
+  final double minutesProgress;
+  final double caloriesProgress;
   final Color backgroundColor;
 
-  _StepsProgressPainter({
-    required this.progress,
-    required this.color,
+  _ActivityRingsPainter({
+    required this.stepsProgress,
+    required this.minutesProgress,
+    required this.caloriesProgress,
     required this.backgroundColor,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = min(size.width, size.height) / 2 - 8;
-    const strokeWidth = 12.0;
+    const strokeWidth = 16.0;
+    const gap = 5.0;
+
+    // 3 concentric rings: outer = steps (green), middle = mins (blue), inner = kcal (pink)
+    final rings = [
+      (radius: min(size.width, size.height) / 2 - 12, progress: stepsProgress, color: Colors.green),
+      (radius: min(size.width, size.height) / 2 - 12 - strokeWidth - gap, progress: minutesProgress, color: Colors.blue),
+      (radius: min(size.width, size.height) / 2 - 12 - (strokeWidth + gap) * 2, progress: caloriesProgress, color: Colors.pinkAccent),
+    ];
 
     final bgPaint = Paint()
       ..color = backgroundColor
@@ -265,27 +352,34 @@ class _StepsProgressPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    canvas.drawCircle(center, radius, bgPaint);
+    for (final ring in rings) {
+      // Draw background ring
+      canvas.drawCircle(center, ring.radius, bgPaint);
 
-    final progressPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+      // Draw progress arc
+      if (ring.progress > 0) {
+        final progressPaint = Paint()
+          ..color = ring.color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
 
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -pi / 2,
-      2 * pi * progress,
-      false,
-      progressPaint,
-    );
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: ring.radius),
+          -pi / 2,
+          2 * pi * ring.progress,
+          false,
+          progressPaint,
+        );
+      }
+    }
   }
 
   @override
-  bool shouldRepaint(covariant _StepsProgressPainter oldDelegate) {
-    return oldDelegate.progress != progress ||
-        oldDelegate.color != color ||
+  bool shouldRepaint(covariant _ActivityRingsPainter oldDelegate) {
+    return oldDelegate.stepsProgress != stepsProgress ||
+        oldDelegate.minutesProgress != minutesProgress ||
+        oldDelegate.caloriesProgress != caloriesProgress ||
         oldDelegate.backgroundColor != backgroundColor;
   }
 }
