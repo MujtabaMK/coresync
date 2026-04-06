@@ -558,7 +558,7 @@
     // ═══ PASSWORDS ═══
     async function loadPasswords(uid){
         if(!cryptoKey)return;
-        try{const s=await getDocs(collection(db,'users',uid,'passwords_sync'));
+        try{const s=await getDocs(collection(db,'users',uid,'passwords'));
         const passwords=[];
         for(const d of s.docs){const data=d.data();
             passwords.push({id:d.id,passwordFor:await decryptField(data.passwordFor||'',cryptoKey),username:await decryptField(data.username||'',cryptoKey),password:await decryptField(data.password||'',cryptoKey),createdAt:data.createdAt});}
@@ -593,7 +593,7 @@
         $('pwd-submit').disabled=true;$('pwd-submit').textContent='Saving...';
         try{
             const now=new Date();
-            await addDoc(collection(db,'users',currentUid,'passwords_sync'),{
+            await addDoc(collection(db,'users',currentUid,'passwords'),{
                 passwordFor:await encryptField(pf,cryptoKey),username:await encryptField(un,cryptoKey),password:await encryptField(pw,cryptoKey),
                 createdAt:now,updatedAt:now});
             pwdModal.style.display='none';$('pwd-form').reset();$('pwd-error').style.display='none';
