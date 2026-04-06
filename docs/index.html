@@ -502,6 +502,8 @@ async function ensureLibs(){
     const FOOD_CIRC=2*Math.PI*46; // 289.03
     const MET={walking:3.5,running:9.8,bicycling:7.5,swimming:8,yoga:3,weightTraining:6,hiit:12,dancing:5.5,hiking:6,jumpRope:12.3,rowing:7,stairClimbing:9,stretching:2.5,pilates:3.8,martialArts:10.3,other:5};
     const INTENSITY={slow:.75,moderate:1,fast:1.3};
+    const WATER_BOOST=[{kw:['whey','casein','protein shake','protein powder'],ml:500},{kw:['mass gainer'],ml:500},{kw:['creatine'],ml:500},{kw:['pre-workout','pre workout'],ml:400},{kw:['psyllium','isabgol','metamucil'],ml:400},{kw:['protein bar'],ml:300},{kw:['chia','sabja','basil seed'],ml:300},{kw:['bcaa','eaa'],ml:300}];
+    function waterBoostForFood(name){const n=name.toLowerCase();for(const e of WATER_BOOST)for(const k of e.kw)if(n.includes(k))return e.ml;return 0;}
 
     // ═══ CRYPTO ═══
     async function deriveAesKey(uid){
@@ -702,7 +704,11 @@ async function ensureLibs(){
         computeDerived();
     }
     async function loadSteps(uid,ds){try{const s=await getDoc(doc(db,'users',uid,'gym_steps',ds));const v=s.exists()?(s.data().steps||0):0;dashData.steps=v;$('stat-steps').textContent=v.toLocaleString();$('qs-steps').textContent=v.toLocaleString();setRing('ring-steps',v,goals.steps);}catch{$('stat-steps').textContent='0';$('qs-steps').textContent='0';dashData.steps=0;}}
-    async function loadWater(uid,ds){try{const s=await getDoc(doc(db,'users',uid,'gym_water',ds));const v=s.exists()?(s.data().ml||0):0;dashData.water=v;$('stat-water').textContent=v.toLocaleString();$('qs-water').textContent=(v/250).toFixed(1);setRing('ring-water',v,goals.water);}catch{$('stat-water').textContent='0';$('qs-water').textContent='0';dashData.water=0;}}
+    async function loadWater(uid,ds){try{const s=await getDoc(doc(db,'users',uid,'gym_water',ds));const d=s.exists()?s.data():{};const v=d.ml||0;dashData.water=v;
+        // Use stored goalMl if available, else base goal
+        if(d.goalMl&&d.goalMl>0)goals.water=d.goalMl;
+        $('stat-water').textContent=v.toLocaleString();$('qs-water').textContent=(v/250).toFixed(1);setRing('ring-water',v,goals.water);$('goal-water').textContent='of '+goals.water.toLocaleString()+' ml';
+    }catch{$('stat-water').textContent='0';$('qs-water').textContent='0';dashData.water=0;}}
     async function loadFoodDetailed(uid,ms,me){
         try{
             const foods=[];let cal=0;
@@ -740,6 +746,11 @@ async function ensureLibs(){
     }
     function computeDerived(){
         const w=userProfile.wl_currentWeight||userProfile.userWeight||70;
+        // Compute water boost from today's foods
+        const waterBoost=dashData.foods.reduce((s,f)=>s+waterBoostForFood(f.name),0);
+        const baseWater=Math.round(w*33);
+        const effectiveWater=baseWater+waterBoost;
+        if(effectiveWater>0){goals.water=effectiveWater;$('goal-water').textContent='of '+goals.water.toLocaleString()+' ml';setRing('ring-water',dashData.water,goals.water);}
         dashData.stepKcal=Math.round(dashData.steps*0.04*w/70);
         dashData.workoutKcal=0;
         dashData.workouts.forEach(wk=>{
@@ -987,54 +998,94 @@ async function ensureLibs(){
     function getMacroGoals(){const g=goals.calories;return{protein:Math.round(g*.3/4),carbs:Math.round(g*.4/4),fat:Math.round(g*.3/9)};}
 
     // ═══ EXPORT EXCEL ═══
+    function xlsTable(wb,name,sections){
+        // sections = [{title,headers,rows},...] — each gets its own properly formatted table
+        const data=[];
+        sections.forEach((sec,si)=>{
+            if(si>0)data.push([]);
+            if(sec.title)data.push([sec.title]);
+            if(sec.headers)data.push(sec.headers);
+            if(sec.rows)sec.rows.forEach(r=>data.push(r));
+        });
+        const ws=XLSX.utils.aoa_to_sheet(data);
+        // Auto-size columns
+        const maxCols=data.reduce((m,r)=>Math.max(m,r.length),0);
+        ws['!cols']=Array.from({length:maxCols},(_,ci)=>{
+            let w=10;data.forEach(r=>{if(r[ci]!=null){const l=String(r[ci]).length;if(l>w)w=l;}});
+            return{wch:Math.min(w+4,50)};
+        });
+        XLSX.utils.book_append_sheet(wb,ws,name);
+    }
+
     $('export-excel').onclick=async()=>{
         if(!window.XLSX){await ensureLibs();if(!window.XLSX){alert('Could not load Excel library. Check your internet.');return;}}
-        const ds=fmtDate(currentDate);const wb=XLSX.utils.book_new();const mg=getMacroGoals();
+        const ds=fmtDate(currentDate);const wb=XLSX.utils.book_new();const mg=getMacroGoals();const bmi=getBmiStr();
 
-        // Sheet 1: Daily Summary
-        const sum=[['CoreSync Daily Report'],['Date',ds],[]];
-        if(membership){const s=membership._start,e=membership._end;sum.push(['Membership',membership.plan||''],['Start',s?s.toLocaleDateString():''],['End',e?e.toLocaleDateString():''],['Days Remaining',$('memb-remaining')?.textContent||''],[]);}
-        sum.push(['Metric','Value','Goal'],
-            ['Steps',dashData.steps,goals.steps],['Calories',dashData.calories,goals.calories],['Water (ml)',dashData.water,goals.water],
-            ['Water (glasses)',(dashData.water/250).toFixed(1),''],['Sleep',getSleepStr(),'8h'],
-            ['Step kcal',dashData.stepKcal,''],['Workout kcal',dashData.workoutKcal,''],['Total Burnt',dashData.totalBurnt,''],
-            ['Tasks Done',dashData.completedTasks,dashData.tasks.length]);
-        const bmi=getBmiStr();if(bmi)sum.push(['BMI',bmi,'']);
-        const ws1=XLSX.utils.aoa_to_sheet(sum);ws1['!cols']=[{wch:20},{wch:14},{wch:12}];XLSX.utils.book_append_sheet(wb,ws1,'Summary');
+        // Sheet 1: Summary
+        const sumSections=[{title:'CoreSync Report — '+ds}];
+        if(membership){const s=membership._start,e=membership._end;
+            sumSections.push({title:'MEMBERSHIP',headers:['Field','Value'],rows:[['Plan',membership.plan||''],['Start',s?s.toLocaleDateString():''],['End',e?e.toLocaleDateString():''],['Days Remaining',$('memb-remaining')?.textContent||'']]});}
+        sumSections.push({title:'DAILY STATS',headers:['Metric','Value','Goal','% of Goal'],rows:[
+            ['Steps',dashData.steps,goals.steps,Math.round(dashData.steps/goals.steps*100)+'%'],
+            ['Calories (kcal)',dashData.calories,goals.calories,Math.round(dashData.calories/goals.calories*100)+'%'],
+            ['Water (ml)',dashData.water,goals.water,Math.round(dashData.water/goals.water*100)+'%'],
+            ['Water (glasses)',(dashData.water/250).toFixed(1),(goals.water/250).toFixed(1),''],
+            ['Sleep',getSleepStr(),'8h',''],
+            ['Step kcal',dashData.stepKcal,'',''],['Workout kcal',dashData.workoutKcal,'',''],['Total Burnt',dashData.totalBurnt,'',''],
+            ['Tasks Done',dashData.completedTasks+' / '+dashData.tasks.length,'',''],
+            ...(bmi?[['BMI',bmi,'','']]:[])]});
+        xlsTable(wb,'Summary',sumSections);
 
-        // Sheet 2: Food & Nutrition
-        const fd=[['Food & Nutrition - '+ds],[],['Macronutrients','Consumed','Goal'],
-            ['Calories',dashData.calories,goals.calories],['Protein (g)',Math.round(macros.protein),mg.protein],['Carbs (g)',Math.round(macros.carbs),mg.carbs],['Fat (g)',Math.round(macros.fat),mg.fat],
-            [],['Micronutrients','Consumed','Daily Goal'],
-            ['Fiber (g)',macros.fiber?.toFixed(1)||0,38],['Sugar (g)',macros.sugar?.toFixed(1)||0,25],['Iron (mg)',macros.iron?.toFixed(1)||0,8],
-            ['Calcium (mg)',macros.calcium?.toFixed(1)||0,1000],['Potassium (mg)',macros.potassium?.toFixed(1)||0,3400],['Sodium (mg)',macros.sodium?.toFixed(1)||0,2000],
-            ['Zinc (mg)',macros.zinc?.toFixed(1)||0,11],['Magnesium (mg)',macros.magnesium?.toFixed(1)||0,420],['Cholesterol (mg)',macros.cholesterol?.toFixed(1)||0,300],
-            [],['Vitamins','Consumed','Daily Goal'],
-            ['Vitamin A (mcg)',macros.vitaminA?.toFixed(1)||0,900],['Vitamin B6 (mg)',macros.vitaminB6?.toFixed(1)||0,1.7],['Vitamin B12 (mcg)',macros.vitaminB12?.toFixed(1)||0,2.4],
-            ['Vitamin C (mg)',macros.vitaminC?.toFixed(1)||0,90],['Vitamin D (mcg)',macros.vitaminD?.toFixed(1)||0,20],['Vitamin E (mg)',macros.vitaminE?.toFixed(1)||0,15],
-            ['Vitamin K (mcg)',macros.vitaminK?.toFixed(1)||0,120],['Folate (mcg)',macros.folate?.toFixed(1)||0,400],
-            [],['More Minerals','Consumed','Daily Goal'],
-            ['Phosphorus (mg)',macros.phosphorus?.toFixed(1)||0,700],['Selenium (mcg)',macros.selenium?.toFixed(1)||0,55],['Manganese (mg)',macros.manganese?.toFixed(1)||0,2.3],
-            [],['Meals','Calories','Items']];
-        const meals={breakfast:'Breakfast',morningSnack:'Morning Snack',lunch:'Lunch',eveningSnack:'Evening Snack',dinner:'Dinner'};
-        for(const[k,n]of Object.entries(meals)){const items=dashData.foods.filter(f=>f.mealType===k);const mc=Math.round(items.reduce((s,i)=>s+i.calories,0));fd.push([n,mc,items.map(i=>i.name).join(', ')||'-']);}
-        const ws2=XLSX.utils.aoa_to_sheet(fd);ws2['!cols']=[{wch:22},{wch:12},{wch:40}];XLSX.utils.book_append_sheet(wb,ws2,'Nutrition');
+        // Sheet 2: Nutrition
+        const nutSections=[{title:'MACRONUTRIENTS',headers:['Nutrient','Consumed','Goal','% of Goal'],rows:[
+            ['Calories',dashData.calories,goals.calories,Math.round(dashData.calories/goals.calories*100)+'%'],
+            ['Protein (g)',Math.round(macros.protein),mg.protein,mg.protein?Math.round(macros.protein/mg.protein*100)+'%':''],
+            ['Carbs (g)',Math.round(macros.carbs),mg.carbs,mg.carbs?Math.round(macros.carbs/mg.carbs*100)+'%':''],
+            ['Fat (g)',Math.round(macros.fat),mg.fat,mg.fat?Math.round(macros.fat/mg.fat*100)+'%':'']]},
+        {title:'MICRONUTRIENTS',headers:['Nutrient','Consumed','Daily Goal','% of Goal'],rows:[
+            ['Fiber',(macros.fiber||0).toFixed(1)+' g','38 g',Math.round((macros.fiber||0)/38*100)+'%'],
+            ['Sugar',(macros.sugar||0).toFixed(1)+' g','25 g',Math.round((macros.sugar||0)/25*100)+'%'],
+            ['Iron',(macros.iron||0).toFixed(1)+' mg','8 mg',Math.round((macros.iron||0)/8*100)+'%'],
+            ['Calcium',(macros.calcium||0).toFixed(1)+' mg','1000 mg',Math.round((macros.calcium||0)/1000*100)+'%'],
+            ['Potassium',(macros.potassium||0).toFixed(1)+' mg','3400 mg',Math.round((macros.potassium||0)/3400*100)+'%'],
+            ['Sodium',(macros.sodium||0).toFixed(1)+' mg','2000 mg',Math.round((macros.sodium||0)/2000*100)+'%'],
+            ['Zinc',(macros.zinc||0).toFixed(1)+' mg','11 mg',Math.round((macros.zinc||0)/11*100)+'%'],
+            ['Magnesium',(macros.magnesium||0).toFixed(1)+' mg','420 mg',Math.round((macros.magnesium||0)/420*100)+'%'],
+            ['Cholesterol',(macros.cholesterol||0).toFixed(1)+' mg','300 mg',Math.round((macros.cholesterol||0)/300*100)+'%']]},
+        {title:'VITAMINS',headers:['Vitamin','Consumed','Daily Goal','% of Goal'],rows:[
+            ['Vitamin A',(macros.vitaminA||0).toFixed(1)+' mcg','900 mcg',Math.round((macros.vitaminA||0)/900*100)+'%'],
+            ['Vitamin B6',(macros.vitaminB6||0).toFixed(1)+' mg','1.7 mg',Math.round((macros.vitaminB6||0)/1.7*100)+'%'],
+            ['Vitamin B12',(macros.vitaminB12||0).toFixed(1)+' mcg','2.4 mcg',Math.round((macros.vitaminB12||0)/2.4*100)+'%'],
+            ['Vitamin C',(macros.vitaminC||0).toFixed(1)+' mg','90 mg',Math.round((macros.vitaminC||0)/90*100)+'%'],
+            ['Vitamin D',(macros.vitaminD||0).toFixed(1)+' mcg','20 mcg',Math.round((macros.vitaminD||0)/20*100)+'%'],
+            ['Vitamin E',(macros.vitaminE||0).toFixed(1)+' mg','15 mg',Math.round((macros.vitaminE||0)/15*100)+'%'],
+            ['Vitamin K',(macros.vitaminK||0).toFixed(1)+' mcg','120 mcg',Math.round((macros.vitaminK||0)/120*100)+'%'],
+            ['Folate',(macros.folate||0).toFixed(1)+' mcg','400 mcg',Math.round((macros.folate||0)/400*100)+'%']]},
+        {title:'MORE MINERALS',headers:['Mineral','Consumed','Daily Goal','% of Goal'],rows:[
+            ['Phosphorus',(macros.phosphorus||0).toFixed(1)+' mg','700 mg',Math.round((macros.phosphorus||0)/700*100)+'%'],
+            ['Selenium',(macros.selenium||0).toFixed(1)+' mcg','55 mcg',Math.round((macros.selenium||0)/55*100)+'%'],
+            ['Manganese',(macros.manganese||0).toFixed(1)+' mg','2.3 mg',Math.round((macros.manganese||0)/2.3*100)+'%']]}];
+        // Meals
+        const mealDefs={breakfast:'Breakfast',morningSnack:'Morning Snack',lunch:'Lunch',eveningSnack:'Evening Snack',dinner:'Dinner'};
+        const mealRows=[];for(const[k,n]of Object.entries(mealDefs)){const items=dashData.foods.filter(f=>f.mealType===k);items.forEach(i=>mealRows.push([n,i.name,Math.round(i.calories)+' kcal']));}
+        if(mealRows.length)nutSections.push({title:'MEALS',headers:['Meal','Food Item','Calories'],rows:mealRows});
+        xlsTable(wb,'Nutrition',nutSections);
 
         // Sheet 3: Report
         if(reportData){const r=reportData;const sleepH=Math.floor(r.sleepAvg/60),sleepM=Math.round(r.sleepAvg%60);
-            const rp=[['Report Analytics'],[],
-                ['ATTENDANCE','',''],['Present',r.presentCount,''],['Absent',r.absentCount,''],['Attendance Rate',r.rate+'%',''],['Current Streak',r.currentStreak+' days',''],['Best Streak',r.bestStreak+' days',''],
-                [],['WATER INTAKE','',''],['Avg / Day',(r.waterAvg/250).toFixed(1)+' glasses',''],['Total',r.waterTotal>0?(r.waterTotal/1000).toFixed(1)+' L':'0 L',''],['Goal Met',r.waterGoalMet+' / '+r.totalDays+' days',''],
-                [],['STEPS','',''],['Avg / Day',r.stepsAvg.toLocaleString(),''],['Total Steps',r.stepsTotal.toLocaleString(),''],['Goal Met',r.stepsGoalMet+' / '+r.totalDays+' days',''],
-                [],['FOOD TRACKING','',''],['Avg / Day',r.foodAvg.toLocaleString()+' kcal',''],['Total',r.foodTotal.toLocaleString()+' kcal',''],['Days Tracked',r.foodDays+' / '+r.totalDays+' days',''],
-                [],['SLEEP','',''],['Avg / Night',sleepH+'h '+sleepM+'m',''],['Days Tracked',r.sleepDays,''],['Goal Met (8h)',r.sleepGoalMet+' / '+r.totalDays+' days','']];
-            const ws3=XLSX.utils.aoa_to_sheet(rp);ws3['!cols']=[{wch:22},{wch:20},{wch:12}];XLSX.utils.book_append_sheet(wb,ws3,'Report');}
+            xlsTable(wb,'Report',[
+                {title:'ATTENDANCE',headers:['Metric','Value'],rows:[['Present',r.presentCount],['Absent',r.absentCount],['Attendance Rate',r.rate+'%'],['Current Streak',r.currentStreak+' days'],['Best Streak',r.bestStreak+' days']]},
+                {title:'WATER INTAKE',headers:['Metric','Value'],rows:[['Avg / Day',(r.waterAvg/250).toFixed(1)+' glasses'],['Total',(r.waterTotal/1000).toFixed(1)+' L'],['Goal Met',r.waterGoalMet+' / '+r.totalDays+' days']]},
+                {title:'STEPS',headers:['Metric','Value'],rows:[['Avg / Day',r.stepsAvg.toLocaleString()],['Total Steps',r.stepsTotal.toLocaleString()],['Goal Met',r.stepsGoalMet+' / '+r.totalDays+' days']]},
+                {title:'FOOD TRACKING',headers:['Metric','Value'],rows:[['Avg / Day',r.foodAvg.toLocaleString()+' kcal'],['Total',r.foodTotal.toLocaleString()+' kcal'],['Days Tracked',r.foodDays+' / '+r.totalDays+' days']]},
+                {title:'SLEEP',headers:['Metric','Value'],rows:[['Avg / Night',sleepH+'h '+sleepM+'m'],['Days Tracked',r.sleepDays+''],['Goal Met (8h)',r.sleepGoalMet+' / '+r.totalDays+' days']]}
+            ]);}
 
         // Sheet 4: Tasks
-        if(dashData.tasks.length){const tr=[['Title','Description','Status','Due Date']];dashData.tasks.forEach(t=>{const due=t.dueDate?.seconds?new Date(t.dueDate.seconds*1000).toLocaleDateString():'';tr.push([t.title||'',t.description||'',t.status==='completed'?'Completed':t.status==='working'?'Working':'Not Started',due]);});const ws4=XLSX.utils.aoa_to_sheet(tr);ws4['!cols']=[{wch:30},{wch:40},{wch:14},{wch:14}];XLSX.utils.book_append_sheet(wb,ws4,'Tasks');}
+        if(dashData.tasks.length){xlsTable(wb,'Tasks',[{headers:['Title','Description','Status','Due Date'],rows:dashData.tasks.map(t=>[t.title||'',t.description||'',t.status==='completed'?'Completed':t.status==='working'?'Working':'Not Started',t.dueDate?.seconds?new Date(t.dueDate.seconds*1000).toLocaleDateString():''])}]);}
 
         // Sheet 5: Passwords
-        if(dashData.passwords.length){const pr=[['Service','Username']];dashData.passwords.forEach(p=>pr.push([p.passwordFor,p.username]));const ws5=XLSX.utils.aoa_to_sheet(pr);ws5['!cols']=[{wch:25},{wch:30}];XLSX.utils.book_append_sheet(wb,ws5,'Passwords');}
+        if(dashData.passwords.length){xlsTable(wb,'Passwords',[{headers:['Service','Username'],rows:dashData.passwords.map(p=>[p.passwordFor,p.username])}]);}
 
         XLSX.writeFile(wb,'CoreSync_Report_'+ds+'.xlsx');
     };
