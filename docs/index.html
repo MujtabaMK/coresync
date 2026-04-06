@@ -344,10 +344,15 @@
     </main>
 </div>
 
-<!-- Libraries -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Libraries (loaded dynamically on demand as fallback) -->
+<script>
+function loadScript(src){return new Promise((ok,fail)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=fail;document.head.appendChild(s);})}
+async function ensureLibs(){
+    if(!window.XLSX)try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js')}catch(e){console.warn('XLSX load failed',e)}
+    if(!window.jspdf){try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js');await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js')}catch(e){console.warn('jsPDF load failed',e)}}
+}
+ensureLibs();
+</script>
 
 <!-- ═══ APP ═══ -->
 <script type="module">
@@ -573,12 +578,14 @@
             <div class="pwd-actions">
                 <button class="pwd-act-btn" title="Toggle password" onclick="togglePwd(${i})"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 <button class="pwd-act-btn" title="Copy password" onclick="copyPwd(${i})"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
+                <button class="pwd-act-btn" title="Delete password" style="color:#ef4444" onclick="deletePwd(${i})"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
             </div></div>`).join('');}catch(err){console.error('Passwords:',err);$('pwd-list').innerHTML='<div class="placeholder-text">Could not load passwords.</div>';}
     }
 
     // Expose to onclick handlers
     window.togglePwd=(i)=>{const el=$('pp-'+i);const p=dashData.passwords[i];if(!p)return;const masked='*'.repeat(Math.min(p.password.length,12));el.textContent=el.textContent===masked?p.password:masked;};
     window.copyPwd=(i)=>{const p=dashData.passwords[i];if(!p)return;navigator.clipboard.writeText(p.password).then(()=>{const t=$('copied-toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500);});};
+    window.deletePwd=async(i)=>{const p=dashData.passwords[i];if(!p||!currentUid)return;if(!confirm('Delete "'+p.passwordFor+'" password?'))return;try{await deleteDoc(doc(db,'users',currentUid,'passwords',p.id));await loadPasswords(currentUid);}catch(err){console.error('Delete pwd:',err);alert('Failed to delete password.');}};
 
     // Password add modal
     const pwdModal=$('pwd-modal');
@@ -603,8 +610,8 @@
     };
 
     // ═══ EXPORT ═══
-    $('export-excel').onclick=()=>{
-        if(!window.XLSX){alert('Library loading...');return;}const ds=fmtDate(currentDate);const wb=XLSX.utils.book_new();
+    $('export-excel').onclick=async()=>{
+        if(!window.XLSX){await ensureLibs();if(!window.XLSX){alert('Could not load Excel library. Check your internet.');return;}}const ds=fmtDate(currentDate);const wb=XLSX.utils.book_new();
         const sum=[['CoreSync Daily Report'],['Date',ds],[],['Metric','Value','Goal'],['Steps',dashData.steps,goals.steps],['Calories',dashData.calories,goals.calories],['Water (ml)',dashData.water,goals.water],['Tasks Done',dashData.completedTasks,dashData.tasks.length]];
         if(userProfile.wl_currentWeight&&userProfile.wl_heightCm){const hm=(userProfile.wl_heightCm)/100;sum.push(['BMI',(userProfile.wl_currentWeight/(hm*hm)).toFixed(1),'']);}
         const ws1=XLSX.utils.aoa_to_sheet(sum);ws1['!cols']=[{wch:18},{wch:12},{wch:10}];XLSX.utils.book_append_sheet(wb,ws1,'Summary');
@@ -613,8 +620,8 @@
         XLSX.writeFile(wb,'CoreSync_Report_'+ds+'.xlsx');
     };
 
-    $('export-pdf').onclick=()=>{
-        if(!window.jspdf){alert('Library loading...');return;}const{jsPDF}=window.jspdf;const pdf=new jsPDF();const ds=fmtDate(currentDate);
+    $('export-pdf').onclick=async()=>{
+        if(!window.jspdf){await ensureLibs();if(!window.jspdf){alert('Could not load PDF library. Check your internet.');return;}}const{jsPDF}=window.jspdf;const pdf=new jsPDF();const ds=fmtDate(currentDate);
         const dd=currentDate.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
         pdf.setFillColor(15,15,26);pdf.rect(0,0,210,38,'F');pdf.setTextColor(0,212,255);pdf.setFontSize(20);pdf.setFont(undefined,'bold');pdf.text('CoreSync',20,20);
         pdf.setFontSize(9);pdf.setTextColor(160,160,184);pdf.text('Daily Wellness & Productivity Report',20,30);pdf.setTextColor(240,240,245);pdf.text(dd,190,24,{align:'right'});
