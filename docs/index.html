@@ -179,7 +179,7 @@
         .coll-header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer;font-size:.9rem;font-weight:600;color:var(--text2)}
         .coll-header:hover{color:var(--text)}
         .coll-arrow{transition:transform .3s;font-size:.7rem}
-        .coll-section.open .coll-arrow{transform:rotate(180deg)}
+        .coll-section.open .coll-arrow{transform:rotate(90deg)}
         .coll-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
         .coll-section.open .coll-body{max-height:2000px}
         .micro-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:12px}
@@ -432,8 +432,9 @@
                 <div class="macro-item"><div class="macro-val" id="macro-carbs" style="color:#F59E0B">0/0g</div><div class="macro-bar-bg"><div class="macro-bar-fill" id="macro-carbs-bar" style="background:#F59E0B;width:0%"></div></div><div class="macro-name">Carbs</div></div>
                 <div class="macro-item"><div class="macro-val" id="macro-fat" style="color:#EF4444">0/0g</div><div class="macro-bar-bg"><div class="macro-bar-fill" id="macro-fat-bar" style="background:#EF4444;width:0%"></div></div><div class="macro-name">Fat</div></div>
             </div>
-            <div class="coll-section" id="micro-section"><div class="coll-header" onclick="this.parentElement.classList.toggle('open')"><span>Micronutrients</span><span class="coll-arrow">&#9660;</span></div><div class="coll-body"><div class="micro-grid" id="micro-grid"></div></div></div>
-            <div class="coll-section" id="vitamin-section"><div class="coll-header" onclick="this.parentElement.classList.toggle('open')"><span>Vitamins</span><span class="coll-arrow">&#9660;</span></div><div class="coll-body"><div class="micro-grid" id="vitamin-grid"></div></div></div>
+            <div class="coll-section" id="micro-section"><div class="coll-header" onclick="this.parentElement.classList.toggle('open')"><span>Micronutrients</span><span class="coll-arrow">&#9656;</span></div><div class="coll-body"><div class="micro-grid" id="micro-grid"></div></div></div>
+            <div class="coll-section" id="vitamin-section"><div class="coll-header" onclick="this.parentElement.classList.toggle('open')"><span>Vitamins</span><span class="coll-arrow">&#9656;</span></div><div class="coll-body"><div class="micro-grid" id="vitamin-grid"></div></div></div>
+            <div class="coll-section" id="mineral-section"><div class="coll-header" onclick="this.parentElement.classList.toggle('open')"><span>More Minerals</span><span class="coll-arrow">&#9656;</span></div><div class="coll-body"><div class="micro-grid" id="mineral-grid"></div></div></div>
             <div class="meals-section" id="meals-section"></div>
         </div>
 
@@ -492,7 +493,7 @@ ensureLibs();
     let currentUid=null,currentDate=new Date(),cryptoKey=null;
     let goals={steps:10000,calories:2000,water:3000};
     let dashData={steps:0,calories:0,water:0,tasks:[],completedTasks:0,passwords:[],foods:[],sleep:null,workouts:[],stepKcal:0,workoutKcal:0,totalBurnt:0};
-    let macros={protein:0,carbs:0,fat:0,fiber:0,sugar:0,sodium:0,cholesterol:0,iron:0,calcium:0,potassium:0,zinc:0,magnesium:0,vitaminA:0,vitaminB12:0,vitaminC:0,vitaminD:0,vitaminE:0,vitaminK:0,vitaminB6:0,folate:0};
+    let macros={protein:0,carbs:0,fat:0,fiber:0,sugar:0,sodium:0,cholesterol:0,iron:0,calcium:0,potassium:0,zinc:0,magnesium:0,vitaminA:0,vitaminB12:0,vitaminC:0,vitaminD:0,vitaminE:0,vitaminK:0,vitaminB6:0,folate:0,phosphorus:0,selenium:0,manganese:0};
     let userProfile={};
     let membership=null;
     let reportData=null;
@@ -801,8 +802,13 @@ ensureLibs();
                 return`<div class="micro-item"><div class="micro-top"><span class="micro-name">${d.n}</span><span class="micro-pct">${pct}%</span></div><div class="micro-bar-bg"><div class="micro-bar-fill" style="width:${pct}%;background:${col}"></div></div><div class="micro-val">${v.toFixed(1)} / ${d.g} ${d.u}</div></div>`;
             }).join('');
         }
+        const mineralDefs=[
+            {k:'phosphorus',n:'Phosphorus',g:700,u:'mg'},{k:'selenium',n:'Selenium',g:55,u:'mcg'},
+            {k:'manganese',n:'Manganese',g:2.3,u:'mg'}
+        ];
         renderMicroGrid('micro-grid',microDefs);
         renderMicroGrid('vitamin-grid',vitDefs);
+        renderMicroGrid('mineral-grid',mineralDefs);
         // Meals
         const mealDefs=[
             {type:'breakfast',name:'Breakfast',icon:'&#127836;',share:.25},
