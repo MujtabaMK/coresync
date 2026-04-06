@@ -10,14 +10,19 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg-primary: #1A1A2B;
-            --bg-card: #23233A;
-            --bg-card-hover: #2C2C4A;
+            --bg-primary: #0F0F1A;
+            --bg-secondary: #161625;
+            --bg-card: #1E1E32;
+            --bg-card-hover: #262645;
             --accent-cyan: #00D4FF;
             --accent-purple: #A855F7;
             --text-primary: #F0F0F5;
-            --text-secondary: #A0A0B8;
+            --text-secondary: #8888A4;
             --gradient: linear-gradient(135deg, #00D4FF, #A855F7);
+            --green: #10B981; --green-light: #34D399;
+            --orange: #F59E0B; --orange-light: #FBBF24;
+            --blue: #3B82F6; --blue-light: #60A5FA;
+            --purple: #8B5CF6; --purple-light: #A78BFA;
         }
 
         html { scroll-behavior: smooth; }
@@ -33,23 +38,21 @@
         /* ── Top Nav ── */
         .top-nav {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             z-index: 100;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 16px 32px;
-            background: rgba(26, 26, 43, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(15, 15, 26, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
         }
 
         .nav-brand {
-            font-size: 1.2rem;
-            font-weight: 700;
+            font-size: 1.25rem;
+            font-weight: 800;
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -57,20 +60,21 @@
         }
 
         .nav-login-btn {
-            padding: 8px 24px;
+            padding: 9px 26px;
             border-radius: 10px;
-            border: 1px solid var(--accent-cyan);
+            border: 1.5px solid var(--accent-cyan);
             background: transparent;
             color: var(--accent-cyan);
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             cursor: pointer;
-            transition: background 0.2s, color 0.2s;
+            transition: all 0.25s;
         }
 
         .nav-login-btn:hover {
             background: var(--accent-cyan);
             color: var(--bg-primary);
+            box-shadow: 0 0 20px rgba(0,212,255,0.3);
         }
 
         /* ── Hero ── */
@@ -81,34 +85,41 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 60px 24px 80px;
+            padding: 80px 24px 80px;
             position: relative;
+            overflow: hidden;
         }
 
         .hero::before {
             content: '';
             position: absolute;
-            top: -40%;
-            left: 50%;
+            top: -40%; left: 50%;
             transform: translateX(-50%);
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(0,212,255,0.12) 0%, transparent 70%);
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, rgba(0,212,255,0.10) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -20%; right: -10%;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%);
             pointer-events: none;
         }
 
         .hero-icon {
-            width: 120px;
-            height: 120px;
+            width: 120px; height: 120px;
             border-radius: 28px;
             box-shadow: 0 8px 40px rgba(0,212,255,0.25);
             margin-bottom: 32px;
         }
 
         .hero h1 {
-            font-size: 3.2rem;
+            font-size: 3.4rem;
             font-weight: 800;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -117,7 +128,7 @@
         }
 
         .hero .tagline {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             color: var(--text-secondary);
             max-width: 520px;
             margin-bottom: 40px;
@@ -141,112 +152,57 @@
             text-decoration: none;
             font-weight: 600;
             font-size: 0.95rem;
-            border: 1px solid rgba(255,255,255,0.08);
-            transition: background 0.2s, transform 0.2s;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.25s;
         }
 
         .store-btn:hover {
             background: var(--bg-card-hover);
             transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
 
-        .store-btn svg {
-            width: 22px;
-            height: 22px;
-            fill: currentColor;
-        }
-
-        .store-btn .store-label {
-            text-align: left;
-            line-height: 1.2;
-        }
-
-        .store-btn .store-label small {
-            font-size: 0.7rem;
-            font-weight: 400;
-            color: var(--text-secondary);
-            display: block;
-        }
+        .store-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        .store-btn .store-label { text-align: left; line-height: 1.2; }
+        .store-btn .store-label small { font-size: 0.7rem; font-weight: 400; color: var(--text-secondary); display: block; }
 
         .hero-login-btn {
-            margin-top: 28px;
-            padding: 14px 40px;
+            margin-top: 32px;
+            padding: 16px 48px;
             border-radius: 14px;
             border: none;
             background: var(--gradient);
             color: #fff;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.05rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: opacity 0.2s, transform 0.2s;
+            transition: all 0.25s;
+            box-shadow: 0 4px 24px rgba(0,212,255,0.25);
         }
 
         .hero-login-btn:hover {
-            opacity: 0.9;
             transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,212,255,0.35);
         }
 
         /* ── Section shared ── */
-        section {
-            padding: 80px 24px;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            color: var(--text-secondary);
-            max-width: 540px;
-            margin: 0 auto 56px;
-        }
+        section { padding: 80px 24px; }
+        .section-title { text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
+        .section-subtitle { text-align: center; color: var(--text-secondary); max-width: 540px; margin: 0 auto 56px; }
 
         /* ── Features Grid ── */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            max-width: 1080px;
-            margin: 0 auto;
-        }
-
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 1080px; margin: 0 auto; }
         .feature-card {
             background: var(--bg-card);
             border-radius: 20px;
             padding: 32px;
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: transform 0.25s, box-shadow 0.25s;
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.3s;
         }
-
-        .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-        }
-
-        .feature-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-
-        .feature-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-        }
-
-        .feature-card p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.08); }
+        .feature-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; }
+        .feature-card h3 { font-size: 1.2rem; margin-bottom: 8px; }
+        .feature-card p { color: var(--text-secondary); font-size: 0.95rem; }
 
         .icon-tasks     { background: linear-gradient(135deg, #3B82F6, #60A5FA); }
         .icon-passwords { background: linear-gradient(135deg, #EF4444, #F87171); }
@@ -256,460 +212,479 @@
         .icon-calc      { background: linear-gradient(135deg, #EC4899, #F472B6); }
 
         /* ── Highlights Strip ── */
-        .highlights {
-            background: var(--bg-card);
-            border-top: 1px solid rgba(255,255,255,0.05);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .highlights-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 32px;
-            max-width: 960px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .highlight-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .highlight-icon {
-            font-size: 28px;
-            width: 56px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(0,212,255,0.1);
-        }
-
-        .highlight-item h4 {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .highlight-item p {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
+        .highlights { background: var(--bg-secondary); border-top: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .highlights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; max-width: 960px; margin: 0 auto; text-align: center; }
+        .highlight-item { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .highlight-icon { font-size: 28px; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(0,212,255,0.08); }
+        .highlight-item h4 { font-size: 1rem; font-weight: 600; }
+        .highlight-item p { color: var(--text-secondary); font-size: 0.85rem; }
 
         /* ── Footer ── */
-        footer {
-            padding: 40px 24px;
-            text-align: center;
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 24px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-
-        .footer-links a:hover {
-            color: var(--accent-cyan);
-        }
-
-        footer .copyright {
-            color: rgba(160,160,184,0.6);
-            font-size: 0.8rem;
-        }
+        footer { padding: 40px 24px; text-align: center; border-top: 1px solid rgba(255,255,255,0.04); }
+        .footer-links { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .footer-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--accent-cyan); }
+        footer .copyright { color: rgba(136,136,164,0.5); font-size: 0.8rem; }
 
         /* ── Login Modal ── */
         .modal-overlay {
             display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 200;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            align-items: center;
-            justify-content: center;
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            align-items: center; justify-content: center;
             padding: 24px;
         }
-
         .modal {
             background: var(--bg-card);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(255,255,255,0.08);
+            width: 100%; max-width: 400px;
+            border: 1px solid rgba(255,255,255,0.06);
             position: relative;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.5);
         }
-
-        .modal-close {
-            position: absolute;
-            top: 16px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            line-height: 1;
-            transition: color 0.2s;
-        }
-
-        .modal-close:hover {
-            color: var(--text-primary);
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
+        .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; line-height: 1; transition: color 0.2s; }
+        .modal-close:hover { color: var(--text-primary); }
+        .modal-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; text-align: center; }
+        .form-group { margin-bottom: 16px; }
         .form-input {
-            width: 100%;
-            padding: 14px 16px;
+            width: 100%; padding: 14px 16px;
             border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.08);
             background: var(--bg-primary);
             color: var(--text-primary);
             font-size: 0.95rem;
             outline: none;
             transition: border-color 0.2s;
         }
-
-        .form-input:focus {
-            border-color: var(--accent-cyan);
-        }
-
-        .form-input::placeholder {
-            color: var(--text-secondary);
-        }
-
+        .form-input:focus { border-color: var(--accent-cyan); }
+        .form-input::placeholder { color: var(--text-secondary); }
         .form-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: none;
+            width: 100%; padding: 14px;
+            border-radius: 12px; border: none;
             background: var(--gradient);
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s, transform 0.2s;
+            color: #fff; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
             margin-top: 8px;
         }
+        .form-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .form-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .form-error { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25); color: #F87171; padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 16px; display: none; }
+        .form-toggle { text-align: center; margin-top: 20px; color: var(--text-secondary); font-size: 0.9rem; }
+        .form-toggle a { color: var(--accent-cyan); text-decoration: none; font-weight: 600; }
+        .form-toggle a:hover { text-decoration: underline; }
 
-        .form-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); color: #34D399; padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 16px; display: none; }
+        .form-forgot { text-align: center; margin-top: 12px; }
+        .form-forgot a { color: var(--text-secondary); text-decoration: none; font-size: 0.84rem; transition: color 0.2s; }
+        .form-forgot a:hover { color: var(--accent-cyan); }
+        .field-error { color: #F87171; font-size: 0.78rem; margin-top: 4px; display: none; }
+        .form-input.input-error { border-color: rgba(239,68,68,0.5); }
 
-        .form-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
+        /* ══════════════════════════════
+           DASHBOARD
+           ══════════════════════════════ */
 
-        .form-error {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #F87171;
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            margin-bottom: 16px;
-            display: none;
-        }
-
-        .form-toggle {
-            text-align: center;
-            margin-top: 20px;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .form-toggle a {
-            color: var(--accent-cyan);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .form-toggle a:hover {
-            text-decoration: underline;
-        }
-
-        /* ── Dashboard ── */
         .dash-topbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 32px;
+            background: rgba(15, 15, 26, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .dash-brand { font-size: 1.25rem; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .dash-user { display: flex; align-items: center; gap: 16px; }
+        .dash-user-email { color: var(--text-secondary); font-size: 0.88rem; }
+
+        .dash-main {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+            position: relative;
+        }
+
+        /* Background glow */
+        .dash-main::before {
+            content: '';
+            position: absolute;
+            top: -100px; left: 50%;
+            transform: translateX(-50%);
+            width: 600px; height: 400px;
+            background: radial-gradient(ellipse, rgba(0,212,255,0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* ── Dashboard Header ── */
+        .dash-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 32px;
-            background: rgba(26, 26, 43, 0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 32px;
+            position: relative;
         }
 
-        .dash-brand {
-            font-size: 1.2rem;
-            font-weight: 700;
+        .dash-greeting {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .dash-greeting span {
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .dash-user {
+        /* ── Date Navigator ── */
+        .date-nav {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 8px;
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 6px 8px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .dash-user-email {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+        .date-arrow {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
 
-        .dash-main {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 32px 24px 80px;
+        .date-arrow:hover { background: rgba(255,255,255,0.1); }
+
+        .date-input {
+            background: transparent;
+            color: var(--text-primary);
+            border: none;
+            font-size: 0.92rem;
+            font-weight: 600;
+            font-family: inherit;
+            padding: 6px 12px;
+            cursor: pointer;
+            outline: none;
+            min-width: 160px;
+            text-align: center;
         }
 
-        .dash-greeting {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 28px;
+        .date-input::-webkit-calendar-picker-indicator {
+            filter: invert(0.7);
+            cursor: pointer;
         }
 
+        .date-today-btn {
+            padding: 6px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,212,255,0.3);
+            background: rgba(0,212,255,0.08);
+            color: var(--accent-cyan);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .date-today-btn:hover { background: rgba(0,212,255,0.15); }
+
+        /* ── Stats Grid with Ring Progress ── */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
-            margin-bottom: 40px;
+            margin-bottom: 28px;
         }
 
         .stat-card {
             background: var(--bg-card);
-            border-radius: 18px;
-            padding: 24px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 22px;
+            padding: 28px 20px;
+            border: 1px solid rgba(255,255,255,0.04);
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            transition: transform 0.2s;
+            align-items: center;
+            text-align: center;
+            gap: 14px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            border-radius: 22px 22px 0 0;
+        }
+
+        .stat-steps::before { background: linear-gradient(90deg, var(--green), var(--green-light)); }
+        .stat-calories::before { background: linear-gradient(90deg, var(--orange), var(--orange-light)); }
+        .stat-water::before { background: linear-gradient(90deg, var(--blue), var(--blue-light)); }
+        .stat-tasks::before { background: linear-gradient(90deg, var(--purple), var(--purple-light)); }
 
         .stat-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.08);
         }
 
-        .stat-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+        .ring-wrap {
+            position: relative;
+            width: 130px; height: 130px;
+        }
+
+        .ring-svg {
+            width: 130px; height: 130px;
+            transform: rotate(-90deg);
+        }
+
+        .ring-bg {
+            fill: none;
+            stroke: rgba(255,255,255,0.05);
+            stroke-width: 8;
+        }
+
+        .ring-progress {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ring-value {
+            position: absolute;
+            inset: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
 
-        .stat-icon svg {
-            width: 22px;
-            height: 22px;
-        }
-
-        .stat-steps .stat-icon { background: linear-gradient(135deg, #10B981, #34D399); }
-        .stat-calories .stat-icon { background: linear-gradient(135deg, #F59E0B, #FBBF24); }
-        .stat-water .stat-icon { background: linear-gradient(135deg, #3B82F6, #60A5FA); }
-        .stat-tasks .stat-icon { background: linear-gradient(135deg, #8B5CF6, #A78BFA); }
-
-        .stat-value {
-            font-size: 2rem;
+        .ring-number {
+            font-size: 1.6rem;
             font-weight: 800;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
         }
+
+        .ring-sub {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .stat-steps .ring-number { color: var(--green-light); }
+        .stat-calories .ring-number { color: var(--orange-light); }
+        .stat-water .ring-number { color: var(--blue-light); }
+        .stat-tasks .ring-number { color: var(--purple-light); }
 
         .stat-label {
+            font-size: 0.88rem;
+            font-weight: 600;
             color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-weight: 500;
         }
 
-        .stat-loading {
-            color: var(--text-secondary);
-            font-size: 1.4rem;
+        /* ── Export Bar ── */
+        .export-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 36px;
+            flex-wrap: wrap;
         }
 
-        /* ── Task List ── */
+        .export-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .export-btn:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .export-btn svg { width: 18px; height: 18px; }
+
+        .export-excel { border-color: rgba(16,185,129,0.25); }
+        .export-excel:hover { border-color: rgba(16,185,129,0.5); box-shadow: 0 4px 20px rgba(16,185,129,0.15); }
+
+        .export-pdf { border-color: rgba(239,68,68,0.25); }
+        .export-pdf:hover { border-color: rgba(239,68,68,0.5); box-shadow: 0 4px 20px rgba(239,68,68,0.15); }
+
+        /* ── Task Section ── */
+        .task-section {
+            background: var(--bg-card);
+            border-radius: 22px;
+            padding: 28px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
         .task-section-title {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            margin-bottom: 16px;
+        }
+
+        .task-count-badge {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 20px;
+            background: rgba(139,92,246,0.12);
+            color: var(--purple-light);
         }
 
         .task-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: 480px;
+            gap: 8px;
+            max-height: 420px;
             overflow-y: auto;
         }
-
-        .task-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .task-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .task-list::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-        }
+        .task-list::-webkit-scrollbar { width: 5px; }
+        .task-list::-webkit-scrollbar-track { background: transparent; }
+        .task-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
 
         .task-item {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 14px;
-            padding: 16px 20px;
-            background: var(--bg-card);
+            padding: 14px 18px;
+            background: var(--bg-secondary);
             border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.2s;
+        }
+
+        .task-item:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(255,255,255,0.06);
         }
 
         .task-status-dot {
-            width: 10px;
-            height: 10px;
+            width: 10px; height: 10px;
             border-radius: 50%;
-            margin-top: 6px;
             flex-shrink: 0;
         }
-
-        .status-completed .task-status-dot,
-        .task-status-dot.status-completed { background: #10B981; }
-        .status-working .task-status-dot,
-        .task-status-dot.status-working { background: #F59E0B; }
-        .status-not-started .task-status-dot,
+        .task-status-dot.status-completed { background: var(--green); box-shadow: 0 0 8px rgba(16,185,129,0.4); }
+        .task-status-dot.status-working { background: var(--orange); box-shadow: 0 0 8px rgba(245,158,11,0.4); }
         .task-status-dot.status-not-started { background: var(--text-secondary); }
 
-        .task-info {
-            flex: 1;
-            min-width: 0;
+        .task-info { flex: 1; min-width: 0; }
+        .task-title { font-weight: 600; font-size: 0.92rem; word-break: break-word; }
+        .task-done { text-decoration: line-through; opacity: 0.5; }
+        .task-desc { color: var(--text-secondary); font-size: 0.8rem; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .task-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+        .task-status-badge { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+        .task-status-badge.status-completed { background: rgba(16,185,129,0.12); color: var(--green-light); }
+        .task-status-badge.status-working { background: rgba(245,158,11,0.12); color: var(--orange-light); }
+        .task-status-badge.status-not-started { background: rgba(136,136,164,0.12); color: var(--text-secondary); }
+        .task-due { color: var(--text-secondary); font-size: 0.72rem; }
+
+        .placeholder-text { color: var(--text-secondary); text-align: center; padding: 40px 16px; font-size: 0.92rem; }
+
+        /* ── Animations ── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .task-title {
-            font-weight: 600;
-            font-size: 0.95rem;
-            word-break: break-word;
+        .dash-main > * {
+            animation: fadeIn 0.5s ease-out both;
         }
-
-        .task-done {
-            text-decoration: line-through;
-            opacity: 0.6;
-        }
-
-        .task-desc {
-            color: var(--text-secondary);
-            font-size: 0.82rem;
-            margin-top: 4px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .task-meta {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .task-status-badge {
-            font-size: 0.72rem;
-            font-weight: 600;
-            padding: 3px 10px;
-            border-radius: 20px;
-        }
-
-        .task-status-badge.status-completed {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34D399;
-        }
-
-        .task-status-badge.status-working {
-            background: rgba(245, 158, 11, 0.15);
-            color: #FBBF24;
-        }
-
-        .task-status-badge.status-not-started {
-            background: rgba(160, 160, 184, 0.15);
-            color: var(--text-secondary);
-        }
-
-        .task-due {
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-        }
-
-        .placeholder-text {
-            color: var(--text-secondary);
-            text-align: center;
-            padding: 32px 16px;
-            font-size: 0.95rem;
-        }
+        .dash-main > *:nth-child(1) { animation-delay: 0s; }
+        .dash-main > *:nth-child(2) { animation-delay: 0.08s; }
+        .dash-main > *:nth-child(3) { animation-delay: 0.16s; }
+        .dash-main > *:nth-child(4) { animation-delay: 0.24s; }
 
         /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
         @media (max-width: 640px) {
-            .hero h1 { font-size: 2.2rem; }
+            .hero h1 { font-size: 2.4rem; }
             .hero .tagline { font-size: 1.05rem; }
             .hero-icon { width: 96px; height: 96px; border-radius: 22px; }
             .section-title { font-size: 1.6rem; }
             .features-grid { grid-template-columns: 1fr; }
             .store-btn { padding: 12px 20px; font-size: 0.9rem; }
-            .top-nav { padding: 12px 20px; }
-            .dash-topbar { padding: 12px 20px; }
+            .top-nav, .dash-topbar { padding: 12px 16px; }
             .dash-user-email { display: none; }
+            .dash-header { flex-direction: column; align-items: flex-start; }
+            .dash-greeting { font-size: 1.4rem; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-            .stat-card { padding: 18px; }
-            .stat-value { font-size: 1.5rem; }
-            .modal { padding: 28px 24px; }
+            .stat-card { padding: 20px 14px; }
+            .ring-wrap, .ring-svg { width: 110px; height: 110px; }
+            .ring-number { font-size: 1.3rem; }
+            .modal { padding: 28px 20px; }
+            .task-section { padding: 20px 16px; }
+            .export-btn { padding: 9px 16px; font-size: 0.82rem; }
         }
     </style>
 </head>
 <body>
 
+    <!-- SVG Gradient Definitions -->
+    <svg width="0" height="0" style="position:absolute;pointer-events:none">
+        <defs>
+            <linearGradient id="grad-steps" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#34D399"/>
+            </linearGradient>
+            <linearGradient id="grad-calories" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#FBBF24"/>
+            </linearGradient>
+            <linearGradient id="grad-water" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3B82F6"/><stop offset="100%" stop-color="#60A5FA"/>
+            </linearGradient>
+            <linearGradient id="grad-tasks" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#A78BFA"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
     <!-- ═══════ Landing Page ═══════ -->
     <div id="landing-content">
 
-        <!-- Top Nav -->
         <nav class="top-nav">
             <div class="nav-brand">CoreSync</div>
             <button id="login-btn" class="nav-login-btn">Login</button>
         </nav>
 
-        <!-- Hero -->
         <section class="hero">
             <img src="app_icon.png" alt="CoreSync App Icon" class="hero-icon">
             <h1>CoreSync</h1>
@@ -727,89 +702,52 @@
             <button class="hero-login-btn" id="hero-login-btn">Login / Sign Up</button>
         </section>
 
-        <!-- Features -->
         <section id="features">
             <h2 class="section-title">Everything You Need</h2>
             <p class="section-subtitle">Six powerful modules working together so you can focus on what matters.</p>
-
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon icon-tasks">
-                        <svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-                    </div>
+                    <div class="feature-icon icon-tasks"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
                     <h3>Task Manager</h3>
                     <p>Create, organize, and share tasks with friends and teammates. Set reminders, priorities, and never miss a deadline.</p>
                 </div>
-
                 <div class="feature-card">
-                    <div class="feature-icon icon-passwords">
-                        <svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                    </div>
+                    <div class="feature-icon icon-passwords"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
                     <h3>Password Manager</h3>
                     <p>Store credentials with industry-standard encryption. Auto-generate strong passwords and keep your accounts secure.</p>
                 </div>
-
                 <div class="feature-card">
-                    <div class="feature-icon icon-gym">
-                        <svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-                    </div>
+                    <div class="feature-icon icon-gym"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
                     <h3>Gym &amp; Fitness</h3>
                     <p>Track steps, water intake, workouts, sleep, and food with AI-powered scanning. Set meal reminders and monitor your progress.</p>
                 </div>
-
                 <div class="feature-card">
-                    <div class="feature-icon icon-scanner">
-                        <svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                    </div>
+                    <div class="feature-icon icon-scanner"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
                     <h3>Document Scanner</h3>
                     <p>Scan documents, extract text with OCR, create multi-page PDFs, and add digital signatures — all from your camera.</p>
                 </div>
-
                 <div class="feature-card">
-                    <div class="feature-icon icon-qr">
-                        <svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/><line x1="22" y1="14" x2="22" y2="14.01"/><line x1="22" y1="22" x2="22" y2="22.01"/><line x1="18" y1="22" x2="18" y2="22.01"/></svg>
-                    </div>
+                    <div class="feature-icon icon-qr"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/><line x1="22" y1="14" x2="22" y2="14.01"/><line x1="22" y1="22" x2="22" y2="22.01"/><line x1="18" y1="22" x2="18" y2="22.01"/></svg></div>
                     <h3>QR &amp; Barcode Scanner</h3>
                     <p>Scan QR codes and barcodes instantly. Generate your own codes and use NFC for contactless interactions.</p>
                 </div>
-
                 <div class="feature-card">
-                    <div class="feature-icon icon-calc">
-                        <svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="16" y1="14" x2="16" y2="14.01"/><line x1="8" y1="18" x2="8" y2="18.01"/><line x1="12" y1="18" x2="16" y2="18"/></svg>
-                    </div>
+                    <div class="feature-icon icon-calc"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="16" y1="14" x2="16" y2="14.01"/><line x1="8" y1="18" x2="8" y2="18.01"/><line x1="12" y1="18" x2="16" y2="18"/></svg></div>
                     <h3>Calculator</h3>
                     <p>Simple and scientific calculators plus a full unit converter. Handle everyday math and complex conversions with ease.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Highlights Strip -->
         <section class="highlights">
             <div class="highlights-grid">
-                <div class="highlight-item">
-                    <div class="highlight-icon">&#9729;</div>
-                    <h4>Cloud Sync</h4>
-                    <p>Your data, everywhere. Seamlessly synced across all your devices in real time.</p>
-                </div>
-                <div class="highlight-item">
-                    <div class="highlight-icon">&#128274;</div>
-                    <h4>Encrypted &amp; Secure</h4>
-                    <p>Industry-standard encryption keeps your passwords and personal data safe.</p>
-                </div>
-                <div class="highlight-item">
-                    <div class="highlight-icon">&#127912;</div>
-                    <h4>Material 3 Design</h4>
-                    <p>A polished, modern interface following the latest Material You guidelines.</p>
-                </div>
-                <div class="highlight-item">
-                    <div class="highlight-icon">&#127761;</div>
-                    <h4>Dark Mode</h4>
-                    <p>Easy on the eyes. Switch between light and dark themes effortlessly.</p>
-                </div>
+                <div class="highlight-item"><div class="highlight-icon">&#9729;</div><h4>Cloud Sync</h4><p>Your data, everywhere. Seamlessly synced across all your devices in real time.</p></div>
+                <div class="highlight-item"><div class="highlight-icon">&#128274;</div><h4>Encrypted &amp; Secure</h4><p>Industry-standard encryption keeps your passwords and personal data safe.</p></div>
+                <div class="highlight-item"><div class="highlight-icon">&#127912;</div><h4>Material 3 Design</h4><p>A polished, modern interface following the latest Material You guidelines.</p></div>
+                <div class="highlight-item"><div class="highlight-icon">&#127761;</div><h4>Dark Mode</h4><p>Easy on the eyes. Switch between light and dark themes effortlessly.</p></div>
             </div>
         </section>
 
-        <!-- Footer -->
         <footer>
             <nav class="footer-links">
                 <a href="privacy-policy.html">Privacy Policy</a>
@@ -819,7 +757,7 @@
             <p class="copyright">&copy; 2026 CoreSync. All rights reserved.</p>
         </footer>
 
-    </div><!-- /landing-content -->
+    </div>
 
     <!-- ═══════ Login Modal ═══════ -->
     <div id="login-modal" class="modal-overlay">
@@ -827,18 +765,38 @@
             <button class="modal-close" id="modal-close-btn">&times;</button>
             <h2 class="modal-title" id="modal-title">Welcome Back</h2>
             <div id="auth-error" class="form-error"></div>
-            <form id="auth-form">
-                <div class="form-group">
-                    <input type="email" id="auth-email" class="form-input" placeholder="Email" required autocomplete="email">
+            <div id="auth-success" class="form-success"></div>
+            <form id="auth-form" novalidate>
+                <!-- Signup-only fields -->
+                <div id="signup-fields" style="display:none">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" id="auth-first-name" class="form-input" placeholder="First Name" autocomplete="given-name">
+                            <div class="field-error" id="err-first-name"></div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="auth-last-name" class="form-input" placeholder="Last Name" autocomplete="family-name">
+                            <div class="field-error" id="err-last-name"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="auth-phone" class="form-input" placeholder="Phone Number" autocomplete="tel">
+                        <div class="field-error" id="err-phone"></div>
+                    </div>
                 </div>
+                <!-- Common fields -->
                 <div class="form-group">
-                    <input type="password" id="auth-password" class="form-input" placeholder="Password" required autocomplete="current-password">
+                    <input type="email" id="auth-email" class="form-input" placeholder="Email" autocomplete="email">
+                    <div class="field-error" id="err-email"></div>
+                </div>
+                <div class="form-group" id="password-group">
+                    <input type="password" id="auth-password" class="form-input" placeholder="Password" autocomplete="current-password">
+                    <div class="field-error" id="err-password"></div>
                 </div>
                 <button type="submit" id="auth-submit" class="form-btn">Login</button>
             </form>
-            <p class="form-toggle" id="toggle-text">
-                Don't have an account? <a href="#" id="toggle-auth">Sign Up</a>
-            </p>
+            <p class="form-forgot" id="forgot-link"><a href="#" id="forgot-auth">Forgot Password?</a></p>
+            <p class="form-toggle" id="toggle-text">Don't have an account? <a href="#" id="toggle-auth">Sign Up</a></p>
         </div>
     </div>
 
@@ -854,64 +812,113 @@
         </nav>
 
         <main class="dash-main">
-            <h2 class="dash-greeting" id="dash-greeting">Today's Overview</h2>
 
+            <!-- Header + Date Nav -->
+            <div class="dash-header">
+                <h2 class="dash-greeting" id="dash-greeting">Welcome back</h2>
+                <div class="date-nav">
+                    <button class="date-arrow" id="date-prev">&#8249;</button>
+                    <input type="date" class="date-input" id="date-input">
+                    <button class="date-arrow" id="date-next">&#8250;</button>
+                    <button class="date-today-btn" id="date-today">Today</button>
+                </div>
+            </div>
+
+            <!-- Stat Cards -->
             <div class="stats-grid">
-                <!-- Steps -->
                 <div class="stat-card stat-steps">
-                    <div class="stat-icon">
-                        <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M13 4v16M7 4v16M17 4v4M17 12v4M3 8h4M3 16h4M17 8h4M17 16h4"/></svg>
+                    <div class="ring-wrap">
+                        <svg class="ring-svg" viewBox="0 0 130 130">
+                            <circle class="ring-bg" cx="65" cy="65" r="56"/>
+                            <circle class="ring-progress" id="ring-steps" cx="65" cy="65" r="56" stroke="url(#grad-steps)" stroke-dasharray="351.86" stroke-dashoffset="351.86"/>
+                        </svg>
+                        <div class="ring-value">
+                            <div class="ring-number" id="stat-steps">--</div>
+                            <div class="ring-sub">of 10,000</div>
+                        </div>
                     </div>
-                    <div class="stat-value" id="stat-steps"><span class="stat-loading">--</span></div>
-                    <div class="stat-label">Steps Today</div>
+                    <div class="stat-label">Steps</div>
                 </div>
-
-                <!-- Calories -->
                 <div class="stat-card stat-calories">
-                    <div class="stat-icon">
-                        <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 12c-2-2.67-6-2.67-6 2 0 4 6 8 6 8s6-4 6-8c0-4.67-4-4.67-6-2z"/></svg>
+                    <div class="ring-wrap">
+                        <svg class="ring-svg" viewBox="0 0 130 130">
+                            <circle class="ring-bg" cx="65" cy="65" r="56"/>
+                            <circle class="ring-progress" id="ring-calories" cx="65" cy="65" r="56" stroke="url(#grad-calories)" stroke-dasharray="351.86" stroke-dashoffset="351.86"/>
+                        </svg>
+                        <div class="ring-value">
+                            <div class="ring-number" id="stat-calories">--</div>
+                            <div class="ring-sub">of 2,000</div>
+                        </div>
                     </div>
-                    <div class="stat-value" id="stat-calories"><span class="stat-loading">--</span></div>
-                    <div class="stat-label">Calories Today</div>
+                    <div class="stat-label">Calories</div>
                 </div>
-
-                <!-- Water -->
                 <div class="stat-card stat-water">
-                    <div class="stat-icon">
-                        <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+                    <div class="ring-wrap">
+                        <svg class="ring-svg" viewBox="0 0 130 130">
+                            <circle class="ring-bg" cx="65" cy="65" r="56"/>
+                            <circle class="ring-progress" id="ring-water" cx="65" cy="65" r="56" stroke="url(#grad-water)" stroke-dasharray="351.86" stroke-dashoffset="351.86"/>
+                        </svg>
+                        <div class="ring-value">
+                            <div class="ring-number" id="stat-water">--</div>
+                            <div class="ring-sub">of 3,000 ml</div>
+                        </div>
                     </div>
-                    <div class="stat-value" id="stat-water"><span class="stat-loading">--</span></div>
-                    <div class="stat-label">Water (ml)</div>
+                    <div class="stat-label">Water</div>
                 </div>
-
-                <!-- Tasks -->
                 <div class="stat-card stat-tasks">
-                    <div class="stat-icon">
-                        <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                    <div class="ring-wrap">
+                        <svg class="ring-svg" viewBox="0 0 130 130">
+                            <circle class="ring-bg" cx="65" cy="65" r="56"/>
+                            <circle class="ring-progress" id="ring-tasks" cx="65" cy="65" r="56" stroke="url(#grad-tasks)" stroke-dasharray="351.86" stroke-dashoffset="351.86"/>
+                        </svg>
+                        <div class="ring-value">
+                            <div class="ring-number" id="stat-tasks">--</div>
+                            <div class="ring-sub" id="stat-tasks-sub">completed</div>
+                        </div>
                     </div>
-                    <div class="stat-value" id="stat-tasks"><span class="stat-loading">--</span></div>
                     <div class="stat-label">Tasks</div>
                 </div>
             </div>
 
+            <!-- Export Buttons -->
+            <div class="export-bar">
+                <button class="export-btn export-excel" id="export-excel">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2M8 17h2M14 13h2M14 17h2"/></svg>
+                    Export Excel
+                </button>
+                <button class="export-btn export-pdf" id="export-pdf">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                    Export PDF
+                </button>
+            </div>
+
+            <!-- Tasks -->
             <div class="task-section">
-                <h3 class="task-section-title">Your Tasks</h3>
+                <div class="task-header">
+                    <h3 class="task-section-title">Your Tasks</h3>
+                    <span class="task-count-badge" id="task-count-badge">0 tasks</span>
+                </div>
                 <div id="task-list" class="task-list">
                     <div class="placeholder-text">Loading tasks...</div>
                 </div>
             </div>
+
         </main>
     </div>
+
+    <!-- ═══════ Libraries for Export ═══════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <!-- ═══════ Firebase + App Logic ═══════ -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut }
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail }
             from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-        import { getFirestore, collection, query, where, getDocs, doc, getDoc }
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc }
             from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
-        // ── Firebase Config ──
         const app = initializeApp({
             apiKey: 'AIzaSyC_3AdOLRj0yCy7jmzQ5MVJNT2JQgZ6KoY',
             authDomain: 'coresync-e7fb5.firebaseapp.com',
@@ -921,61 +928,181 @@
             appId: '1:954417312512:web:f3bbcb678855eda73079e5',
         });
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const db   = getFirestore(app);
 
-        // ── DOM refs ──
         const $ = id => document.getElementById(id);
-        const landingContent = $('landing-content');
-        const loginModal     = $('login-modal');
-        const dashboard      = $('dashboard');
-        const authForm       = $('auth-form');
-        const authEmail      = $('auth-email');
-        const authPassword   = $('auth-password');
-        const authSubmit     = $('auth-submit');
-        const authError      = $('auth-error');
-        const modalTitle     = $('modal-title');
-        const userEmailEl    = $('user-email');
+        const CIRC = 2 * Math.PI * 56; // 351.86
 
-        let isSignUp = false;
+        let currentUid  = null;
+        let currentDate = new Date();
+        let dashData = { steps: 0, calories: 0, water: 0, tasks: [], completedTasks: 0 };
 
-        // ── Modal open / close ──
-        $('login-btn').addEventListener('click', () => { loginModal.style.display = 'flex'; });
-        $('hero-login-btn').addEventListener('click', () => { loginModal.style.display = 'flex'; });
+        // ── Modal ──
+        const loginModal = $('login-modal');
+        const authForm   = $('auth-form');
+        const authSubmit = $('auth-submit');
+        const authError  = $('auth-error');
+        const authSuccess = $('auth-success');
+        // Modes: 'login' | 'signup' | 'forgot'
+        let authMode = 'login';
 
+        $('login-btn').addEventListener('click', () => { openModal('login'); });
+        $('hero-login-btn').addEventListener('click', () => { openModal('login'); });
         $('modal-close-btn').addEventListener('click', closeModal);
         loginModal.addEventListener('click', e => { if (e.target === loginModal) closeModal(); });
+
+        function openModal(mode) {
+            authMode = mode;
+            updateModalUI();
+            loginModal.style.display = 'flex';
+        }
 
         function closeModal() {
             loginModal.style.display = 'none';
             authError.style.display = 'none';
+            authSuccess.style.display = 'none';
+            clearFieldErrors();
         }
 
-        // ── Toggle Login / Sign Up (event delegation) ──
+        function updateModalUI() {
+            authError.style.display = 'none';
+            authSuccess.style.display = 'none';
+            clearFieldErrors();
+            if (authMode === 'login') {
+                $('modal-title').textContent = 'Welcome Back';
+                $('signup-fields').style.display = 'none';
+                $('password-group').style.display = '';
+                authSubmit.textContent = 'Login';
+                $('forgot-link').style.display = '';
+                $('toggle-text').innerHTML = 'Don\'t have an account? <a href="#" id="toggle-auth">Sign Up</a>';
+            } else if (authMode === 'signup') {
+                $('modal-title').textContent = 'Create Account';
+                $('signup-fields').style.display = '';
+                $('password-group').style.display = '';
+                authSubmit.textContent = 'Sign Up';
+                $('forgot-link').style.display = 'none';
+                $('toggle-text').innerHTML = 'Already have an account? <a href="#" id="toggle-auth">Login</a>';
+            } else {
+                $('modal-title').textContent = 'Reset Password';
+                $('signup-fields').style.display = 'none';
+                $('password-group').style.display = 'none';
+                authSubmit.textContent = 'Send Reset Link';
+                $('forgot-link').style.display = 'none';
+                $('toggle-text').innerHTML = '<a href="#" id="toggle-auth">Back to Login</a>';
+            }
+        }
+
+        // Toggle auth mode (event delegation)
         document.addEventListener('click', e => {
             if (e.target.id === 'toggle-auth') {
                 e.preventDefault();
-                isSignUp = !isSignUp;
-                modalTitle.textContent = isSignUp ? 'Create Account' : 'Welcome Back';
-                authSubmit.textContent = isSignUp ? 'Sign Up' : 'Login';
-                $('toggle-text').innerHTML = isSignUp
-                    ? 'Already have an account? <a href="#" id="toggle-auth">Login</a>'
-                    : 'Don\'t have an account? <a href="#" id="toggle-auth">Sign Up</a>';
-                authError.style.display = 'none';
+                if (authMode === 'login') authMode = 'signup';
+                else authMode = 'login';
+                updateModalUI();
+            }
+            if (e.target.id === 'forgot-auth') {
+                e.preventDefault();
+                authMode = 'forgot';
+                updateModalUI();
             }
         });
 
-        // ── Auth form submit ──
+        // Validation helpers
+        function clearFieldErrors() {
+            document.querySelectorAll('.field-error').forEach(el => { el.style.display = 'none'; el.textContent = ''; });
+            document.querySelectorAll('.form-input').forEach(el => el.classList.remove('input-error'));
+        }
+
+        function showFieldError(id, msg) {
+            const el = $('err-' + id);
+            const input = $('auth-' + id);
+            if (el) { el.textContent = msg; el.style.display = 'block'; }
+            if (input) input.classList.add('input-error');
+        }
+
+        function validateForm() {
+            clearFieldErrors();
+            let valid = true;
+            const email = $('auth-email').value.trim();
+            const emailRegex = /^[\w\-.]+@([\w-]+\.)+[\w-]{2,}$/;
+
+            if (!email) { showFieldError('email', 'Email is required'); valid = false; }
+            else if (!emailRegex.test(email)) { showFieldError('email', 'Enter a valid email address'); valid = false; }
+
+            if (authMode === 'forgot') return valid;
+
+            const password = $('auth-password').value;
+            if (!password) { showFieldError('password', 'Password is required'); valid = false; }
+            else if (password.length < 4) { showFieldError('password', 'Password must be at least 4 characters'); valid = false; }
+
+            if (authMode === 'signup') {
+                if (!$('auth-first-name').value.trim()) { showFieldError('first-name', 'First name is required'); valid = false; }
+                if (!$('auth-last-name').value.trim()) { showFieldError('last-name', 'Last name is required'); valid = false; }
+                const phone = $('auth-phone').value.replace(/[^\d+]/g, '');
+                if (!phone) { showFieldError('phone', 'Phone number is required'); valid = false; }
+                else if (phone.length < 10) { showFieldError('phone', 'Enter a valid phone number (min 10 digits)'); valid = false; }
+            }
+
+            return valid;
+        }
+
+        // Auth form submit
         authForm.addEventListener('submit', async e => {
             e.preventDefault();
             authError.style.display = 'none';
+            authSuccess.style.display = 'none';
+            if (!validateForm()) return;
+
             authSubmit.disabled = true;
-            authSubmit.textContent = isSignUp ? 'Creating account...' : 'Logging in...';
+            const origText = authSubmit.textContent;
+            authSubmit.textContent = authMode === 'signup' ? 'Creating account...' : authMode === 'forgot' ? 'Sending...' : 'Logging in...';
 
             try {
-                if (isSignUp) {
-                    await createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value);
+                if (authMode === 'forgot') {
+                    await sendPasswordResetEmail(auth, $('auth-email').value.trim());
+                    authSuccess.textContent = 'Password reset email sent! Check your inbox.';
+                    authSuccess.style.display = 'block';
+                    authSubmit.disabled = false;
+                    authSubmit.textContent = origText;
+                    return;
+                }
+
+                if (authMode === 'signup') {
+                    const phone = $('auth-phone').value.replace(/[^\d+]/g, '');
+                    // Check phone uniqueness (best effort - may fail if rules block it)
+                    try {
+                        const phoneQ = query(collection(db, 'user_lookup'), where('phoneNumber', '==', phone));
+                        const phoneSnap = await getDocs(phoneQ);
+                        if (!phoneSnap.empty) {
+                            authError.textContent = 'This phone number is already registered.';
+                            authError.style.display = 'block';
+                            authSubmit.disabled = false;
+                            authSubmit.textContent = origText;
+                            return;
+                        }
+                    } catch { /* skip if no permission */ }
+
+                    const cred = await createUserWithEmailAndPassword(auth, $('auth-email').value.trim(), $('auth-password').value);
+                    // Create user document in Firestore
+                    if (cred.user) {
+                        const firstName = $('auth-first-name').value.trim();
+                        const lastName = $('auth-last-name').value.trim();
+                        const displayName = [firstName, lastName].filter(Boolean).join(' ');
+                        const now = new Date();
+                        await setDoc(doc(db, 'users', cred.user.uid), {
+                            uid: cred.user.uid,
+                            email: cred.user.email || '',
+                            firstName, lastName, phoneNumber: phone,
+                            displayName: displayName || null,
+                            createdAt: now.getTime(),
+                        }, { merge: true });
+                        await setDoc(doc(db, 'user_lookup', cred.user.uid), {
+                            email: cred.user.email || '',
+                            phoneNumber: phone,
+                        });
+                    }
                 } else {
-                    await signInWithEmailAndPassword(auth, authEmail.value, authPassword.value);
+                    await signInWithEmailAndPassword(auth, $('auth-email').value.trim(), $('auth-password').value);
                 }
                 closeModal();
                 authForm.reset();
@@ -985,144 +1112,140 @@
                 authError.style.display = 'block';
             } finally {
                 authSubmit.disabled = false;
-                authSubmit.textContent = isSignUp ? 'Sign Up' : 'Login';
+                authSubmit.textContent = origText;
             }
         });
 
-        // ── Logout ──
         $('logout-btn').addEventListener('click', () => signOut(auth));
 
-        // ── Auth state listener ──
+        // ── Auth State ──
         onAuthStateChanged(auth, user => {
             if (user) {
-                landingContent.style.display = 'none';
-                dashboard.style.display = 'block';
-                userEmailEl.textContent = user.email;
-                loadDashboard(user.uid);
+                $('landing-content').style.display = 'none';
+                $('dashboard').style.display = 'block';
+                $('user-email').textContent = user.email;
+                const name = user.email.split('@')[0];
+                $('dash-greeting').innerHTML = 'Welcome back, <span>' + esc(name) + '</span>';
+                currentUid = user.uid;
+                currentDate = new Date();
+                setDateInput(currentDate);
+                loadDashboard(user.uid, currentDate);
             } else {
-                landingContent.style.display = '';
-                dashboard.style.display = 'none';
-                // Reset stats
-                ['stat-steps','stat-calories','stat-water','stat-tasks'].forEach(id => {
-                    $(id).innerHTML = '<span class="stat-loading">--</span>';
-                });
-                $('task-list').innerHTML = '<div class="placeholder-text">Loading tasks...</div>';
+                $('landing-content').style.display = '';
+                $('dashboard').style.display = 'none';
+                currentUid = null;
+                resetRings();
             }
         });
 
-        // ── Dashboard data loading ──
-        async function loadDashboard(uid) {
-            const today    = new Date();
-            const dateStr  = today.getFullYear()
-                + '-' + String(today.getMonth() + 1).padStart(2, '0')
-                + '-' + String(today.getDate()).padStart(2, '0');
+        // ── Date Navigation ──
+        function fmtDate(d) {
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+        function setDateInput(d) { $('date-input').value = fmtDate(d); }
 
-            const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-            const endOfDay   = startOfDay + 86400000 - 1; // 23:59:59.999
+        $('date-prev').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() - 1); setDateInput(currentDate); if (currentUid) loadDashboard(currentUid, currentDate); });
+        $('date-next').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 1); setDateInput(currentDate); if (currentUid) loadDashboard(currentUid, currentDate); });
+        $('date-today').addEventListener('click', () => { currentDate = new Date(); setDateInput(currentDate); if (currentUid) loadDashboard(currentUid, currentDate); });
+        $('date-input').addEventListener('change', e => {
+            currentDate = new Date(e.target.value + 'T12:00:00');
+            if (currentUid) loadDashboard(currentUid, currentDate);
+        });
+
+        // ── Ring Helpers ──
+        function setRing(id, value, goal) {
+            const pct = Math.min(value / goal, 1);
+            const offset = CIRC * (1 - pct);
+            $(id).style.strokeDashoffset = offset;
+        }
+        function resetRings() {
+            ['ring-steps','ring-calories','ring-water','ring-tasks'].forEach(id => {
+                $(id).style.strokeDashoffset = CIRC;
+            });
+            ['stat-steps','stat-calories','stat-water','stat-tasks'].forEach(id => { $(id).textContent = '--'; });
+        }
+
+        // ── Load Dashboard ──
+        async function loadDashboard(uid, date) {
+            const dateStr = fmtDate(date);
+            const startMs = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+            const endMs = startMs + 86400000 - 1;
+
+            resetRings();
 
             await Promise.allSettled([
                 loadSteps(uid, dateStr),
                 loadWater(uid, dateStr),
-                loadCalories(uid, startOfDay, endOfDay),
+                loadCalories(uid, startMs, endMs),
                 loadTasks(uid),
             ]);
         }
 
-        // ── Steps ──
         async function loadSteps(uid, dateStr) {
             try {
                 const snap = await getDoc(doc(db, 'users', uid, 'gym_steps', dateStr));
-                $('stat-steps').textContent = snap.exists() ? (snap.data().steps || 0).toLocaleString() : '0';
-            } catch {
-                $('stat-steps').textContent = '0';
-            }
+                const v = snap.exists() ? (snap.data().steps || 0) : 0;
+                dashData.steps = v;
+                $('stat-steps').textContent = v.toLocaleString();
+                setRing('ring-steps', v, 10000);
+            } catch { $('stat-steps').textContent = '0'; dashData.steps = 0; }
         }
 
-        // ── Water ──
         async function loadWater(uid, dateStr) {
             try {
                 const snap = await getDoc(doc(db, 'users', uid, 'gym_water', dateStr));
-                $('stat-water').textContent = snap.exists() ? (snap.data().ml || 0).toLocaleString() : '0';
-            } catch {
-                $('stat-water').textContent = '0';
-            }
+                const v = snap.exists() ? (snap.data().ml || 0) : 0;
+                dashData.water = v;
+                $('stat-water').textContent = v.toLocaleString();
+                setRing('ring-water', v, 3000);
+            } catch { $('stat-water').textContent = '0'; dashData.water = 0; }
         }
 
-        // ── Calories (food tracking + food scans) ──
         async function loadCalories(uid, startMs, endMs) {
             try {
                 let total = 0;
-
-                // Manually tracked food
-                const trackingQ = query(
-                    collection(db, 'users', uid, 'gym_food_tracking'),
-                    where('trackedAt', '>=', startMs),
-                    where('trackedAt', '<=', endMs),
-                );
-                const trackingSnap = await getDocs(trackingQ);
-                trackingSnap.forEach(d => {
-                    const data = d.data();
-                    total += (data.calories || 0) * (data.quantity || 1);
-                });
-
-                // AI-scanned food
-                const scansQ = query(
-                    collection(db, 'users', uid, 'gym_food_scans'),
-                    where('scannedAt', '>=', startMs),
-                    where('scannedAt', '<=', endMs),
-                );
-                const scansSnap = await getDocs(scansQ);
-                scansSnap.forEach(d => {
-                    total += d.data().totalCalories || 0;
-                });
-
-                $('stat-calories').textContent = Math.round(total).toLocaleString();
-            } catch {
-                $('stat-calories').textContent = '0';
-            }
+                const tSnap = await getDocs(query(collection(db, 'users', uid, 'gym_food_tracking'), where('trackedAt', '>=', startMs), where('trackedAt', '<=', endMs)));
+                tSnap.forEach(d => { const x = d.data(); total += (x.calories||0) * (x.quantity||1); });
+                const sSnap = await getDocs(query(collection(db, 'users', uid, 'gym_food_scans'), where('scannedAt', '>=', startMs), where('scannedAt', '<=', endMs)));
+                sSnap.forEach(d => { total += d.data().totalCalories || 0; });
+                total = Math.round(total);
+                dashData.calories = total;
+                $('stat-calories').textContent = total.toLocaleString();
+                setRing('ring-calories', total, 2000);
+            } catch { $('stat-calories').textContent = '0'; dashData.calories = 0; }
         }
 
-        // ── Tasks ──
         async function loadTasks(uid) {
             try {
-                const q = query(collection(db, 'tasks'), where('ownerId', '==', uid));
-                const snap = await getDocs(q);
+                const snap = await getDocs(query(collection(db, 'tasks'), where('ownerId', '==', uid)));
                 const tasks = [];
                 snap.forEach(d => tasks.push({ id: d.id, ...d.data() }));
-
-                // Sort: incomplete first, then by due date ascending
                 tasks.sort((a, b) => {
-                    const aDone = a.status === 'completed' ? 1 : 0;
-                    const bDone = b.status === 'completed' ? 1 : 0;
-                    if (aDone !== bDone) return aDone - bDone;
-                    return (a.dueDate?.seconds || 0) - (b.dueDate?.seconds || 0);
+                    const ad = a.status === 'completed' ? 1 : 0;
+                    const bd = b.status === 'completed' ? 1 : 0;
+                    if (ad !== bd) return ad - bd;
+                    return (a.dueDate?.seconds||0) - (b.dueDate?.seconds||0);
                 });
+                const done = tasks.filter(t => t.status === 'completed').length;
+                dashData.tasks = tasks;
+                dashData.completedTasks = done;
 
-                // Task count: completed / total
-                const completedCount = tasks.filter(t => t.status === 'completed').length;
-                $('stat-tasks').textContent = completedCount + ' / ' + tasks.length;
+                $('stat-tasks').textContent = done + '/' + tasks.length;
+                $('stat-tasks-sub').textContent = 'completed';
+                setRing('ring-tasks', done, tasks.length || 1);
+                $('task-count-badge').textContent = tasks.length + ' task' + (tasks.length !== 1 ? 's' : '');
 
-                // Render list
                 const taskList = $('task-list');
-                if (tasks.length === 0) {
-                    taskList.innerHTML = '<div class="placeholder-text">No tasks yet. Create tasks in the app!</div>';
-                    return;
-                }
+                if (tasks.length === 0) { taskList.innerHTML = '<div class="placeholder-text">No tasks yet. Create tasks in the app!</div>'; return; }
 
                 taskList.innerHTML = tasks.map(t => {
-                    const cls = t.status === 'completed' ? 'status-completed'
-                              : t.status === 'working'   ? 'status-working'
-                              : 'status-not-started';
-                    const label = t.status === 'completed' ? 'Completed'
-                                : t.status === 'working'   ? 'Working'
-                                : 'Not Started';
-                    const due = t.dueDate?.seconds
-                        ? new Date(t.dueDate.seconds * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-                        : '';
+                    const cls = t.status === 'completed' ? 'status-completed' : t.status === 'working' ? 'status-working' : 'status-not-started';
+                    const label = t.status === 'completed' ? 'Completed' : t.status === 'working' ? 'Working' : 'Not Started';
+                    const due = t.dueDate?.seconds ? new Date(t.dueDate.seconds * 1000).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }) : '';
                     return `<div class="task-item">
                         <div class="task-status-dot ${cls}"></div>
                         <div class="task-info">
-                            <div class="task-title ${t.status === 'completed' ? 'task-done' : ''}">${esc(t.title)}</div>
+                            <div class="task-title ${t.status==='completed'?'task-done':''}">${esc(t.title)}</div>
                             ${t.description ? `<div class="task-desc">${esc(t.description)}</div>` : ''}
                         </div>
                         <div class="task-meta">
@@ -1132,18 +1255,137 @@
                     </div>`;
                 }).join('');
             } catch (err) {
-                console.error('Failed to load tasks:', err);
+                console.error('Tasks error:', err);
                 $('task-list').innerHTML = '<div class="placeholder-text">Could not load tasks.</div>';
                 $('stat-tasks').textContent = '0';
             }
         }
 
+        // ── Export Excel ──
+        $('export-excel').addEventListener('click', () => {
+            if (!window.XLSX) { alert('Excel library still loading, try again.'); return; }
+            const dateStr = fmtDate(currentDate);
+            const wb = XLSX.utils.book_new();
+
+            // Summary sheet
+            const summaryData = [
+                ['CoreSync Daily Report'],
+                ['Date', dateStr],
+                [''],
+                ['Metric', 'Value', 'Goal'],
+                ['Steps', dashData.steps, 10000],
+                ['Calories', dashData.calories, 2000],
+                ['Water (ml)', dashData.water, 3000],
+                ['Tasks Completed', dashData.completedTasks, dashData.tasks.length],
+            ];
+            const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+            ws1['!cols'] = [{wch:18},{wch:12},{wch:10}];
+            XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
+
+            // Tasks sheet
+            if (dashData.tasks.length > 0) {
+                const taskRows = [['Title', 'Description', 'Status', 'Due Date']];
+                dashData.tasks.forEach(t => {
+                    const due = t.dueDate?.seconds ? new Date(t.dueDate.seconds*1000).toLocaleDateString() : '';
+                    const status = t.status === 'completed' ? 'Completed' : t.status === 'working' ? 'Working' : 'Not Started';
+                    taskRows.push([t.title||'', t.description||'', status, due]);
+                });
+                const ws2 = XLSX.utils.aoa_to_sheet(taskRows);
+                ws2['!cols'] = [{wch:30},{wch:40},{wch:14},{wch:14}];
+                XLSX.utils.book_append_sheet(wb, ws2, 'Tasks');
+            }
+
+            XLSX.writeFile(wb, 'CoreSync_Report_' + dateStr + '.xlsx');
+        });
+
+        // ── Export PDF ──
+        $('export-pdf').addEventListener('click', () => {
+            if (!window.jspdf) { alert('PDF library still loading, try again.'); return; }
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            const dateStr = fmtDate(currentDate);
+            const displayDate = currentDate.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+
+            // Header
+            pdf.setFillColor(15, 15, 26);
+            pdf.rect(0, 0, 210, 40, 'F');
+            pdf.setTextColor(0, 212, 255);
+            pdf.setFontSize(22);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('CoreSync', 20, 22);
+            pdf.setFontSize(10);
+            pdf.setTextColor(160, 160, 184);
+            pdf.text('Daily Wellness & Productivity Report', 20, 32);
+            pdf.setTextColor(240, 240, 245);
+            pdf.text(displayDate, 190, 27, { align: 'right' });
+
+            // Stats
+            let y = 55;
+            pdf.setFontSize(14);
+            pdf.setTextColor(30, 30, 50);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Daily Summary', 20, y);
+            y += 10;
+
+            const stats = [
+                ['Steps', dashData.steps.toLocaleString(), '10,000'],
+                ['Calories', dashData.calories.toLocaleString(), '2,000'],
+                ['Water (ml)', dashData.water.toLocaleString(), '3,000'],
+                ['Tasks Done', dashData.completedTasks + ' / ' + dashData.tasks.length, ''],
+            ];
+
+            pdf.autoTable({
+                startY: y,
+                head: [['Metric', 'Value', 'Goal']],
+                body: stats,
+                theme: 'grid',
+                headStyles: { fillColor: [30, 30, 50], textColor: [0, 212, 255], fontStyle: 'bold' },
+                styles: { fontSize: 11, cellPadding: 6 },
+                columnStyles: { 0: {fontStyle:'bold'} },
+                margin: { left: 20, right: 20 },
+            });
+
+            // Tasks
+            if (dashData.tasks.length > 0) {
+                const taskY = pdf.lastAutoTable.finalY + 16;
+                pdf.setFontSize(14);
+                pdf.setTextColor(30, 30, 50);
+                pdf.setFont(undefined, 'bold');
+                pdf.text('Tasks', 20, taskY);
+
+                const taskBody = dashData.tasks.map(t => {
+                    const status = t.status === 'completed' ? 'Completed' : t.status === 'working' ? 'Working' : 'Not Started';
+                    const due = t.dueDate?.seconds ? new Date(t.dueDate.seconds*1000).toLocaleDateString() : '-';
+                    return [t.title||'', status, due];
+                });
+
+                pdf.autoTable({
+                    startY: taskY + 6,
+                    head: [['Task', 'Status', 'Due Date']],
+                    body: taskBody,
+                    theme: 'striped',
+                    headStyles: { fillColor: [30, 30, 50], textColor: [168, 85, 247], fontStyle: 'bold' },
+                    styles: { fontSize: 10, cellPadding: 5 },
+                    columnStyles: { 0: {cellWidth:90} },
+                    margin: { left: 20, right: 20 },
+                });
+            }
+
+            // Footer
+            const pageCount = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(8);
+                pdf.setTextColor(160, 160, 184);
+                pdf.text('Generated by CoreSync Web Dashboard', 20, 287);
+                pdf.text('Page ' + i + ' of ' + pageCount, 190, 287, { align: 'right' });
+            }
+
+            pdf.save('CoreSync_Report_' + dateStr + '.pdf');
+        });
+
         // ── Helpers ──
-        function esc(str) {
-            const d = document.createElement('div');
-            d.textContent = str || '';
-            return d.innerHTML;
-        }
+        function esc(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
     </script>
 
 </body>
