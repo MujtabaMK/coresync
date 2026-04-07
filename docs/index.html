@@ -712,7 +712,7 @@ async function ensureLibs(){
     async function loadFoodDetailed(uid,ms,me){
         try{
             const foods=[];let cal=0;
-            const mk=k=>({protein:0,carbs:0,fat:0,fiber:0,sugar:0,sodium:0,cholesterol:0,iron:0,calcium:0,potassium:0,zinc:0,magnesium:0,vitaminA:0,vitaminB12:0,vitaminC:0,vitaminD:0,vitaminE:0,vitaminK:0,vitaminB6:0,folate:0});
+            const mk=k=>({protein:0,carbs:0,fat:0,fiber:0,sugar:0,sodium:0,cholesterol:0,iron:0,calcium:0,potassium:0,zinc:0,magnesium:0,vitaminA:0,vitaminB12:0,vitaminC:0,vitaminD:0,vitaminE:0,vitaminK:0,vitaminB6:0,folate:0,phosphorus:0,selenium:0,manganese:0});
             const tot=mk();
             const tS=await getDocs(query(collection(db,'users',uid,'gym_food_tracking'),where('trackedAt','>=',ms),where('trackedAt','<=',me)));
             tS.forEach(d=>{const x=d.data();const q=x.quantity||1;const c=(x.calories||0)*q;cal+=c;
@@ -860,25 +860,30 @@ async function ensureLibs(){
             // Current streak (from today backwards)
             currentStreak=0;for(let i=sortedDates.length-1;i>=0;i--){if(presentDates.has(sortedDates[i]))currentStreak++;else break;}
 
-            // Water
+            // Water (per-day goals)
             const waterSnap=await getDocs(collection(db,'users',uid,'gym_water'));
             let waterTotal=0,waterDays=0,waterGoalMet=0;
-            waterSnap.forEach(d=>{const ml=d.data().ml||0;if(ml>0){waterTotal+=ml;waterDays++;if(ml>=goals.water)waterGoalMet++;}});
+            waterSnap.forEach(d=>{const x=d.data();const ml=x.ml||0;if(ml>0){waterTotal+=ml;waterDays++;const dayGoal=x.goalMl||2500;if(ml>=dayGoal)waterGoalMet++;}});
             const waterAvg=waterDays?Math.round(waterTotal/waterDays):0;
 
-            // Steps
+            // Steps (per-day goals)
             const stepsSnap=await getDocs(collection(db,'users',uid,'gym_steps'));
             let stepsTotal=0,stepsDays=0,stepsGoalMet=0;
-            stepsSnap.forEach(d=>{const s=d.data().steps||0;if(s>0){stepsTotal+=s;stepsDays++;if(s>=goals.steps)stepsGoalMet++;}});
+            stepsSnap.forEach(d=>{const x=d.data();const s=x.steps||0;if(s>0){stepsTotal+=s;stepsDays++;const dayGoal=x.goalSteps||10000;if(s>=dayGoal)stepsGoalMet++;}});
             const stepsAvg=stepsDays?Math.round(stepsTotal/stepsDays):0;
 
-            // Food
+            // Food (per-day calorie goals)
             const foodSnap=await getDocs(collection(db,'users',uid,'gym_food_tracking'));
             const foodByDay={};
             foodSnap.forEach(d=>{const x=d.data();const day=new Date(x.trackedAt).toISOString().slice(0,10);foodByDay[day]=(foodByDay[day]||0)+(x.calories||0)*(x.quantity||1);});
             const foodDays=Object.keys(foodByDay).length;
             const foodTotal=Math.round(Object.values(foodByDay).reduce((a,b)=>a+b,0));
             const foodAvg=foodDays?Math.round(foodTotal/foodDays):0;
+            // Read per-day calorie goals
+            let foodGoalMet=0;
+            const calGoalByDay={};
+            try{const calSnap=await getDocs(collection(db,'users',uid,'gym_calorie_goals'));calSnap.forEach(d=>{const g=d.data().goalCalories;if(g&&g>0)calGoalByDay[d.id]=g;});}catch(e){console.warn('calorie goals:',e);}
+            for(const[day,cal] of Object.entries(foodByDay)){if(cal>0){const dayGoal=calGoalByDay[day]||2000;if(Math.round(cal)===Math.round(dayGoal))foodGoalMet++;}}
 
             // Sleep
             const sleepSnap=await getDocs(collection(db,'users',uid,'gym_sleep'));
@@ -889,7 +894,7 @@ async function ensureLibs(){
             reportData={presentCount,absentCount,rate,currentStreak,bestStreak,totalDays,
                 waterAvg,waterTotal,waterDays,waterGoalMet,
                 stepsAvg,stepsTotal,stepsDays,stepsGoalMet,
-                foodAvg,foodTotal,foodDays,
+                foodAvg,foodTotal,foodDays,foodGoalMet,
                 sleepAvg,sleepDays,sleepGoalMet};
 
             $('qs-present').textContent=presentCount;
@@ -932,6 +937,7 @@ async function ensureLibs(){
                 <div class="report-stat"><div class="report-stat-icon">&#127860;</div><div class="report-stat-val">${fmtK(r.foodAvg)} kcal</div><div class="report-stat-lbl">Avg / Day</div></div>
                 <div class="report-stat"><div class="report-stat-icon">&#128293;</div><div class="report-stat-val">${fmtK(r.foodTotal)} kcal</div><div class="report-stat-lbl">Total</div></div>
             </div>
+            <div class="report-bar"><span class="report-bar-label">Goal Met</span><div class="report-bar-bg"><div class="report-bar-fill" style="width:${r.foodDays?r.foodGoalMet/r.foodDays*100:0}%;background:var(--green)"></div></div><span class="report-bar-val">${r.foodGoalMet} / ${r.foodDays} days</span></div>
             <div class="report-bar"><span class="report-bar-label">Days Tracked</span><div class="report-bar-bg"><div class="report-bar-fill" style="width:${r.totalDays?r.foodDays/r.totalDays*100:0}%;background:var(--orange)"></div></div><span class="report-bar-val">${r.foodDays} / ${r.totalDays} days</span></div>
         </div>
         <div class="report-block"><div class="report-block-title">Sleep</div>
