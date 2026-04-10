@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoreSync — Your All-in-One Productivity & Wellness Hub</title>
-    <meta name="description" content="CoreSync combines task management, password security, fitness tracking, document scanning, QR codes, and calculators in one beautiful app.">
+    <title>CoreSync Go — Your All-in-One Productivity & Wellness Hub</title>
+    <meta name="description" content="CoreSync Go combines task management, password security, fitness tracking, document scanning, QR codes, and calculators in one beautiful app.">
     <link rel="icon" type="image/png" href="app_icon.png">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -297,9 +297,9 @@
 
 <!-- ═══ LANDING ═══ -->
 <div id="landing-content">
-    <nav class="top-nav"><div class="nav-brand">CoreSync</div><button id="login-btn" class="nav-btn">Login</button></nav>
+    <nav class="top-nav"><div class="nav-brand">CoreSync Go</div><button id="login-btn" class="nav-btn">Login</button></nav>
     <section class="hero">
-        <img src="app_icon.png" alt="CoreSync" class="hero-icon"><h1>CoreSync</h1>
+        <img src="app_icon.png" alt="CoreSync Go" class="hero-icon"><h1>CoreSync Go</h1>
         <p class="tagline">Your all-in-one productivity &amp; wellness hub. Tasks, passwords, fitness, scanning, and more — unified in a single app.</p>
         <div class="store-buttons">
             <a href="#" class="store-btn"><svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg><span class="store-label"><small>Download on the</small>App Store</span></a>
@@ -324,7 +324,7 @@
         <div class="highlight-item"><div class="highlight-icon">&#127912;</div><h4>Material 3 Design</h4><p>Modern interface following Material You guidelines.</p></div>
         <div class="highlight-item"><div class="highlight-icon">&#127761;</div><h4>Dark Mode</h4><p>Easy on the eyes with light and dark themes.</p></div>
     </div></section>
-    <footer><nav class="footer-links"><a href="privacy-policy.html">Privacy Policy</a><a href="delete-account.html">Delete Account</a><a href="mailto:mujtabaulhasankhan@gmail.com">Contact</a></nav><p class="copyright">&copy; 2026 CoreSync. All rights reserved.</p></footer>
+    <footer><nav class="footer-links"><a href="privacy-policy.html">Privacy Policy</a><a href="delete-account.html">Delete Account</a><a href="mailto:mujtabaulhasankhan@gmail.com">Contact</a></nav><p class="copyright">&copy; 2026 CoreSync Go. All rights reserved.</p></footer>
 </div>
 
 <!-- ═══ LOGIN MODAL ═══ -->
@@ -367,7 +367,7 @@
 
 <!-- ═══ DASHBOARD ═══ -->
 <div id="dashboard" style="display:none">
-    <nav class="dash-topbar"><div class="dash-brand">CoreSync</div><div class="dash-user"><span class="dash-user-email" id="user-email"></span><button id="logout-btn" class="nav-btn">Logout</button></div></nav>
+    <nav class="dash-topbar"><div class="dash-brand">CoreSync Go</div><div class="dash-user"><span class="dash-user-email" id="user-email"></span><button id="logout-btn" class="nav-btn">Logout</button></div></nav>
     <main class="dash-main">
         <div class="dash-header">
             <h2 class="dash-greeting" id="dash-greeting">Welcome back</h2>
@@ -1028,7 +1028,7 @@ async function ensureLibs(){
         const ds=fmtDate(currentDate);const wb=XLSX.utils.book_new();const mg=getMacroGoals();const bmi=getBmiStr();
 
         // Sheet 1: Summary
-        const sumSections=[{title:'CoreSync Report — '+ds}];
+        const sumSections=[{title:'CoreSync Go Report — '+ds}];
         if(membership){const s=membership._start,e=membership._end;
             sumSections.push({title:'MEMBERSHIP',headers:['Field','Value'],rows:[['Plan',membership.plan||''],['Start',s?s.toLocaleDateString():''],['End',e?e.toLocaleDateString():''],['Days Remaining',$('memb-remaining')?.textContent||'']]});}
         sumSections.push({title:'DAILY STATS',headers:['Metric','Value','Goal','% of Goal'],rows:[
@@ -1093,7 +1093,7 @@ async function ensureLibs(){
         // Sheet 5: Passwords
         if(dashData.passwords.length){xlsTable(wb,'Passwords',[{headers:['Service','Username'],rows:dashData.passwords.map(p=>[p.passwordFor,p.username])}]);}
 
-        XLSX.writeFile(wb,'CoreSync_Report_'+ds+'.xlsx');
+        XLSX.writeFile(wb,'CoreSync_Go_Report_'+ds+'.xlsx');
     };
 
     // ═══ EXPORT PDF ═══
@@ -1104,7 +1104,7 @@ async function ensureLibs(){
         const tblHead={fillColor:[30,30,50],textColor:[0,212,255]};const tblStyle={fontSize:9,cellPadding:4};const marg={left:20,right:20};
 
         // Header
-        pdf.setFillColor(15,15,26);pdf.rect(0,0,210,38,'F');pdf.setTextColor(0,212,255);pdf.setFontSize(20);pdf.setFont(undefined,'bold');pdf.text('CoreSync',20,20);
+        pdf.setFillColor(15,15,26);pdf.rect(0,0,210,38,'F');pdf.setTextColor(0,212,255);pdf.setFontSize(20);pdf.setFont(undefined,'bold');pdf.text('CoreSync Go',20,20);
         pdf.setFontSize(9);pdf.setTextColor(160,160,184);pdf.text('Daily Wellness & Productivity Report',20,30);pdf.setTextColor(240,240,245);pdf.text(dd,190,24,{align:'right'});
 
         // Membership
@@ -1169,8 +1169,8 @@ async function ensureLibs(){
             pdf.autoTable({startY:38,head:[['Task','Status','Due']],body:dashData.tasks.map(t=>[t.title||'',t.status==='completed'?'Completed':t.status==='working'?'Working':'Not Started',t.dueDate?.seconds?new Date(t.dueDate.seconds*1000).toLocaleDateString():'-']),theme:'striped',headStyles:{fillColor:[30,30,50],textColor:[168,85,247]},styles:tblStyle,columnStyles:{0:{cellWidth:90}},margin:marg});}
 
         // Footer on all pages
-        const pc=pdf.internal.getNumberOfPages();for(let i=1;i<=pc;i++){pdf.setPage(i);pdf.setFontSize(7);pdf.setTextColor(160,160,184);pdf.text('Generated by CoreSync',20,287);pdf.text('Page '+i+'/'+pc,190,287,{align:'right'});}
-        pdf.save('CoreSync_Report_'+ds+'.pdf');
+        const pc=pdf.internal.getNumberOfPages();for(let i=1;i<=pc;i++){pdf.setPage(i);pdf.setFontSize(7);pdf.setTextColor(160,160,184);pdf.text('Generated by CoreSync Go',20,287);pdf.text('Page '+i+'/'+pc,190,287,{align:'right'});}
+        pdf.save('CoreSync_Go_Report_'+ds+'.pdf');
     };
 
     function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
