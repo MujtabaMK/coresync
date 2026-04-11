@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:health/health.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pedometer_2/pedometer_2.dart';
@@ -10,8 +11,10 @@ import 'package:permission_handler/permission_handler.dart';
 
 /// Singleton service that tracks steps using the hardware step counter sensor.
 ///
-/// On Android, uses TYPE_STEP_COUNTER which accumulates even when the app is
-/// killed. On iOS, uses CMPedometer. Both are independent of Health Connect.
+/// On Android, a native foreground service (StepCounterForegroundService)
+/// counts steps 24/7 using TYPE_STEP_COUNTER and syncs to Firestore every
+/// 15 minutes — even when the Flutter app is closed.
+/// On iOS, uses CMPedometer.
 class StepCounterService {
   StepCounterService._();
   static final instance = StepCounterService._();
@@ -21,6 +24,8 @@ class StepCounterService {
   static const _kRaw = 'saved_raw';
   static const _kSteps = 'saved_steps';
   static const _kRebootSteps = 'reboot_carry';
+
+  static const _channel = MethodChannel('com.mujtaba.coresync/step_counter');
 
   final _pedometer = Pedometer();
   StreamSubscription<int>? _stepSub;
@@ -55,6 +60,30 @@ class StepCounterService {
   /// Stream of pedestrian status updates.
   Stream<PedestrianStatus> get statusStream => _statusController.stream;
 
+  // ── Native service helpers (Android only) ──
+
+  /// Start the native Android foreground service for background step counting.
+  static Future<void> startNativeService() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _channel.invokeMethod('startService');
+    } catch (e) {
+      debugPrint('Failed to start step counter service: $e');
+    }
+  }
+
+  /// Read today's step count cached by the native foreground service.
+  static Future<int> getNativeSteps() async {
+    if (!Platform.isAndroid) return 0;
+    try {
+      return await _channel.invokeMethod<int>('getSteps') ?? 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  // ── Public API ──
+
   /// Initialize the step counter. Safe to call multiple times.
   /// Returns false if permission was denied or sensor is unavailable.
   Future<bool> initialize() async {
@@ -67,6 +96,34 @@ class StepCounterService {
 
     _initialized = true;
     _firstAndroidEvent = true;
+
+    if (Platform.isAndroid) {
+      // Start the native foreground service so steps are tracked 24/7.
+      await startNativeService();
+
+      // Read steps already counted by the native service while app was closed.
+      final nativeSteps = await getNativeSteps();
+      if (nativeSteps > _currentSteps) {
+        _currentSteps = nativeSteps;
+        _stepsController.add(_currentSteps);
+      }
+
+      // Also try Health Connect as a secondary source (if available).
+      final hcSteps = await _getHealthConnectSteps();
+      if (hcSteps != null && hcSteps > _currentSteps) {
+        _currentSteps = hcSteps;
+        _stepsController.add(_currentSteps);
+      }
+
+      // Persist the authoritative step count and clear the stale pedometer
+      // raw baseline. Without this, the first pedometer stream event would
+      // compute a delta from the old _kRaw and add it on top of the
+      // native/HC value, double-counting steps taken before this init.
+      final box = await Hive.openBox(_boxName);
+      await box.put(_kSteps, _currentSteps);
+      await box.put(_kDate, _todayKey());
+      await box.delete(_kRaw);
+    }
 
     _stepSub = _pedometer.stepCountStream().listen(
       (rawSteps) async {
@@ -107,38 +164,49 @@ class StepCounterService {
     }
   }
 
-  /// Refresh iOS baseline from CMPedometer (call on app resume).
+  /// Refresh step count on app resume.
   Future<void> refreshOnResume() async {
     if (Platform.isIOS) {
       await _refreshIOSBaseline();
+    } else if (Platform.isAndroid) {
+      await _refreshAndroidOnResume();
     }
   }
 
-  Future<void> _refreshIOSBaseline() async {
-    final now = DateTime.now();
-    final midnight = DateTime(now.year, now.month, now.day);
-    try {
-      final steps = await _pedometer.getStepCount(from: midnight, to: now);
-      _platformBaseline = steps;
-      _hasPlatformBaseline = true;
-      _streamBaseline = null;
-      _currentSteps = _platformBaseline;
+  // ── Android ──
+
+  Future<void> _refreshAndroidOnResume() async {
+    // 1. Read from native foreground service (primary)
+    final nativeSteps = await getNativeSteps();
+    if (nativeSteps > _currentSteps) {
+      _currentSteps = nativeSteps;
       _stepsController.add(_currentSteps);
-    } catch (e) {
-      debugPrint('CMPedometer getStepCount error: $e');
     }
-  }
 
-  void _handleIOSSensorEvent(int rawSteps) {
-    _streamBaseline ??= rawSteps;
-    final delta = rawSteps - _streamBaseline!;
+    // 2. Also try Health Connect as a secondary source
+    final hcSteps = await _getHealthConnectSteps();
+    if (hcSteps != null && hcSteps > _currentSteps) {
+      _currentSteps = hcSteps;
+      _stepsController.add(_currentSteps);
+    }
 
-    final totalToday = _hasPlatformBaseline
-        ? _platformBaseline + delta
-        : _currentSteps + delta;
+    // 3. Persist the authoritative step count and clear the stale pedometer
+    //    raw baseline to prevent double-counting. Without this, the next
+    //    pedometer event would compute a delta from the old _kRaw (set
+    //    before the app went to background) and add it on top of the
+    //    native/HC value — counting background steps twice.
+    final box = await Hive.openBox(_boxName);
+    await box.put(_kSteps, _currentSteps);
+    await box.put(_kDate, _todayKey());
+    await box.delete(_kRaw);
+    _firstAndroidEvent = true;
 
-    _currentSteps = totalToday;
-    _stepsController.add(_currentSteps);
+    // 4. Re-subscribe to the sensor stream in case the OS killed it
+    _stepSub?.cancel();
+    _stepSub = _pedometer.stepCountStream().listen(
+      (rawSteps) async => _handleAndroidSensorEvent(rawSteps),
+      onError: (error) => debugPrint('Step count error: $error'),
+    );
   }
 
   Future<void> _handleAndroidSensorEvent(int rawSteps) async {
@@ -163,8 +231,10 @@ class StepCounterService {
     } else {
       // New day
       if (_firstAndroidEvent) {
+        // Try native service first, then Health Connect
+        final nativeSteps = await getNativeSteps();
         final hcSteps = await _getHealthConnectSteps();
-        todaySteps = max(hcSteps ?? 0, 0);
+        todaySteps = max(nativeSteps, max(hcSteps ?? 0, 0));
         _firstAndroidEvent = false;
       } else {
         todaySteps = 0;
@@ -195,6 +265,37 @@ class StepCounterService {
       return null;
     }
   }
+
+  // ── iOS ──
+
+  Future<void> _refreshIOSBaseline() async {
+    final now = DateTime.now();
+    final midnight = DateTime(now.year, now.month, now.day);
+    try {
+      final steps = await _pedometer.getStepCount(from: midnight, to: now);
+      _platformBaseline = steps;
+      _hasPlatformBaseline = true;
+      _streamBaseline = null;
+      _currentSteps = _platformBaseline;
+      _stepsController.add(_currentSteps);
+    } catch (e) {
+      debugPrint('CMPedometer getStepCount error: $e');
+    }
+  }
+
+  void _handleIOSSensorEvent(int rawSteps) {
+    _streamBaseline ??= rawSteps;
+    final delta = rawSteps - _streamBaseline!;
+
+    final totalToday = _hasPlatformBaseline
+        ? _platformBaseline + delta
+        : _currentSteps + delta;
+
+    _currentSteps = totalToday;
+    _stepsController.add(_currentSteps);
+  }
+
+  // ── Shared ──
 
   String _todayKey() {
     final now = DateTime.now();
