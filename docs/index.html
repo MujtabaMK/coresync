@@ -351,7 +351,7 @@
             <a href="#" class="store-btn"><svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg><span class="store-label"><small>Download on the</small>App Store</span></a>
             <a href="#" class="store-btn"><svg viewBox="0 0 24 24"><path d="M3.18 23.48c-.27-.17-.48-.47-.48-.87V1.39c0-.4.21-.7.48-.87L13.55 12 3.18 23.48zm1.44-23L16.08 5.6l-3.3 3.3L4.62.49zM20.16 10.33l-2.95 1.66-3.34-3.33 3.34-3.34 2.95 1.66c.88.49.88 1.86 0 2.35l.01.01-.01-.01zm-4.07 2.33l3.34 3.34-2.95 1.66c-.44.24-.92.24-1.18.12l-.01-.01-8.84-5.12 3.3-3.3 6.34 3.31z"/></svg><span class="store-label"><small>Get it on</small>Google Play</span></a>
         </div>
-        <button class="hero-login-btn" id="hero-login-btn">Login / Sign Up</button>
+        <button class="hero-login-btn" id="hero-login-btn">Login</button>
     </section>
     <section id="features">
         <h2 class="section-title">Everything You Need</h2><p class="section-subtitle">Seven powerful modules working together so you can focus on what matters.</p>
@@ -381,19 +381,11 @@
     <div id="auth-error" class="form-error"></div>
     <div id="auth-success" class="form-success"></div>
     <form id="auth-form" novalidate>
-        <div id="signup-fields" style="display:none">
-            <div class="form-row">
-                <div class="form-group"><input type="text" id="auth-first-name" class="form-input" placeholder="First Name" autocomplete="given-name"><div class="field-error" id="err-first-name"></div></div>
-                <div class="form-group"><input type="text" id="auth-last-name" class="form-input" placeholder="Last Name" autocomplete="family-name"><div class="field-error" id="err-last-name"></div></div>
-            </div>
-            <div class="form-group"><input type="tel" id="auth-phone" class="form-input" placeholder="Phone Number" autocomplete="tel"><div class="field-error" id="err-phone"></div></div>
-        </div>
         <div class="form-group"><input type="email" id="auth-email" class="form-input" placeholder="Email" autocomplete="email"><div class="field-error" id="err-email"></div></div>
         <div class="form-group" id="password-group"><input type="password" id="auth-password" class="form-input" placeholder="Password" autocomplete="current-password"><div class="field-error" id="err-password"></div></div>
         <button type="submit" id="auth-submit" class="form-btn">Login</button>
     </form>
     <p class="form-forgot" id="forgot-link"><a href="#" id="forgot-auth">Forgot Password?</a></p>
-    <p class="form-toggle" id="toggle-text">Don't have an account? <a href="#" id="toggle-auth">Sign Up</a></p>
 </div></div>
 
 <!-- ═══ PASSWORD ADD MODAL ═══ -->
@@ -527,7 +519,7 @@ async function ensureLibs(){
 <!-- ═══ APP ═══ -->
 <script type="module">
     import{initializeApp}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-    import{getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,onAuthStateChanged,signOut,sendPasswordResetEmail}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import{getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut,sendPasswordResetEmail}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
     import{getFirestore,collection,query,where,getDocs,doc,getDoc,setDoc,addDoc,deleteDoc,orderBy}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
     const app=initializeApp({apiKey:'AIzaSyC_3AdOLRj0yCy7jmzQ5MVJNT2JQgZ6KoY',authDomain:'coresync-e7fb5.firebaseapp.com',projectId:'coresync-e7fb5',storageBucket:'coresync-e7fb5.firebasestorage.app',messagingSenderId:'954417312512',appId:'1:954417312512:web:f3bbcb678855eda73079e5'});
@@ -579,16 +571,13 @@ async function ensureLibs(){
     function closeAuthModal(){loginModal.style.display='none';authError.style.display='none';authSuccess.style.display='none';clearFieldErrors();}
     function updateAuthUI(){
         authError.style.display='none';authSuccess.style.display='none';clearFieldErrors();
-        const s=authMode==='signup',f=authMode==='forgot';
-        $('modal-title').textContent=f?'Reset Password':s?'Create Account':'Welcome Back';
-        $('signup-fields').style.display=s?'':'none';
+        const f=authMode==='forgot';
+        $('modal-title').textContent=f?'Reset Password':'Welcome Back';
         $('password-group').style.display=f?'none':'';
-        authSubmit.textContent=f?'Send Reset Link':s?'Sign Up':'Login';
-        $('forgot-link').style.display=f||s?'none':'';
-        $('toggle-text').innerHTML=f?'<a href="#" id="toggle-auth">Back to Login</a>':s?'Already have an account? <a href="#" id="toggle-auth">Login</a>':'Don\'t have an account? <a href="#" id="toggle-auth">Sign Up</a>';
+        authSubmit.textContent=f?'Send Reset Link':'Login';
+        $('forgot-link').style.display=f?'none':'';
     }
     document.addEventListener('click',e=>{
-        if(e.target.id==='toggle-auth'){e.preventDefault();authMode=authMode==='login'?'signup':'login';updateAuthUI();}
         if(e.target.id==='forgot-auth'){e.preventDefault();authMode='forgot';updateAuthUI();}
     });
 
@@ -600,12 +589,6 @@ async function ensureLibs(){
         if(authMode==='forgot')return ok;
         const pw=$('auth-password').value;
         if(!pw){showFE('password','Password is required');ok=false}else if(pw.length<4){showFE('password','Min 4 characters');ok=false}
-        if(authMode==='signup'){
-            if(!$('auth-first-name').value.trim()){showFE('first-name','Required');ok=false}
-            if(!$('auth-last-name').value.trim()){showFE('last-name','Required');ok=false}
-            const ph=$('auth-phone').value.replace(/[^\d+]/g,'');
-            if(!ph){showFE('phone','Required');ok=false}else if(ph.length<10){showFE('phone','Min 10 digits');ok=false}
-        }
         return ok;
     }
 
@@ -613,17 +596,10 @@ async function ensureLibs(){
         e.preventDefault();authError.style.display='none';authSuccess.style.display='none';
         if(!validateAuth())return;
         authSubmit.disabled=true;const orig=authSubmit.textContent;
-        authSubmit.textContent=authMode==='forgot'?'Sending...':authMode==='signup'?'Creating...':'Logging in...';
+        authSubmit.textContent=authMode==='forgot'?'Sending...':'Logging in...';
         try{
             if(authMode==='forgot'){await sendPasswordResetEmail(auth,$('auth-email').value.trim());authSuccess.textContent='Reset email sent! Check inbox.';authSuccess.style.display='block';authSubmit.disabled=false;authSubmit.textContent=orig;return;}
-            if(authMode==='signup'){
-                const phone=$('auth-phone').value.replace(/[^\d+]/g,'');
-                try{const pq=await getDocs(query(collection(db,'user_lookup'),where('phoneNumber','==',phone)));if(!pq.empty){authError.textContent='Phone number already registered.';authError.style.display='block';authSubmit.disabled=false;authSubmit.textContent=orig;return;}}catch{}
-                const cred=await createUserWithEmailAndPassword(auth,$('auth-email').value.trim(),$('auth-password').value);
-                if(cred.user){const fn=$('auth-first-name').value.trim(),ln=$('auth-last-name').value.trim(),dn=[fn,ln].filter(Boolean).join(' ');
-                    await setDoc(doc(db,'users',cred.user.uid),{uid:cred.user.uid,email:cred.user.email||'',firstName:fn,lastName:ln,phoneNumber:phone,displayName:dn||null,createdAt:Date.now()},{merge:true});
-                    await setDoc(doc(db,'user_lookup',cred.user.uid),{email:cred.user.email||'',phoneNumber:phone});}
-            }else{await signInWithEmailAndPassword(auth,$('auth-email').value.trim(),$('auth-password').value);}
+            await signInWithEmailAndPassword(auth,$('auth-email').value.trim(),$('auth-password').value);
             closeAuthModal();authForm.reset();
         }catch(err){const m=err.message||'Error';authError.textContent=m.replace(/Firebase:\s*/i,'').replace(/\(auth\/.*\)\.?/i,'').trim()||m;authError.style.display='block';}
         finally{authSubmit.disabled=false;authSubmit.textContent=orig;}
