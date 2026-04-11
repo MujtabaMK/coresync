@@ -53,7 +53,7 @@
         .feature-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
         .feature-card h3{font-size:1.2rem;margin-bottom:8px}
         .feature-card p{color:var(--text2);font-size:.95rem}
-        .icon-tasks{background:linear-gradient(135deg,#3B82F6,#60A5FA)}.icon-passwords{background:linear-gradient(135deg,#EF4444,#F87171)}.icon-gym{background:linear-gradient(135deg,#10B981,#34D399)}.icon-scanner{background:linear-gradient(135deg,#F59E0B,#FBBF24)}.icon-qr{background:linear-gradient(135deg,#8B5CF6,#A78BFA)}.icon-calc{background:linear-gradient(135deg,#EC4899,#F472B6)}
+        .icon-tasks{background:linear-gradient(135deg,#3B82F6,#60A5FA)}.icon-passwords{background:linear-gradient(135deg,#EF4444,#F87171)}.icon-gym{background:linear-gradient(135deg,#10B981,#34D399)}.icon-scanner{background:linear-gradient(135deg,#F59E0B,#FBBF24)}.icon-qr{background:linear-gradient(135deg,#8B5CF6,#A78BFA)}.icon-calc{background:linear-gradient(135deg,#EC4899,#F472B6)}.icon-translator{background:linear-gradient(135deg,#06B6D4,#22D3EE)}
         .highlights{background:var(--bg2);border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)}
         .highlights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;max-width:960px;margin:0 auto;text-align:center}
         .highlight-item{display:flex;flex-direction:column;align-items:center;gap:12px}
@@ -68,189 +68,195 @@
 
         /* MODAL */
         .modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px}
-        .modal{background:var(--card);border-radius:24px;padding:36px;width:100%;max-width:420px;border:1px solid rgba(255,255,255,.06);position:relative;box-shadow:0 24px 80px rgba(0,0,0,.5);max-height:90vh;overflow-y:auto}
-        .modal-close{position:absolute;top:14px;right:18px;background:none;border:none;color:var(--text2);font-size:1.5rem;cursor:pointer;line-height:1}
-        .modal-close:hover{color:var(--text)}
+        .modal{background:rgba(255,255,255,.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:24px;padding:36px;width:100%;max-width:420px;border:1px solid rgba(255,255,255,.7);position:relative;box-shadow:0 24px 80px rgba(0,0,0,.15);max-height:90vh;overflow-y:auto;color:#1E2432}
+        .modal-close{position:absolute;top:14px;right:18px;background:none;border:none;color:#6B7280;font-size:1.5rem;cursor:pointer;line-height:1}
+        .modal-close:hover{color:#1E2432}
         .modal-title{font-size:1.4rem;font-weight:700;margin-bottom:20px;text-align:center}
         .form-group{margin-bottom:14px}
         .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        .form-input{width:100%;padding:12px 14px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:var(--bg);color:var(--text);font-size:.92rem;outline:none;transition:border-color .2s}
-        .form-input:focus{border-color:var(--cyan)}
-        .form-input::placeholder{color:var(--text2)}
+        .form-input{width:100%;padding:12px 14px;border-radius:11px;border:1px solid rgba(0,0,0,.1);background:rgba(255,255,255,.6);color:#1E2432;font-size:.92rem;outline:none;transition:border-color .2s}
+        .form-input:focus{border-color:#4A5FE0}
+        .form-input::placeholder{color:#9CA3AF}
         .form-input.input-error{border-color:rgba(239,68,68,.5)}
-        .form-btn{width:100%;padding:13px;border-radius:11px;border:none;background:var(--grad);color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:6px}
+        .form-btn{width:100%;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,#4A5FE0,#7C5CE6);color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:6px}
         .form-btn:hover{opacity:.9;transform:translateY(-1px)}
         .form-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
         .form-error{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:var(--red2);padding:10px 14px;border-radius:10px;font-size:.83rem;margin-bottom:14px;display:none}
         .form-success{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:var(--green2);padding:10px 14px;border-radius:10px;font-size:.83rem;margin-bottom:14px;display:none}
-        .form-toggle{text-align:center;margin-top:18px;color:var(--text2);font-size:.88rem}
-        .form-toggle a{color:var(--cyan);text-decoration:none;font-weight:600}
+        .form-toggle{text-align:center;margin-top:18px;color:#6B7280;font-size:.88rem}
+        .form-toggle a{color:#4A5FE0;text-decoration:none;font-weight:600}
         .form-toggle a:hover{text-decoration:underline}
         .form-forgot{text-align:center;margin-top:10px}
-        .form-forgot a{color:var(--text2);text-decoration:none;font-size:.82rem}
-        .form-forgot a:hover{color:var(--cyan)}
+        .form-forgot a{color:#6B7280;text-decoration:none;font-size:.82rem}
+        .form-forgot a:hover{color:#4A5FE0}
         .field-error{color:var(--red2);font-size:.76rem;margin-top:3px;display:none}
 
         /* ══ DASHBOARD ══ */
+        #dashboard{background:linear-gradient(170deg,#F2F4F8 0%,#E8ECF5 50%,#F0F2F8 100%);color:#1E2432;min-height:100vh}
+        #dashboard .dash-topbar{background:rgba(255,255,255,.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.06)}
+        #dashboard .dash-brand{background:linear-gradient(135deg,#4A5FE0,#7C5CE6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        #dashboard .nav-btn{border-color:#4A5FE0;color:#4A5FE0}
+        #dashboard .nav-btn:hover{background:#4A5FE0;color:#fff;box-shadow:0 4px 20px rgba(74,95,224,.25)}
+        #dashboard .dash-user-email{color:#6B7280}
         .dash-main{max-width:1080px;margin:0 auto;padding:28px 24px 80px;position:relative}
-        .dash-main::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(0,212,255,.05) 0%,transparent 70%);pointer-events:none}
+        .dash-main::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(74,95,224,.04) 0%,transparent 70%);pointer-events:none}
         .dash-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:24px}
-        .dash-greeting{font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
-        .dash-greeting span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .dash-greeting{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;color:#1E2432}
+        .dash-greeting span{background:linear-gradient(135deg,#4A5FE0,#7C5CE6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
         /* DATE NAV */
-        .date-nav{display:flex;align-items:center;gap:6px;background:var(--card);border-radius:12px;padding:5px 7px;border:1px solid rgba(255,255,255,.04)}
-        .date-arrow{width:34px;height:34px;border-radius:9px;border:none;background:rgba(255,255,255,.05);color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-        .date-arrow:hover{background:rgba(255,255,255,.1)}
-        .date-input{background:transparent;color:var(--text);border:none;font-size:.9rem;font-weight:600;font-family:inherit;padding:5px 10px;cursor:pointer;outline:none;min-width:150px;text-align:center}
-        .date-input::-webkit-calendar-picker-indicator{filter:invert(.7);cursor:pointer}
-        .date-today-btn{padding:5px 14px;border-radius:8px;border:1px solid rgba(0,212,255,.25);background:rgba(0,212,255,.07);color:var(--cyan);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s}
-        .date-today-btn:hover{background:rgba(0,212,255,.14)}
+        .date-nav{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:12px;padding:5px 7px;border:1px solid rgba(255,255,255,.7);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+        .date-arrow{width:34px;height:34px;border-radius:9px;border:none;background:rgba(0,0,0,.04);color:#1E2432;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+        .date-arrow:hover{background:rgba(0,0,0,.08)}
+        .date-input{background:transparent;color:#1E2432;border:none;font-size:.9rem;font-weight:600;font-family:inherit;padding:5px 10px;cursor:pointer;outline:none;min-width:150px;text-align:center}
+        .date-input::-webkit-calendar-picker-indicator{cursor:pointer}
+        .date-today-btn{padding:5px 14px;border-radius:8px;border:1px solid rgba(74,95,224,.25);background:rgba(74,95,224,.07);color:#4A5FE0;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s}
+        .date-today-btn:hover{background:rgba(74,95,224,.14)}
 
         /* BMI CARD */
-        .bmi-card{background:var(--card);border-radius:20px;padding:24px 28px;margin-bottom:24px;border:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+        .bmi-card{background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;padding:24px 28px;margin-bottom:24px;border:1px solid rgba(255,255,255,.7);box-shadow:0 2px 12px rgba(0,0,0,.04);display:flex;align-items:center;gap:24px;flex-wrap:wrap}
         .bmi-ring-wrap{position:relative;width:90px;height:90px;flex-shrink:0}
         .bmi-svg{width:90px;height:90px;transform:rotate(-90deg)}
-        .bmi-bg{fill:none;stroke:rgba(255,255,255,.05);stroke-width:7}
+        .bmi-bg{fill:none;stroke:rgba(0,0,0,.06);stroke-width:7}
         .bmi-progress{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
         .bmi-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
         .bmi-number{font-size:1.3rem;font-weight:800;line-height:1}
-        .bmi-label{font-size:.65rem;color:var(--text2);margin-top:2px}
+        .bmi-label{font-size:.65rem;color:#6B7280;margin-top:2px}
         .bmi-info{flex:1;min-width:180px}
         .bmi-category{font-size:1.05rem;font-weight:700;margin-bottom:4px}
-        .bmi-details{font-size:.85rem;color:var(--text2)}
+        .bmi-details{font-size:.85rem;color:#6B7280}
         .bmi-hidden{display:none}
 
         /* MEMBERSHIP CARD */
-        .memb-card{background:linear-gradient(135deg,#2D1B69,#1E1E32);border-radius:20px;padding:22px 24px;margin-bottom:24px;border:1px solid rgba(168,85,247,.2);display:none}
+        .memb-card{background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;padding:22px 24px;margin-bottom:24px;border:1px solid rgba(255,255,255,.7);box-shadow:0 2px 12px rgba(0,0,0,.04);display:none}
         .memb-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
         .memb-plan{font-size:1.2rem;font-weight:800}
         .memb-badge{padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(16,185,129,.15);color:var(--green2);border:1px solid rgba(16,185,129,.3)}
-        .memb-dates{font-size:.85rem;color:var(--text2);margin-bottom:12px;display:flex;gap:20px;flex-wrap:wrap}
+        .memb-dates{font-size:.85rem;color:#6B7280;margin-bottom:12px;display:flex;gap:20px;flex-wrap:wrap}
         .memb-dates span{display:flex;align-items:center;gap:6px}
-        .memb-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:6px}
+        .memb-bar{height:6px;border-radius:3px;background:rgba(0,0,0,.06);overflow:hidden;margin-bottom:6px}
         .memb-bar-fill{height:100%;border-radius:3px;background:var(--green);transition:width .6s}
-        .memb-remaining{font-size:.8rem;color:var(--text2)}
+        .memb-remaining{font-size:.8rem;color:#6B7280}
 
         /* QUICK STATS 3x3 */
-        .qstats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
-        .qs-card{background:var(--card);border-radius:16px;padding:16px 12px;border:1px solid rgba(255,255,255,.04);text-align:center;transition:all .2s}
-        .qs-card:hover{background:var(--card2)}
+        .qstats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:24px}
+        .qs-card{background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px;padding:16px 12px;border:1px solid rgba(255,255,255,.7);box-shadow:0 2px 8px rgba(0,0,0,.04);text-align:center;transition:all .2s}
+        .qs-card:hover{background:rgba(255,255,255,.8)}
         .qs-icon{font-size:1.3rem;margin-bottom:4px}
         .qs-value{font-size:1.4rem;font-weight:800;line-height:1.2}
-        .qs-label{font-size:.75rem;color:var(--text2);margin-top:2px}
+        .qs-label{font-size:.75rem;color:#6B7280;margin-top:2px}
 
         /* STATS GRID (4-col ring cards) */
         .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:24px}
-        .stat-card{background:var(--card);border-radius:20px;padding:24px 18px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;transition:all .3s;position:relative;overflow:hidden}
+        .stat-card{background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;padding:24px 18px;border:1px solid rgba(255,255,255,.7);box-shadow:0 2px 12px rgba(0,0,0,.04);display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;transition:all .3s;position:relative;overflow:hidden}
         .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:20px 20px 0 0}
         .stat-steps::before{background:linear-gradient(90deg,var(--green),var(--green2))}.stat-calories::before{background:linear-gradient(90deg,var(--orange),var(--orange2))}.stat-water::before{background:linear-gradient(90deg,var(--blue),var(--blue2))}.stat-tasks::before{background:linear-gradient(90deg,var(--violet),var(--violet2))}
-        .stat-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+        .stat-card:hover{transform:translateY(-3px);background:rgba(255,255,255,.8);box-shadow:0 12px 40px rgba(0,0,0,.07)}
         .ring-wrap{position:relative;width:120px;height:120px}
         .ring-svg{width:120px;height:120px;transform:rotate(-90deg)}
-        .ring-bg{fill:none;stroke:rgba(255,255,255,.05);stroke-width:7}
+        .ring-bg{fill:none;stroke:rgba(0,0,0,.06);stroke-width:7}
         .ring-progress{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)}
         .ring-value{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
         .ring-number{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;line-height:1.1}
-        .ring-sub{font-size:.65rem;color:var(--text2);margin-top:2px}
+        .ring-sub{font-size:.65rem;color:#6B7280;margin-top:2px}
         .stat-steps .ring-number{color:var(--green2)}.stat-calories .ring-number{color:var(--orange2)}.stat-water .ring-number{color:var(--blue2)}.stat-tasks .ring-number{color:var(--violet2)}
-        .stat-label{font-size:.85rem;font-weight:600;color:var(--text2)}
+        .stat-label{font-size:.85rem;font-weight:600;color:#6B7280}
 
         /* FOOD DETAIL PANEL */
         .food-summary{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:20px}
         .food-ring-wrap{position:relative;width:110px;height:110px;flex-shrink:0}
         .food-ring-svg{width:110px;height:110px;transform:rotate(-90deg)}
-        .food-ring-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:9}
+        .food-ring-bg{fill:none;stroke:rgba(0,0,0,.06);stroke-width:9}
         .food-ring-prog{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .8s}
         .food-ring-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
         .food-ring-num{font-size:1.5rem;font-weight:800;color:var(--orange2)}
         .food-info{flex:1;min-width:180px}
         .food-info h4{font-size:1rem;font-weight:700;margin-bottom:4px}
-        .food-info-sub{font-size:.85rem;color:var(--text2)}
-        .food-info-rem{font-size:.85rem;color:var(--green2);margin-top:2px}
-        .food-info-net{font-size:.8rem;color:var(--text2);margin-top:2px}
+        .food-info-sub{font-size:.85rem;color:#6B7280}
+        .food-info-rem{font-size:.85rem;color:var(--green);margin-top:2px}
+        .food-info-net{font-size:.8rem;color:#6B7280;margin-top:2px}
         .macro-bars{display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap}
         .macro-item{flex:1;min-width:80px;text-align:center}
         .macro-val{font-size:.85rem;font-weight:700;margin-bottom:4px}
-        .macro-bar-bg{height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+        .macro-bar-bg{height:5px;border-radius:3px;background:rgba(0,0,0,.06);overflow:hidden}
         .macro-bar-fill{height:100%;border-radius:3px;transition:width .6s}
-        .macro-name{font-size:.72rem;color:var(--text2);margin-top:3px}
-        .coll-section{border-top:1px solid rgba(255,255,255,.04);margin-top:12px}
-        .coll-header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer;font-size:.9rem;font-weight:600;color:var(--text2)}
-        .coll-header:hover{color:var(--text)}
+        .macro-name{font-size:.72rem;color:#6B7280;margin-top:3px}
+        .coll-section{border-top:1px solid rgba(0,0,0,.06);margin-top:12px}
+        .coll-header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer;font-size:.9rem;font-weight:600;color:#6B7280}
+        .coll-header:hover{color:#1E2432}
         .coll-arrow{transition:transform .3s;font-size:.7rem}
         .coll-section.open .coll-arrow{transform:rotate(90deg)}
         .coll-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
         .coll-section.open .coll-body{max-height:2000px}
         .micro-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:12px}
-        .micro-item{background:var(--bg2);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,.03)}
+        .micro-item{background:rgba(255,255,255,.4);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,.6)}
         .micro-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
         .micro-name{font-size:.82rem;font-weight:600}
-        .micro-pct{font-size:.75rem;color:var(--text2)}
-        .micro-bar-bg{height:4px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden;margin-bottom:4px}
+        .micro-pct{font-size:.75rem;color:#6B7280}
+        .micro-bar-bg{height:4px;border-radius:2px;background:rgba(0,0,0,.06);overflow:hidden;margin-bottom:4px}
         .micro-bar-fill{height:100%;border-radius:2px}
-        .micro-val{font-size:.72rem;color:var(--text2)}
+        .micro-val{font-size:.72rem;color:#6B7280}
         .meals-section{margin-top:16px}
-        .meal-card{background:var(--bg2);border-radius:14px;padding:14px 16px;margin-bottom:8px;border:1px solid rgba(255,255,255,.03)}
+        .meal-card{background:rgba(255,255,255,.4);border-radius:14px;padding:14px 16px;margin-bottom:8px;border:1px solid rgba(255,255,255,.6)}
         .meal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
         .meal-name{font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px}
-        .meal-kcal{font-size:.82rem;color:var(--text2)}
-        .meal-item{display:flex;justify-content:space-between;padding:4px 0 4px 24px;font-size:.82rem;color:var(--text2)}
+        .meal-kcal{font-size:.82rem;color:#6B7280}
+        .meal-item{display:flex;justify-content:space-between;padding:4px 0 4px 24px;font-size:.82rem;color:#6B7280}
         .meal-item-name{display:flex;align-items:center;gap:6px}
 
         /* REPORT PANEL */
         .report-section{margin-top:8px}
         .report-block{margin-bottom:20px}
-        .report-block-title{font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:10px}
+        .report-block-title{font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;margin-bottom:10px}
         .report-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
-        .report-stat{flex:1;min-width:120px;background:var(--bg2);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,.03);text-align:center}
+        .report-stat{flex:1;min-width:120px;background:rgba(255,255,255,.4);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,.6);text-align:center}
         .report-stat-icon{font-size:1.1rem;margin-bottom:4px}
         .report-stat-val{font-size:1.1rem;font-weight:800}
-        .report-stat-lbl{font-size:.72rem;color:var(--text2);margin-top:2px}
+        .report-stat-lbl{font-size:.72rem;color:#6B7280;margin-top:2px}
         .report-bar{display:flex;align-items:center;gap:10px;margin-bottom:4px}
-        .report-bar-label{font-size:.78rem;color:var(--text2);min-width:80px}
-        .report-bar-bg{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden}
+        .report-bar-label{font-size:.78rem;color:#6B7280;min-width:80px}
+        .report-bar-bg{flex:1;height:5px;border-radius:3px;background:rgba(0,0,0,.06);overflow:hidden}
         .report-bar-fill{height:100%;border-radius:3px;transition:width .6s}
-        .report-bar-val{font-size:.75rem;color:var(--text2);min-width:60px;text-align:right}
+        .report-bar-val{font-size:.75rem;color:#6B7280;min-width:60px;text-align:right}
 
         /* EXPORT BAR */
         .export-bar{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
-        .export-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:11px;border:1px solid rgba(255,255,255,.07);background:var(--card);color:var(--text);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .25s}
-        .export-btn:hover{background:var(--card2);transform:translateY(-1px)}
+        .export-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:11px;border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#1E2432;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+        .export-btn:hover{background:rgba(255,255,255,.8);transform:translateY(-1px)}
         .export-btn svg{width:16px;height:16px}
-        .export-excel:hover{border-color:rgba(16,185,129,.4)}.export-pdf:hover{border-color:rgba(239,68,68,.4)}
+        .export-pdf:hover{border-color:rgba(239,68,68,.4)}
 
         /* PASSWORD SECTION */
-        .section-panel{background:var(--card);border-radius:20px;padding:24px;border:1px solid rgba(255,255,255,.04);margin-bottom:28px}
+        .section-panel{background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;padding:24px;border:1px solid rgba(255,255,255,.7);box-shadow:0 2px 12px rgba(0,0,0,.04);margin-bottom:28px}
         .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
         .panel-title{font-size:1.1rem;font-weight:700}
         .panel-badge{font-size:.76rem;font-weight:600;padding:4px 12px;border-radius:20px;background:rgba(239,68,68,.1);color:var(--red2)}
-        .panel-add-btn{padding:7px 18px;border-radius:9px;border:1px solid rgba(0,212,255,.25);background:rgba(0,212,255,.07);color:var(--cyan);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
-        .panel-add-btn:hover{background:rgba(0,212,255,.14)}
+        .panel-add-btn{padding:7px 18px;border-radius:9px;border:1px solid rgba(74,95,224,.25);background:rgba(74,95,224,.07);color:#4A5FE0;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
+        .panel-add-btn:hover{background:rgba(74,95,224,.14)}
 
         .pwd-list{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto}
-        .pwd-list::-webkit-scrollbar{width:5px}.pwd-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
-        .pwd-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg2);border-radius:13px;border:1px solid rgba(255,255,255,.03);transition:all .2s}
-        .pwd-item:hover{background:var(--card2);border-color:rgba(255,255,255,.06)}
+        .pwd-list::-webkit-scrollbar{width:5px}.pwd-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
+        .pwd-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(255,255,255,.4);border-radius:13px;border:1px solid rgba(255,255,255,.6);transition:all .2s}
+        .pwd-item:hover{background:rgba(255,255,255,.7);border-color:rgba(255,255,255,.8)}
         .pwd-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
         .pwd-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2}
         .pwd-info{flex:1;min-width:0}
         .pwd-for{font-weight:600;font-size:.92rem;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        .pwd-user{font-size:.8rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .pwd-user{font-size:.8rem;color:#6B7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .pwd-pass-row{display:flex;align-items:center;gap:6px;margin-top:4px}
-        .pwd-pass{font-size:.82rem;font-family:monospace;color:var(--text2);letter-spacing:.5px}
+        .pwd-pass{font-size:.82rem;font-family:monospace;color:#6B7280;letter-spacing:.5px}
         .pwd-actions{display:flex;gap:6px;flex-shrink:0}
-        .pwd-act-btn{width:32px;height:32px;border-radius:8px;border:none;background:rgba(255,255,255,.05);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:.8rem}
-        .pwd-act-btn:hover{background:rgba(255,255,255,.1);color:var(--text)}
+        .pwd-act-btn{width:32px;height:32px;border-radius:8px;border:none;background:rgba(0,0,0,.04);color:#6B7280;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:.8rem}
+        .pwd-act-btn:hover{background:rgba(0,0,0,.08);color:#1E2432}
         .pwd-act-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
         .copied-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 24px;border-radius:12px;font-size:.88rem;font-weight:600;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none}
         .copied-toast.show{opacity:1}
 
         /* TASK SECTION — Material Card + ListTile style */
         .task-list{display:flex;flex-direction:column;gap:6px;max-height:500px;overflow-y:auto}
-        .task-list::-webkit-scrollbar{width:5px}.task-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
-        .task-card{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:var(--bg2);border-radius:14px;border:1px solid rgba(255,255,255,.03);transition:all .2s}
-        .task-card:hover{background:var(--card2);border-color:rgba(255,255,255,.06)}
+        .task-list::-webkit-scrollbar{width:5px}.task-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
+        .task-card{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:rgba(255,255,255,.4);border-radius:14px;border:1px solid rgba(255,255,255,.6);transition:all .2s}
+        .task-card:hover{background:rgba(255,255,255,.7);border-color:rgba(255,255,255,.8)}
         .task-badge{padding:4px 10px;border-radius:10px;font-size:.7rem;font-weight:600;white-space:nowrap;flex-shrink:0;margin-top:2px}
         .task-badge.tb-completed{background:rgba(16,185,129,.15);color:var(--green2)}
         .task-badge.tb-working{background:rgba(245,158,11,.15);color:var(--orange2)}
@@ -258,10 +264,10 @@
         .task-body{flex:1;min-width:0}
         .task-title{font-weight:600;font-size:.92rem;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .task-done{text-decoration:line-through;opacity:.5}
-        .task-desc{color:var(--text2);font-size:.8rem;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-        .task-date{font-size:.75rem;color:var(--text2);margin-top:4px}
+        .task-desc{color:#6B7280;font-size:.8rem;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .task-date{font-size:.75rem;color:#6B7280;margin-top:4px}
 
-        .placeholder-text{color:var(--text2);text-align:center;padding:36px 16px;font-size:.9rem}
+        .placeholder-text{color:#6B7280;text-align:center;padding:36px 16px;font-size:.9rem}
 
         /* ══ LANDING LIGHT GLASSMORPHISM THEME ══ */
         #landing-content{background:linear-gradient(170deg,#F2F4F8 0%,#E8ECF5 50%,#F0F2F8 100%);color:#1E2432;min-height:100vh}
@@ -313,7 +319,16 @@
             .food-summary{flex-direction:column;text-align:center}
             .macro-bars{flex-direction:column}
             .report-stats{flex-direction:column}
+            .export-bar{justify-content:center}
+            .section-panel{padding:18px 14px}
+            .date-nav{flex-wrap:wrap;justify-content:center}
         }
+        @media(max-width:400px){
+            .stats-grid{grid-template-columns:1fr}
+            .qstats-grid{grid-template-columns:repeat(2,1fr)}
+            .date-nav{gap:4px}.date-input{min-width:120px;font-size:.82rem}
+        }
+        .dash-main,.section-panel,.features-grid,.highlights-grid{max-width:100%;overflow-x:hidden}
     </style>
 </head>
 <body>
@@ -339,7 +354,7 @@
         <button class="hero-login-btn" id="hero-login-btn">Login / Sign Up</button>
     </section>
     <section id="features">
-        <h2 class="section-title">Everything You Need</h2><p class="section-subtitle">Six powerful modules working together so you can focus on what matters.</p>
+        <h2 class="section-title">Everything You Need</h2><p class="section-subtitle">Seven powerful modules working together so you can focus on what matters.</p>
         <div class="features-grid">
             <div class="feature-card"><div class="feature-icon icon-tasks"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><h3>Task Manager</h3><p>Create, organize, and share tasks. Set reminders, priorities, and never miss a deadline.</p></div>
             <div class="feature-card"><div class="feature-icon icon-passwords"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><h3>Password Manager</h3><p>Store credentials with encryption. Auto-generate strong passwords and keep accounts secure.</p></div>
@@ -347,6 +362,7 @@
             <div class="feature-card"><div class="feature-icon icon-scanner"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><h3>Document Scanner</h3><p>Scan documents, extract text with OCR, create PDFs, and add digital signatures.</p></div>
             <div class="feature-card"><div class="feature-icon icon-qr"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div><h3>QR &amp; Barcode Scanner</h3><p>Scan QR codes and barcodes instantly. Generate your own codes for sharing.</p></div>
             <div class="feature-card"><div class="feature-icon icon-calc"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/></svg></div><h3>Calculator</h3><p>Simple and scientific calculators plus a full unit converter for everyday use.</p></div>
+            <div class="feature-card"><div class="feature-icon icon-translator"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/><path d="M2 16h4"/><path d="M18 16h4"/><path d="M10 16l2-2 2 2"/></svg></div><h3>Voice Translator</h3><p>Translate speech in real time across 20+ languages. Conversation mode for two-way communication.</p></div>
         </div>
     </section>
     <section class="highlights"><div class="highlights-grid">
@@ -476,7 +492,6 @@
         </div>
 
         <div class="export-bar">
-            <button class="export-btn export-excel" id="export-excel"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Export Excel</button>
             <button class="export-btn export-pdf" id="export-pdf"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Export PDF</button>
         </div>
 
@@ -500,13 +515,11 @@
 </div>
 
 <!-- Libraries -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <script>
 function loadScript(src){return new Promise((ok,fail)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=fail;document.head.appendChild(s);})}
 async function ensureLibs(){
-    if(!window.XLSX)try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js')}catch(e){}
     if(!window.jspdf){try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js');await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js')}catch(e){}}
 }
 </script>
@@ -922,11 +935,25 @@ async function ensureLibs(){
             sleepSnap.forEach(d=>{const x=d.data();const dur=(x.wakeTime-x.sleepTime)/60000;if(dur>0){sleepTotal+=dur;sleepDays++;if(dur>=480)sleepGoalMet++;}});
             const sleepAvg=sleepDays?Math.round(sleepTotal/sleepDays):0;
 
+            // Build daily arrays for PDF export
+            const dailyWater=[],dailySteps=[],dailyFood=[],dailySleep=[];
+            const waterMap={};waterSnap.forEach(d=>{const x=d.data();waterMap[d.id]={ml:x.ml||0,goal:x.goalMl||2500};});
+            const stepsMap={};stepsSnap.forEach(d=>{const x=d.data();stepsMap[d.id]={steps:x.steps||0,goal:x.goalSteps||10000};});
+            const sleepMap={};sleepSnap.forEach(d=>{const x=d.data();const dur=(x.wakeTime-x.sleepTime)/60000;if(x.loggedAt){const ld=new Date(x.loggedAt);sleepMap[fmtDate(ld)]={min:dur>0?Math.round(dur):0};}});
+            for(let i=0;i<totalDays;i++){
+                const d=new Date(start);d.setDate(d.getDate()+i);const ds=fmtDate(d);
+                const wm=waterMap[ds];dailyWater.push({date:ds,ml:wm?wm.ml:0,goal:wm?wm.goal:2500});
+                const sm=stepsMap[ds];dailySteps.push({date:ds,steps:sm?sm.steps:0,goal:sm?sm.goal:10000});
+                const fc=foodByDay[ds]||0;const fg=calGoalByDay[ds]||2000;dailyFood.push({date:ds,cal:Math.round(fc),goal:fg});
+                const sl=sleepMap[ds];dailySleep.push({date:ds,min:sl?sl.min:0,goal:480});
+            }
+
             reportData={presentCount,absentCount,rate,currentStreak,bestStreak,totalDays,
                 waterAvg,waterTotal,waterDays,waterGoalMet,
                 stepsAvg,stepsTotal,stepsDays,stepsGoalMet,
                 foodAvg,foodTotal,foodDays,foodGoalMet,
-                sleepAvg,sleepDays,sleepGoalMet};
+                sleepAvg,sleepDays,sleepGoalMet,
+                dailyWater,dailySteps,dailyFood,dailySleep};
 
             $('qs-present').textContent=presentCount;
             $('qs-absent').textContent=absentCount;
@@ -1034,174 +1061,128 @@ async function ensureLibs(){
     function getSleepStr(){if(!dashData.sleep)return'--';const dur=(dashData.sleep.wakeTime-dashData.sleep.sleepTime)/60000;return Math.floor(dur/60)+'h '+Math.round(dur%60)+'m';}
     function getMacroGoals(){const g=goals.calories;return{protein:Math.round(g*.3/4),carbs:Math.round(g*.4/4),fat:Math.round(g*.3/9)};}
 
-    // ═══ EXPORT EXCEL ═══
-    function xlsTable(wb,name,sections){
-        // sections = [{title,headers,rows},...] — each gets its own properly formatted table
-        const data=[];
-        sections.forEach((sec,si)=>{
-            if(si>0)data.push([]);
-            if(sec.title)data.push([sec.title]);
-            if(sec.headers)data.push(sec.headers);
-            if(sec.rows)sec.rows.forEach(r=>data.push(r));
-        });
-        const ws=XLSX.utils.aoa_to_sheet(data);
-        // Auto-size columns
-        const maxCols=data.reduce((m,r)=>Math.max(m,r.length),0);
-        ws['!cols']=Array.from({length:maxCols},(_,ci)=>{
-            let w=10;data.forEach(r=>{if(r[ci]!=null){const l=String(r[ci]).length;if(l>w)w=l;}});
-            return{wch:Math.min(w+4,50)};
-        });
-        XLSX.utils.book_append_sheet(wb,ws,name);
-    }
-
-    $('export-excel').onclick=async()=>{
-        if(!window.XLSX){await ensureLibs();if(!window.XLSX){alert('Could not load Excel library. Check your internet.');return;}}
-        const ds=fmtDate(currentDate);const wb=XLSX.utils.book_new();const mg=getMacroGoals();const bmi=getBmiStr();
-
-        // Sheet 1: Summary
-        const sumSections=[{title:'CoreSync Go Report — '+ds}];
-        if(membership){const s=membership._start,e=membership._end;
-            sumSections.push({title:'MEMBERSHIP',headers:['Field','Value'],rows:[['Plan',membership.plan||''],['Start',s?s.toLocaleDateString():''],['End',e?e.toLocaleDateString():''],['Days Remaining',$('memb-remaining')?.textContent||'']]});}
-        sumSections.push({title:'DAILY STATS',headers:['Metric','Value','Goal','% of Goal'],rows:[
-            ['Steps',dashData.steps,goals.steps,Math.round(dashData.steps/goals.steps*100)+'%'],
-            ['Calories (kcal)',dashData.calories,goals.calories,Math.round(dashData.calories/goals.calories*100)+'%'],
-            ['Water (ml)',dashData.water,goals.water,Math.round(dashData.water/goals.water*100)+'%'],
-            ['Water (glasses)',(dashData.water/250).toFixed(1),(goals.water/250).toFixed(1),''],
-            ['Sleep',getSleepStr(),'8h',''],
-            ['Step kcal',dashData.stepKcal,'',''],['Workout kcal',dashData.workoutKcal,'',''],['Total Burnt',dashData.totalBurnt,'',''],
-            ['Tasks Done',dashData.completedTasks+' / '+dashData.tasks.length,'',''],
-            ...(bmi?[['BMI',bmi,'','']]:[])]});
-        xlsTable(wb,'Summary',sumSections);
-
-        // Sheet 2: Nutrition
-        const nutSections=[{title:'MACRONUTRIENTS',headers:['Nutrient','Consumed','Goal','% of Goal'],rows:[
-            ['Calories',dashData.calories,goals.calories,Math.round(dashData.calories/goals.calories*100)+'%'],
-            ['Protein (g)',Math.round(macros.protein),mg.protein,mg.protein?Math.round(macros.protein/mg.protein*100)+'%':''],
-            ['Carbs (g)',Math.round(macros.carbs),mg.carbs,mg.carbs?Math.round(macros.carbs/mg.carbs*100)+'%':''],
-            ['Fat (g)',Math.round(macros.fat),mg.fat,mg.fat?Math.round(macros.fat/mg.fat*100)+'%':'']]},
-        {title:'MICRONUTRIENTS',headers:['Nutrient','Consumed','Daily Goal','% of Goal'],rows:[
-            ['Fiber',(macros.fiber||0).toFixed(1)+' g','38 g',Math.round((macros.fiber||0)/38*100)+'%'],
-            ['Sugar',(macros.sugar||0).toFixed(1)+' g','25 g',Math.round((macros.sugar||0)/25*100)+'%'],
-            ['Iron',(macros.iron||0).toFixed(1)+' mg','8 mg',Math.round((macros.iron||0)/8*100)+'%'],
-            ['Calcium',(macros.calcium||0).toFixed(1)+' mg','1000 mg',Math.round((macros.calcium||0)/1000*100)+'%'],
-            ['Potassium',(macros.potassium||0).toFixed(1)+' mg','3400 mg',Math.round((macros.potassium||0)/3400*100)+'%'],
-            ['Sodium',(macros.sodium||0).toFixed(1)+' mg','2000 mg',Math.round((macros.sodium||0)/2000*100)+'%'],
-            ['Zinc',(macros.zinc||0).toFixed(1)+' mg','11 mg',Math.round((macros.zinc||0)/11*100)+'%'],
-            ['Magnesium',(macros.magnesium||0).toFixed(1)+' mg','420 mg',Math.round((macros.magnesium||0)/420*100)+'%'],
-            ['Cholesterol',(macros.cholesterol||0).toFixed(1)+' mg','300 mg',Math.round((macros.cholesterol||0)/300*100)+'%']]},
-        {title:'VITAMINS',headers:['Vitamin','Consumed','Daily Goal','% of Goal'],rows:[
-            ['Vitamin A',(macros.vitaminA||0).toFixed(1)+' mcg','900 mcg',Math.round((macros.vitaminA||0)/900*100)+'%'],
-            ['Vitamin B6',(macros.vitaminB6||0).toFixed(1)+' mg','1.7 mg',Math.round((macros.vitaminB6||0)/1.7*100)+'%'],
-            ['Vitamin B12',(macros.vitaminB12||0).toFixed(1)+' mcg','2.4 mcg',Math.round((macros.vitaminB12||0)/2.4*100)+'%'],
-            ['Vitamin C',(macros.vitaminC||0).toFixed(1)+' mg','90 mg',Math.round((macros.vitaminC||0)/90*100)+'%'],
-            ['Vitamin D',(macros.vitaminD||0).toFixed(1)+' mcg','20 mcg',Math.round((macros.vitaminD||0)/20*100)+'%'],
-            ['Vitamin E',(macros.vitaminE||0).toFixed(1)+' mg','15 mg',Math.round((macros.vitaminE||0)/15*100)+'%'],
-            ['Vitamin K',(macros.vitaminK||0).toFixed(1)+' mcg','120 mcg',Math.round((macros.vitaminK||0)/120*100)+'%'],
-            ['Folate',(macros.folate||0).toFixed(1)+' mcg','400 mcg',Math.round((macros.folate||0)/400*100)+'%']]},
-        {title:'MORE MINERALS',headers:['Mineral','Consumed','Daily Goal','% of Goal'],rows:[
-            ['Phosphorus',(macros.phosphorus||0).toFixed(1)+' mg','700 mg',Math.round((macros.phosphorus||0)/700*100)+'%'],
-            ['Selenium',(macros.selenium||0).toFixed(1)+' mcg','55 mcg',Math.round((macros.selenium||0)/55*100)+'%'],
-            ['Manganese',(macros.manganese||0).toFixed(1)+' mg','2.3 mg',Math.round((macros.manganese||0)/2.3*100)+'%']]}];
-        // Meals
-        const mealDefs={breakfast:'Breakfast',morningSnack:'Morning Snack',lunch:'Lunch',eveningSnack:'Evening Snack',dinner:'Dinner'};
-        const mealRows=[];for(const[k,n]of Object.entries(mealDefs)){const items=dashData.foods.filter(f=>f.mealType===k);items.forEach(i=>mealRows.push([n,i.name,Math.round(i.calories)+' kcal']));}
-        if(mealRows.length)nutSections.push({title:'MEALS',headers:['Meal','Food Item','Calories'],rows:mealRows});
-        xlsTable(wb,'Nutrition',nutSections);
-
-        // Sheet 3: Report
-        if(reportData){const r=reportData;const sleepH=Math.floor(r.sleepAvg/60),sleepM=Math.round(r.sleepAvg%60);
-            xlsTable(wb,'Report',[
-                {title:'ATTENDANCE',headers:['Metric','Value'],rows:[['Present',r.presentCount],['Absent',r.absentCount],['Attendance Rate',r.rate+'%'],['Current Streak',r.currentStreak+' days'],['Best Streak',r.bestStreak+' days']]},
-                {title:'WATER INTAKE',headers:['Metric','Value'],rows:[['Avg / Day',(r.waterAvg/250).toFixed(1)+' glasses'],['Total',(r.waterTotal/1000).toFixed(1)+' L'],['Goal Met',r.waterGoalMet+' / '+r.totalDays+' days']]},
-                {title:'STEPS',headers:['Metric','Value'],rows:[['Avg / Day',r.stepsAvg.toLocaleString()],['Total Steps',r.stepsTotal.toLocaleString()],['Goal Met',r.stepsGoalMet+' / '+r.totalDays+' days']]},
-                {title:'FOOD TRACKING',headers:['Metric','Value'],rows:[['Avg / Day',r.foodAvg.toLocaleString()+' kcal'],['Total',r.foodTotal.toLocaleString()+' kcal'],['Days Tracked',r.foodDays+' / '+r.totalDays+' days']]},
-                {title:'SLEEP',headers:['Metric','Value'],rows:[['Avg / Night',sleepH+'h '+sleepM+'m'],['Days Tracked',r.sleepDays+''],['Goal Met (8h)',r.sleepGoalMet+' / '+r.totalDays+' days']]}
-            ]);}
-
-        // Sheet 4: Tasks
-        if(dashData.tasks.length){xlsTable(wb,'Tasks',[{headers:['Title','Description','Status','Due Date'],rows:dashData.tasks.map(t=>[t.title||'',t.description||'',t.status==='completed'?'Completed':t.status==='working'?'Working':'Not Started',t.dueDate?.seconds?new Date(t.dueDate.seconds*1000).toLocaleDateString():''])}]);}
-
-        // Sheet 5: Passwords
-        if(dashData.passwords.length){xlsTable(wb,'Passwords',[{headers:['Service','Username'],rows:dashData.passwords.map(p=>[p.passwordFor,p.username])}]);}
-
-        XLSX.writeFile(wb,'CoreSync_Go_Report_'+ds+'.xlsx');
-    };
-
-    // ═══ EXPORT PDF ═══
+    // ═══ EXPORT PDF (matches app report_pdf_service.dart) ═══
     $('export-pdf').onclick=async()=>{
         if(!window.jspdf){await ensureLibs();if(!window.jspdf){alert('Could not load PDF library. Check your internet.');return;}}
-        const{jsPDF}=window.jspdf;const pdf=new jsPDF();const ds=fmtDate(currentDate);const mg=getMacroGoals();
-        const dd=currentDate.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-        const tblHead={fillColor:[30,30,50],textColor:[0,212,255]};const tblStyle={fontSize:9,cellPadding:4};const marg={left:20,right:20};
+        if(!reportData){alert('Report data not loaded yet. Please wait for dashboard to load.');return;}
+        const{jsPDF}=window.jspdf;const pdf=new jsPDF();const r=reportData;
+        const marg={left:20,right:20};const tblStyle={fontSize:9,cellPadding:4};
+        const userName=userProfile.displayName||userProfile.firstName||($('user-email')?.textContent||'').split('@')[0]||'User';
+        const startStr=membership?membership._start.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'';
+        const todayStr=new Date().toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
+        const dateRange=startStr?startStr+' - '+todayStr:todayStr;
+        // Colors matching app: attend=orange, water=blue, steps=teal, food=green, sleep=indigo
+        const C={header:[26,26,46],attend:[255,152,0],water:[33,150,243],steps:[0,150,136],food:[76,175,80],sleep:[63,81,181],membership:[98,0,234]};
+        const fmtK=v=>v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(1)+'K':v.toLocaleString();
+        const pct=(met,total)=>total>0?Math.round(met/total*100)+'%':'0%';
+        const sleepH=Math.floor(r.sleepAvg/60),sleepM=Math.round(r.sleepAvg%60);
 
-        // Header
-        pdf.setFillColor(15,15,26);pdf.rect(0,0,210,38,'F');pdf.setTextColor(0,212,255);pdf.setFontSize(20);pdf.setFont(undefined,'bold');pdf.text('CoreSync Go',20,20);
-        pdf.setFontSize(9);pdf.setTextColor(160,160,184);pdf.text('Daily Wellness & Productivity Report',20,30);pdf.setTextColor(240,240,245);pdf.text(dd,190,24,{align:'right'});
-
-        // Membership
-        let y=48;
-        if(membership){pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Membership',20,y);y+=6;
-            const ms=membership._start,me=membership._end;
-            pdf.autoTable({startY:y,body:[['Plan',membership.plan||''],['Start',ms?ms.toLocaleDateString():''],['End',me?me.toLocaleDateString():''],['Days Remaining',$('memb-remaining')?.textContent||'']],theme:'plain',styles:{fontSize:9,cellPadding:3},columnStyles:{0:{fontStyle:'bold',cellWidth:40}},margin:marg});
-            y=pdf.lastAutoTable.finalY+8;}
-
-        // Daily Summary
-        pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Daily Summary',20,y);y+=6;
-        const stats=[['Steps',dashData.steps.toLocaleString(),goals.steps.toLocaleString()],['Calories',dashData.calories.toLocaleString(),goals.calories.toLocaleString()],['Water (ml)',dashData.water.toLocaleString(),goals.water.toLocaleString()],['Water (glasses)',(dashData.water/250).toFixed(1),''],['Sleep',getSleepStr(),'8h'],['Step kcal',dashData.stepKcal.toLocaleString(),''],['Workout kcal',dashData.workoutKcal.toLocaleString(),''],['Total Burnt',dashData.totalBurnt.toLocaleString(),''],['Tasks Done',dashData.completedTasks+'/'+dashData.tasks.length,'']];
-        const bmi=getBmiStr();if(bmi)stats.push(['BMI',bmi,'']);
-        pdf.autoTable({startY:y,head:[['Metric','Value','Goal']],body:stats,theme:'grid',headStyles:tblHead,styles:tblStyle,margin:marg});
-
-        // Macros
-        y=pdf.lastAutoTable.finalY+10;pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Macronutrients',20,y);y+=6;
-        pdf.autoTable({startY:y,head:[['Nutrient','Consumed','Goal']],body:[['Protein',Math.round(macros.protein)+'g',mg.protein+'g'],['Carbs',Math.round(macros.carbs)+'g',mg.carbs+'g'],['Fat',Math.round(macros.fat)+'g',mg.fat+'g']],theme:'grid',headStyles:tblHead,styles:tblStyle,margin:marg});
-
-        // Micronutrients
-        y=pdf.lastAutoTable.finalY+10;pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Micronutrients',20,y);y+=6;
-        const microRows=[['Fiber',(macros.fiber||0).toFixed(1)+'g','38g'],['Sugar',(macros.sugar||0).toFixed(1)+'g','25g'],['Iron',(macros.iron||0).toFixed(1)+'mg','8mg'],['Calcium',(macros.calcium||0).toFixed(1)+'mg','1000mg'],['Potassium',(macros.potassium||0).toFixed(1)+'mg','3400mg'],['Sodium',(macros.sodium||0).toFixed(1)+'mg','2000mg'],['Zinc',(macros.zinc||0).toFixed(1)+'mg','11mg'],['Magnesium',(macros.magnesium||0).toFixed(1)+'mg','420mg'],['Cholesterol',(macros.cholesterol||0).toFixed(1)+'mg','300mg']];
-        pdf.autoTable({startY:y,head:[['Nutrient','Consumed','Daily Goal']],body:microRows,theme:'striped',headStyles:{fillColor:[30,30,50],textColor:[16,185,129]},styles:tblStyle,margin:marg});
-
-        // Vitamins
-        y=pdf.lastAutoTable.finalY+10;pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Vitamins',20,y);y+=6;
-        const vitRows=[['Vitamin A',(macros.vitaminA||0).toFixed(1)+'mcg','900mcg'],['Vitamin B6',(macros.vitaminB6||0).toFixed(1)+'mg','1.7mg'],['Vitamin B12',(macros.vitaminB12||0).toFixed(1)+'mcg','2.4mcg'],['Vitamin C',(macros.vitaminC||0).toFixed(1)+'mg','90mg'],['Vitamin D',(macros.vitaminD||0).toFixed(1)+'mcg','20mcg'],['Vitamin E',(macros.vitaminE||0).toFixed(1)+'mg','15mg'],['Vitamin K',(macros.vitaminK||0).toFixed(1)+'mcg','120mcg'],['Folate',(macros.folate||0).toFixed(1)+'mcg','400mcg']];
-        pdf.autoTable({startY:y,head:[['Vitamin','Consumed','Daily Goal']],body:vitRows,theme:'striped',headStyles:{fillColor:[30,30,50],textColor:[245,158,11]},styles:tblStyle,margin:marg});
-
-        // More Minerals
-        y=pdf.lastAutoTable.finalY+10;pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('More Minerals',20,y);y+=6;
-        pdf.autoTable({startY:y,head:[['Mineral','Consumed','Daily Goal']],body:[['Phosphorus',(macros.phosphorus||0).toFixed(1)+'mg','700mg'],['Selenium',(macros.selenium||0).toFixed(1)+'mcg','55mcg'],['Manganese',(macros.manganese||0).toFixed(1)+'mg','2.3mg']],theme:'striped',headStyles:{fillColor:[30,30,50],textColor:[139,92,246]},styles:tblStyle,margin:marg});
-
-        // Meals
-        if(dashData.foods.length){y=pdf.lastAutoTable.finalY+10;pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Meals',20,y);y+=6;
-            const meals={breakfast:'Breakfast',morningSnack:'Morning Snack',lunch:'Lunch',eveningSnack:'Evening Snack',dinner:'Dinner'};
-            const mealRows=[];for(const[k,n]of Object.entries(meals)){const items=dashData.foods.filter(f=>f.mealType===k);const mc=Math.round(items.reduce((s,i)=>s+i.calories,0));mealRows.push([n,mc+' kcal',items.map(i=>i.name+' ('+Math.round(i.calories)+')').join(', ')||'-']);}
-            pdf.autoTable({startY:y,head:[['Meal','Calories','Items']],body:mealRows,theme:'grid',headStyles:tblHead,styles:tblStyle,columnStyles:{2:{cellWidth:90}},margin:marg});}
-
-        // Report
-        if(reportData){const r=reportData;const sleepH=Math.floor(r.sleepAvg/60),sleepM=Math.round(r.sleepAvg%60);
-            pdf.addPage();pdf.setFillColor(15,15,26);pdf.rect(0,0,210,30,'F');pdf.setTextColor(0,212,255);pdf.setFontSize(16);pdf.setFont(undefined,'bold');pdf.text('Report Analytics',20,20);
-            y=40;
-            pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Attendance',20,y);y+=6;
-            pdf.autoTable({startY:y,body:[['Present',r.presentCount],['Absent',r.absentCount],['Attendance Rate',r.rate+'%'],['Current Streak',r.currentStreak+' days'],['Best Streak',r.bestStreak+' days']],theme:'plain',styles:{fontSize:9,cellPadding:3},columnStyles:{0:{fontStyle:'bold',cellWidth:45}},margin:marg});
-
-            y=pdf.lastAutoTable.finalY+10;pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Water Intake',20,y);y+=6;
-            pdf.autoTable({startY:y,body:[['Avg / Day',(r.waterAvg/250).toFixed(1)+' glasses'],['Total',(r.waterTotal/1000).toFixed(1)+' L'],['Goal Met',r.waterGoalMet+' / '+r.totalDays+' days']],theme:'plain',styles:{fontSize:9,cellPadding:3},columnStyles:{0:{fontStyle:'bold',cellWidth:45}},margin:marg});
-
-            y=pdf.lastAutoTable.finalY+10;pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Steps',20,y);y+=6;
-            pdf.autoTable({startY:y,body:[['Avg / Day',r.stepsAvg.toLocaleString()],['Total Steps',r.stepsTotal.toLocaleString()],['Goal Met',r.stepsGoalMet+' / '+r.totalDays+' days']],theme:'plain',styles:{fontSize:9,cellPadding:3},columnStyles:{0:{fontStyle:'bold',cellWidth:45}},margin:marg});
-
-            y=pdf.lastAutoTable.finalY+10;pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Food Tracking',20,y);y+=6;
-            pdf.autoTable({startY:y,body:[['Avg / Day',r.foodAvg.toLocaleString()+' kcal'],['Total',r.foodTotal.toLocaleString()+' kcal'],['Days Tracked',r.foodDays+' / '+r.totalDays+' days']],theme:'plain',styles:{fontSize:9,cellPadding:3},columnStyles:{0:{fontStyle:'bold',cellWidth:45}},margin:marg});
-
-            y=pdf.lastAutoTable.finalY+10;pdf.setFontSize(12);pdf.setTextColor(30,30,50);pdf.text('Sleep',20,y);y+=6;
-            pdf.autoTable({startY:y,body:[['Avg / Night',sleepH+'h '+sleepM+'m'],['Days Tracked',r.sleepDays+''],['Goal Met (8h)',r.sleepGoalMet+' / '+r.totalDays+' days']],theme:'plain',styles:{fontSize:9,cellPadding:3},columnStyles:{0:{fontStyle:'bold',cellWidth:45}},margin:marg});
+        // ── Section header helper (colored rounded banner) ──
+        function sectionBanner(title,color,yPos){
+            if(yPos>255){pdf.addPage();yPos=20;}
+            pdf.setFillColor(...color);pdf.roundedRect(20,yPos,170,10,3,3,'F');
+            pdf.setFontSize(11);pdf.setFont(undefined,'bold');pdf.setTextColor(255,255,255);
+            pdf.text(title,26,yPos+7);return yPos+16;
+        }
+        // ── Stat boxes helper (bordered boxes) ──
+        function statBoxes(boxes,yPos){
+            if(yPos>250){pdf.addPage();yPos=20;}
+            const w=Math.floor(170/boxes.length)-2;
+            boxes.forEach((b,i)=>{
+                const x=20+i*(w+3);
+                pdf.setDrawColor(200,200,200);pdf.setLineWidth(0.3);pdf.roundedRect(x,yPos,w,18,2,2,'S');
+                pdf.setFontSize(11);pdf.setFont(undefined,'bold');pdf.setTextColor(b.accent?b.accent[0]:51,b.accent?b.accent[1]:51,b.accent?b.accent[2]:51);
+                pdf.text(b.value,x+4,yPos+8);
+                pdf.setFontSize(7);pdf.setFont(undefined,'normal');pdf.setTextColor(136,136,136);
+                pdf.text(b.label,x+4,yPos+14);
+            });
+            return yPos+24;
+        }
+        // ── Daily table helper (colored header, Date/Value) ──
+        function dailyDataTable(data,color,formatFn,yPos){
+            if(yPos>250){pdf.addPage();yPos=20;}
+            const reversed=[...data].reverse();
+            pdf.autoTable({startY:yPos,head:[['Date','Value']],
+                body:reversed.map(e=>[e.date,formatFn(e)]),
+                theme:'grid',headStyles:{fillColor:color,textColor:[255,255,255],fontStyle:'bold',fontSize:9},
+                styles:{fontSize:8,cellPadding:3},
+                columnStyles:{0:{cellWidth:50}},margin:marg});
+            return pdf.lastAutoTable.finalY+10;
         }
 
-        // Tasks
-        if(dashData.tasks.length){pdf.addPage();pdf.setFillColor(15,15,26);pdf.rect(0,0,210,30,'F');pdf.setTextColor(168,85,247);pdf.setFontSize(16);pdf.setFont(undefined,'bold');pdf.text('Tasks',20,20);
-            pdf.autoTable({startY:38,head:[['Task','Status','Due']],body:dashData.tasks.map(t=>[t.title||'',t.status==='completed'?'Completed':t.status==='working'?'Working':'Not Started',t.dueDate?.seconds?new Date(t.dueDate.seconds*1000).toLocaleDateString():'-']),theme:'striped',headStyles:{fillColor:[30,30,50],textColor:[168,85,247]},styles:tblStyle,columnStyles:{0:{cellWidth:90}},margin:marg});}
+        // ══════ PAGE HEADER (dark navy banner) ══════
+        pdf.setFillColor(...C.header);pdf.roundedRect(20,12,170,28,4,4,'F');
+        pdf.setFontSize(18);pdf.setFont(undefined,'bold');pdf.setTextColor(255,255,255);pdf.text('CoreSync Go Fitness Report',26,26);
+        pdf.setFontSize(10);pdf.setFont(undefined,'normal');pdf.setTextColor(200,200,220);pdf.text(userName,26,34);
+        pdf.text(dateRange,184,34,{align:'right'});
 
-        // Footer on all pages
-        const pc=pdf.internal.getNumberOfPages();for(let i=1;i<=pc;i++){pdf.setPage(i);pdf.setFontSize(7);pdf.setTextColor(160,160,184);pdf.text('Generated by CoreSync Go',20,287);pdf.text('Page '+i+'/'+pc,190,287,{align:'right'});}
-        pdf.save('CoreSync_Go_Report_'+ds+'.pdf');
+        let y=50;
+
+        // ── Attendance Summary ──
+        y=sectionBanner('Attendance Summary',C.attend,y);
+        y=statBoxes([
+            {label:'Present Days',value:''+r.presentCount,accent:[76,175,80]},
+            {label:'Absent Days',value:''+r.absentCount,accent:[244,67,54]},
+            {label:'Attendance Rate',value:r.rate+'%',accent:C.attend},
+            {label:'Current Streak',value:r.currentStreak+' days',accent:C.attend}
+        ],y);
+        y=statBoxes([
+            {label:'Best Streak',value:r.bestStreak+' days',accent:[255,193,7]},
+            {label:'Total Days',value:''+r.totalDays,accent:[100,100,100]}
+        ],y);
+
+        // ── Membership ──
+        if(membership){
+            y=sectionBanner('Membership',C.membership,y);
+            const ms=membership._start,me=membership._end;
+            y=statBoxes([
+                {label:'Plan',value:membership.plan||'--'},
+                {label:'Start',value:ms?ms.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):''},
+                {label:'End',value:me?me.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):''},
+                {label:'Days Left',value:($('memb-remaining')?.textContent||'').replace(' days remaining','')}
+            ],y);
+        }
+
+        // ── Water Intake ──
+        y=sectionBanner('Water Intake',C.water,y);
+        y=statBoxes([
+            {label:'Avg / Day',value:(r.waterAvg/250).toFixed(1)+' glasses',accent:C.water},
+            {label:'Total',value:r.waterTotal>=1000?(r.waterTotal/1000).toFixed(1)+'L':r.waterTotal+'ml',accent:C.water},
+            {label:'Goal Met',value:r.waterGoalMet+' / '+r.totalDays+' days ('+pct(r.waterGoalMet,r.totalDays)+')',accent:C.water}
+        ],y);
+        y=dailyDataTable(r.dailyWater,C.water,e=>(e.ml/250).toFixed(1)+' / '+(e.goal/250).toFixed(1)+' glasses',y);
+
+        // ── Steps ──
+        y=sectionBanner('Steps',C.steps,y);
+        y=statBoxes([
+            {label:'Avg / Day',value:fmtK(r.stepsAvg),accent:C.steps},
+            {label:'Total',value:fmtK(r.stepsTotal),accent:C.steps},
+            {label:'Goal Met',value:r.stepsGoalMet+' / '+r.totalDays+' days ('+pct(r.stepsGoalMet,r.totalDays)+')',accent:C.steps}
+        ],y);
+        y=dailyDataTable(r.dailySteps,C.steps,e=>e.steps+' / '+e.goal,y);
+
+        // ── Food Tracking ──
+        y=sectionBanner('Food Tracking',C.food,y);
+        y=statBoxes([
+            {label:'Avg / Day',value:r.foodAvg+' kcal',accent:C.food},
+            {label:'Total',value:fmtK(r.foodTotal)+' kcal',accent:C.food},
+            {label:'Goal Met',value:r.foodGoalMet+' / '+r.totalDays+' days ('+pct(r.foodGoalMet,r.totalDays)+')',accent:C.food}
+        ],y);
+        y=dailyDataTable(r.dailyFood,C.food,e=>e.cal+' / '+e.goal+' kcal',y);
+
+        // ── Sleep ──
+        y=sectionBanner('Sleep',C.sleep,y);
+        y=statBoxes([
+            {label:'Avg / Night',value:sleepH+'h '+sleepM+'m',accent:C.sleep},
+            {label:'Days Tracked',value:''+r.sleepDays,accent:C.sleep},
+            {label:'Goal Met (8h)',value:r.sleepGoalMet+' / '+r.totalDays+' days ('+pct(r.sleepGoalMet,r.totalDays)+')',accent:C.sleep}
+        ],y);
+        y=dailyDataTable(r.dailySleep,C.sleep,e=>e.min>0?(Math.floor(e.min/60)+'h '+Math.round(e.min%60)+'m / '+(e.goal/60)+'h'):('- / '+(e.goal/60)+'h'),y);
+
+        // ── Footer on all pages ──
+        const pc=pdf.internal.getNumberOfPages();
+        for(let i=1;i<=pc;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(150,150,150);pdf.text('Page '+i+' of '+pc,190,287,{align:'right'});}
+        pdf.save('CoreSync_Go_Fitness_Report.pdf');
     };
 
     function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
