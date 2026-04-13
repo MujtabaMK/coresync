@@ -376,9 +376,14 @@
             .date-nav{gap:4px}.date-input{min-width:120px;font-size:.82rem}
         }
         .dash-main,.section-panel,.features-grid,.highlights-grid{max-width:100%;overflow-x:hidden}
+        /* ── APPLE-STYLE SCROLL ANIMATIONS ── */
+        [data-scroll]{opacity:0;will-change:transform,opacity}
+        [data-scroll="fade-up"]{transform:translateY(60px)}
+        [data-scroll="scale-in"]{transform:scale(.8)}
+        [data-scroll="fade-in"]{transform:none}
+        [data-scroll].is-visible{opacity:1;transform:none;transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
+        .hero-parallax{transition:none}
     </style>
-    <!-- AOS — Animate on Scroll -->
-    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
 </head>
 <body>
 
@@ -402,24 +407,24 @@
         </div>
     </section>
     <section id="features">
-        <h2 class="section-title" data-aos="fade-up" data-aos-duration="600">Everything You Need</h2><p class="section-subtitle" data-aos="fade-up" data-aos-delay="100" data-aos-duration="600">Seven powerful modules working together so you can focus on what matters.</p>
+        <h2 class="section-title" data-scroll="fade-up">Everything You Need</h2><p class="section-subtitle" data-scroll="fade-up" style="transition-delay:.12s">Seven powerful modules working together so you can focus on what matters.</p>
         <div class="features-grid">
-            <div class="feature-card" data-aos="fade-up" data-aos-delay="100"><div class="feature-icon icon-tasks"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><h3>Task Manager</h3><p>Create, organize, and share tasks. Set reminders, priorities, and never miss a deadline.</p></div>
-            <div class="feature-card" data-aos="fade-up" data-aos-delay="200"><div class="feature-icon icon-passwords"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><h3>Password Manager</h3><p>Store credentials with encryption. Auto-generate strong passwords and keep accounts secure.</p></div>
-            <div class="feature-card" data-aos="fade-up" data-aos-delay="300"><div class="feature-icon icon-gym"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div><h3>Gym &amp; Fitness</h3><p>Track steps, water, workouts, sleep, and food. Set reminders and monitor your progress.</p></div>
-            <div class="feature-card" data-aos="fade-up" data-aos-delay="400"><div class="feature-icon icon-scanner"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><h3>Document Scanner</h3><p>Scan documents, extract text with OCR, create PDFs, and add digital signatures.</p></div>
-            <div class="feature-card" data-aos="fade-up" data-aos-delay="500"><div class="feature-icon icon-qr"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div><h3>QR &amp; Barcode Scanner</h3><p>Scan QR codes and barcodes instantly. Generate your own codes for sharing.</p></div>
-            <div class="feature-card" data-aos="fade-up" data-aos-delay="600"><div class="feature-icon icon-calc"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/></svg></div><h3>Calculator</h3><p>Simple and scientific calculators plus a full unit converter for everyday use.</p></div>
-            <div class="feature-card" data-aos="fade-up" data-aos-delay="700"><div class="feature-icon icon-translator"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/><path d="M2 16h4"/><path d="M18 16h4"/><path d="M10 16l2-2 2 2"/></svg></div><h3>Voice Translator</h3><p>Translate speech in real time across 20+ languages. Conversation mode for two-way communication.</p></div>
+            <div class="feature-card" data-scroll="fade-up" style="transition-delay:0s"><div class="feature-icon icon-tasks"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><h3>Task Manager</h3><p>Create, organize, and share tasks. Set reminders, priorities, and never miss a deadline.</p></div>
+            <div class="feature-card" data-scroll="fade-up" style="transition-delay:.12s"><div class="feature-icon icon-passwords"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><h3>Password Manager</h3><p>Store credentials with encryption. Auto-generate strong passwords and keep accounts secure.</p></div>
+            <div class="feature-card" data-scroll="fade-up" style="transition-delay:.24s"><div class="feature-icon icon-gym"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div><h3>Gym &amp; Fitness</h3><p>Track steps, water, workouts, sleep, and food. Set reminders and monitor your progress.</p></div>
+            <div class="feature-card" data-scroll="fade-up" style="transition-delay:.36s"><div class="feature-icon icon-scanner"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><h3>Document Scanner</h3><p>Scan documents, extract text with OCR, create PDFs, and add digital signatures.</p></div>
+            <div class="feature-card" data-scroll="fade-up" style="transition-delay:.48s"><div class="feature-icon icon-qr"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div><h3>QR &amp; Barcode Scanner</h3><p>Scan QR codes and barcodes instantly. Generate your own codes for sharing.</p></div>
+            <div class="feature-card" data-scroll="fade-up" style="transition-delay:.6s"><div class="feature-icon icon-calc"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/></svg></div><h3>Calculator</h3><p>Simple and scientific calculators plus a full unit converter for everyday use.</p></div>
+            <div class="feature-card" data-scroll="fade-up" style="transition-delay:.72s"><div class="feature-icon icon-translator"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/><path d="M2 16h4"/><path d="M18 16h4"/><path d="M10 16l2-2 2 2"/></svg></div><h3>Voice Translator</h3><p>Translate speech in real time across 20+ languages. Conversation mode for two-way communication.</p></div>
         </div>
     </section>
     <section class="highlights"><div class="highlights-grid">
-        <div class="highlight-item" data-aos="zoom-in" data-aos-delay="100" data-aos-duration="500"><div class="highlight-icon">&#9729;</div><h4>Cloud Sync</h4><p>Your data, everywhere. Seamlessly synced in real time.</p></div>
-        <div class="highlight-item" data-aos="zoom-in" data-aos-delay="200" data-aos-duration="500"><div class="highlight-icon">&#128274;</div><h4>Encrypted &amp; Secure</h4><p>Industry-standard encryption for passwords and data.</p></div>
-        <div class="highlight-item" data-aos="zoom-in" data-aos-delay="300" data-aos-duration="500"><div class="highlight-icon">&#127912;</div><h4>Material 3 Design</h4><p>Modern interface following Material You guidelines.</p></div>
-        <div class="highlight-item" data-aos="zoom-in" data-aos-delay="400" data-aos-duration="500"><div class="highlight-icon">&#127761;</div><h4>Dark Mode</h4><p>Easy on the eyes with light and dark themes.</p></div>
+        <div class="highlight-item" data-scroll="scale-in" style="transition-delay:0s"><div class="highlight-icon">&#9729;</div><h4>Cloud Sync</h4><p>Your data, everywhere. Seamlessly synced in real time.</p></div>
+        <div class="highlight-item" data-scroll="scale-in" style="transition-delay:.15s"><div class="highlight-icon">&#128274;</div><h4>Encrypted &amp; Secure</h4><p>Industry-standard encryption for passwords and data.</p></div>
+        <div class="highlight-item" data-scroll="scale-in" style="transition-delay:.3s"><div class="highlight-icon">&#127912;</div><h4>Material 3 Design</h4><p>Modern interface following Material You guidelines.</p></div>
+        <div class="highlight-item" data-scroll="scale-in" style="transition-delay:.45s"><div class="highlight-icon">&#127761;</div><h4>Dark Mode</h4><p>Easy on the eyes with light and dark themes.</p></div>
     </div></section>
-    <footer data-aos="fade-up" data-aos-duration="400"><nav class="footer-links"><a href="privacy-policy.html">Privacy Policy</a><a href="delete-account.html">Delete Account</a><a href="mailto:info@coresyncgo.com">Contact</a></nav><p class="copyright">&copy; 2026 CoreSync Go. All rights reserved.</p></footer>
+    <footer data-scroll="fade-up"><nav class="footer-links"><a href="privacy-policy.html">Privacy Policy</a><a href="delete-account.html">Delete Account</a><a href="mailto:info@coresyncgo.com">Contact</a></nav><p class="copyright">&copy; 2026 CoreSync Go. All rights reserved.</p></footer>
 </div>
 
 <!-- ═══ LOGIN MODAL ═══ -->
@@ -1612,8 +1617,40 @@ async function ensureLibs(){
 
     function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 </script>
-<!-- AOS Library -->
-<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-<script>AOS.init({once:true,duration:600,easing:'ease-out-cubic',offset:150});</script>
+<!-- Apple-style scroll animations -->
+<script>
+(function(){
+  // 1. IntersectionObserver for scroll-triggered reveals
+  const io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('is-visible');
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:0.12,rootMargin:'0px 0px -60px 0px'});
+  document.querySelectorAll('[data-scroll]').forEach(function(el){io.observe(el);});
+
+  // 2. Hero parallax fade on scroll (Apple signature effect)
+  var hero=document.querySelector('.hero');
+  var heroH=hero?hero.offsetHeight:500;
+  var ticking=false;
+  function onScroll(){
+    if(!ticking){
+      ticking=true;
+      requestAnimationFrame(function(){
+        var y=window.scrollY;
+        if(hero&&y<heroH){
+          var p=y/heroH;// 0→1 as hero scrolls away
+          hero.style.opacity=1-p*1.2;
+          hero.style.transform='translateY('+y*0.35+'px) scale('+(1-p*0.06)+')';
+        }
+        ticking=false;
+      });
+    }
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+})();
+</script>
 </body>
 </html>
