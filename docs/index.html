@@ -98,7 +98,7 @@
         .feature-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
         .feature-card h3{font-size:1.2rem;margin-bottom:8px}
         .feature-card p{color:var(--text2);font-size:.95rem}
-        .icon-tasks{background:linear-gradient(135deg,#3B82F6,#60A5FA)}.icon-passwords{background:linear-gradient(135deg,#EF4444,#F87171)}.icon-gym{background:linear-gradient(135deg,#10B981,#34D399)}.icon-scanner{background:linear-gradient(135deg,#F59E0B,#FBBF24)}.icon-qr{background:linear-gradient(135deg,#8B5CF6,#A78BFA)}.icon-calc{background:linear-gradient(135deg,#EC4899,#F472B6)}.icon-translator{background:linear-gradient(135deg,#06B6D4,#22D3EE)}
+        .icon-tasks{background:linear-gradient(135deg,#3B82F6,#60A5FA)}.icon-passwords{background:linear-gradient(135deg,#EF4444,#F87171)}.icon-gym{background:linear-gradient(135deg,#10B981,#34D399)}.icon-scanner{background:linear-gradient(135deg,#F59E0B,#FBBF24)}.icon-qr{background:linear-gradient(135deg,#8B5CF6,#A78BFA)}.icon-calc{background:linear-gradient(135deg,#EC4899,#F472B6)}.icon-translator{background:linear-gradient(135deg,#06B6D4,#22D3EE)}.icon-habits{background:linear-gradient(135deg,#F97316,#FB923C)}
         .highlights{background:var(--bg2);border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)}
         .highlights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;max-width:960px;margin:0 auto;text-align:center}
         .highlight-item{display:flex;flex-direction:column;align-items:center;gap:12px}
@@ -316,6 +316,33 @@
 
         .placeholder-text{color:#6B7280;text-align:center;padding:36px 16px;font-size:.9rem}
 
+        /* HABIT SECTION */
+        .habit-list{display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto}
+        .habit-list::-webkit-scrollbar{width:5px}.habit-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
+        .habit-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(255,255,255,.4);border-radius:14px;border:1px solid rgba(255,255,255,.6);transition:all .2s}
+        .habit-card:hover{background:rgba(255,255,255,.7);border-color:rgba(255,255,255,.8)}
+        .habit-icon-big{font-size:1.8rem;flex-shrink:0;width:44px;text-align:center}
+        .habit-info{flex:1;min-width:0}
+        .habit-name{font-weight:600;font-size:.92rem;line-height:1.35}
+        .habit-meta{font-size:.78rem;color:#6B7280;margin-top:2px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+        .habit-streak{display:inline-flex;align-items:center;gap:3px;color:var(--orange)}
+        .habit-check-btn{width:36px;height:36px;border-radius:50%;border:2px solid rgba(0,0,0,.12);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;font-size:1rem}
+        .habit-check-btn.checked{background:var(--green);border-color:var(--green);color:#fff}
+        .habit-check-btn:hover{border-color:var(--green)}
+        .habit-actions{display:flex;gap:6px;flex-shrink:0}
+        .habit-act-btn{width:32px;height:32px;border-radius:8px;border:none;background:rgba(0,0,0,.04);color:#6B7280;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+        .habit-act-btn:hover{background:rgba(0,0,0,.08);color:#1E2432}
+        .habit-act-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+        .habit-days-row{display:flex;gap:4px;margin-top:6px}
+        .habit-day-chip{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#6B7280;cursor:pointer;transition:all .2s}
+        .habit-day-chip.active{background:rgba(74,95,224,.12);border-color:rgba(74,95,224,.3);color:#4A5FE0}
+        .form-label{font-size:.82rem;font-weight:600;color:#6B7280;margin-bottom:4px;display:block}
+        .form-time-row{display:flex;gap:8px;align-items:center}
+        .form-time-row input{width:70px;text-align:center}
+        .form-switch{display:flex;align-items:center;gap:10px;margin:10px 0}
+        .form-switch label{font-size:.85rem;color:#6B7280;cursor:pointer}
+        .form-switch input[type="checkbox"]{width:18px;height:18px;accent-color:#4A5FE0;cursor:pointer}
+
         /* ══ LANDING LIGHT GLASSMORPHISM THEME ══ */
         #landing-content{background:linear-gradient(170deg,#F2F4F8 0%,#E8ECF5 50%,#F0F2F8 100%);color:#1E2432;min-height:100vh}
         #landing-content .top-nav{background:rgba(255,255,255,.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.06)}
@@ -398,7 +425,7 @@
         </div>
     </section>
     <section id="features">
-        <h2 class="section-title">Everything You Need</h2><p class="section-subtitle">Seven powerful modules working together so you can focus on what matters.</p>
+        <h2 class="section-title">Everything You Need</h2><p class="section-subtitle">Eight powerful modules working together so you can focus on what matters.</p>
         <div class="features-grid">
             <div class="feature-card"><div class="feature-icon icon-tasks"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><h3>Task Manager</h3><p>Create, organize, and share tasks. Set reminders, priorities, and never miss a deadline.</p></div>
             <div class="feature-card"><div class="feature-icon icon-passwords"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><h3>Password Manager</h3><p>Store credentials with encryption. Auto-generate strong passwords and keep accounts secure.</p></div>
@@ -406,6 +433,7 @@
             <div class="feature-card"><div class="feature-icon icon-scanner"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><h3>Document Scanner</h3><p>Scan documents, extract text with OCR, create PDFs, and add digital signatures.</p></div>
             <div class="feature-card"><div class="feature-icon icon-qr"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div><h3>QR &amp; Barcode Scanner</h3><p>Scan QR codes and barcodes instantly. Generate your own codes for sharing.</p></div>
             <div class="feature-card"><div class="feature-icon icon-calc"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/></svg></div><h3>Calculator</h3><p>Simple and scientific calculators plus a full unit converter for everyday use.</p></div>
+            <div class="feature-card"><div class="feature-icon icon-habits"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div><h3>Habit Tracker</h3><p>Build positive habits with daily tracking, streaks, reminders, and weekly progress insights.</p></div>
             <div class="feature-card"><div class="feature-icon icon-translator"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/><path d="M2 16h4"/><path d="M18 16h4"/><path d="M10 16l2-2 2 2"/></svg></div><h3>Voice Translator</h3><p>Translate speech in real time across 20+ languages. Conversation mode for two-way communication.</p></div>
         </div>
     </section>
@@ -447,6 +475,36 @@
 
 <!-- Copied toast -->
 <div class="copied-toast" id="copied-toast">Copied!</div>
+
+<!-- ═══ HABIT ADD/EDIT MODAL ═══ -->
+<div id="habit-modal" class="modal-overlay"><div class="modal">
+    <button class="modal-close" id="habit-modal-close">&times;</button>
+    <h2 class="modal-title" id="habit-modal-title">Add Habit</h2>
+    <div id="habit-error" class="form-error"></div>
+    <form id="habit-form" novalidate>
+        <div class="form-group"><label class="form-label">Name</label><input type="text" id="habit-name" class="form-input" placeholder="e.g. Drink Water" required></div>
+        <div class="form-group"><label class="form-label">Icon (emoji)</label><input type="text" id="habit-icon" class="form-input" placeholder="🎯" maxlength="4" style="width:80px"></div>
+        <div class="form-group">
+            <label class="form-label">Days</label>
+            <div class="habit-days-row" id="habit-days-input">
+                <div class="habit-day-chip active" data-day="1">Mo</div>
+                <div class="habit-day-chip active" data-day="2">Tu</div>
+                <div class="habit-day-chip active" data-day="3">We</div>
+                <div class="habit-day-chip active" data-day="4">Th</div>
+                <div class="habit-day-chip active" data-day="5">Fr</div>
+                <div class="habit-day-chip active" data-day="6">Sa</div>
+                <div class="habit-day-chip active" data-day="7">Su</div>
+            </div>
+        </div>
+        <div class="form-switch"><input type="checkbox" id="habit-reminder-toggle"><label for="habit-reminder-toggle">Enable Reminder</label></div>
+        <div class="form-group" id="habit-reminder-time" style="display:none">
+            <label class="form-label">Reminder Time</label>
+            <div class="form-time-row"><input type="number" id="habit-hour" class="form-input" min="0" max="23" value="9" placeholder="HH"> : <input type="number" id="habit-minute" class="form-input" min="0" max="59" value="0" placeholder="MM"></div>
+        </div>
+        <input type="hidden" id="habit-edit-id">
+        <button type="submit" id="habit-submit" class="form-btn">Save Habit</button>
+    </form>
+</div></div>
 
 <!-- ═══ DASHBOARD ═══ -->
 <div id="dashboard" style="display:none">
@@ -548,6 +606,15 @@
             </div>
             <div class="task-list" id="task-list"><div class="placeholder-text">Loading tasks...</div></div>
         </div>
+
+        <!-- Habits -->
+        <div class="section-panel" id="habit-section">
+            <div class="panel-header">
+                <div style="display:flex;align-items:center;gap:10px"><h3 class="panel-title">Habits</h3><span class="panel-badge" id="habit-count" style="background:rgba(249,115,22,.1);color:#FB923C">0</span></div>
+                <button class="panel-add-btn" id="habit-add-btn">+ Add Habit</button>
+            </div>
+            <div class="habit-list" id="habit-list"><div class="placeholder-text">Loading habits...</div></div>
+        </div>
     </main>
 </div>
 
@@ -565,7 +632,7 @@ async function ensureLibs(){
 <script type="module">
     import{initializeApp}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import{getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut,sendPasswordResetEmail}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-    import{getFirestore,collection,query,where,getDocs,doc,getDoc,setDoc,addDoc,deleteDoc,orderBy}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    import{getFirestore,collection,query,where,getDocs,doc,getDoc,setDoc,addDoc,deleteDoc,updateDoc,orderBy,Timestamp}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
     const app=initializeApp({apiKey:'AIzaSyC_3AdOLRj0yCy7jmzQ5MVJNT2JQgZ6KoY',authDomain:'coresync-e7fb5.firebaseapp.com',projectId:'coresync-e7fb5',storageBucket:'coresync-e7fb5.firebasestorage.app',messagingSenderId:'954417312512',appId:'1:954417312512:web:f3bbcb678855eda73079e5'});
     const auth=getAuth(app),db=getFirestore(app);
@@ -575,7 +642,7 @@ async function ensureLibs(){
 
     let currentUid=null,currentDate=new Date(),cryptoKey=null;
     let goals={steps:10000,calories:2000,water:3000};
-    let dashData={steps:0,calories:0,water:0,tasks:[],completedTasks:0,passwords:[],foods:[],sleep:null,workouts:[],stepKcal:0,workoutKcal:0,totalBurnt:0};
+    let dashData={steps:0,calories:0,water:0,tasks:[],completedTasks:0,passwords:[],foods:[],sleep:null,workouts:[],stepKcal:0,workoutKcal:0,totalBurnt:0,habits:[]};
     let macros={protein:0,carbs:0,fat:0,fiber:0,sugar:0,sodium:0,cholesterol:0,iron:0,calcium:0,potassium:0,zinc:0,magnesium:0,vitaminA:0,vitaminB12:0,vitaminC:0,vitaminD:0,vitaminE:0,vitaminK:0,vitaminB6:0,folate:0,phosphorus:0,selenium:0,manganese:0};
     let userProfile={};
     let membership=null;
@@ -664,6 +731,7 @@ async function ensureLibs(){
             await loadMembership(user.uid);
             loadDashboard(user.uid,currentDate);
             loadPasswords(user.uid);
+            loadHabits(user.uid);
             loadReportData(user.uid);
         }else{$('landing-content').style.display='';$('dashboard').style.display='none';currentUid=null;cryptoKey=null;membership=null;reportData=null;}
     });
@@ -1604,6 +1672,185 @@ async function ensureLibs(){
         const pc=pdf.internal.getNumberOfPages();
         for(let i=1;i<=pc;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(150,150,150);pdf.text('Page '+i+' of '+pc,190,287,{align:'right'});}
         pdf.save('CoreSync_Go_Diet_Chart.pdf');
+    };
+
+    // ═══ HABITS ═══
+    const DAY_NAMES=['','Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    function habitDateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+    async function loadHabits(uid){
+        try{
+            const s=await getDocs(collection(db,'users',uid,'habits'));
+            const habits=[];
+            s.forEach(d=>{const data=d.data();if(!data.isArchived)habits.push({id:d.id,...data});});
+            habits.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+            dashData.habits=habits;
+            $('habit-count').textContent=habits.length;
+            renderHabits();
+        }catch(err){console.error('Habits:',err);$('habit-list').innerHTML='<div class="placeholder-text">Could not load habits.</div>';}
+    }
+
+    function renderHabits(){
+        const hl=$('habit-list');const habits=dashData.habits;
+        if(!habits.length){hl.innerHTML='<div class="placeholder-text">No habits yet. Create one to get started!</div>';return;}
+        const today=new Date();const todayKey=habitDateKey(today);
+        hl.innerHTML=habits.map((h,i)=>{
+            const completions=h.completions||{};
+            const count=completions[todayKey]||0;
+            const volume=h.dailyVolume||1;
+            const isDone=h.executionType==='multiple'||h.executionType==='trackVolume'?count>=volume:count>=1;
+            const streak=calcStreak(h);
+            const daysStr=(h.selectedDays||[1,2,3,4,5,6,7]).map(d=>DAY_NAMES[d]||'').join(', ');
+            const reminderStr=h.reminderEnabled?('&#128276; '+String(h.reminderHour||9).padStart(2,'0')+':'+String(h.reminderMinute||0).padStart(2,'0')):'';
+            const volumeStr=(h.executionType==='multiple'||h.executionType==='trackVolume')?' ('+count+'/'+volume+')':'';
+            return`<div class="habit-card">
+                <div class="habit-icon-big">${h.icon||'\u{1F3AF}'}</div>
+                <div class="habit-info">
+                    <div class="habit-name">${esc(h.name)}${volumeStr}</div>
+                    <div class="habit-meta">
+                        <span class="habit-streak">&#128293; ${streak} day streak</span>
+                        ${reminderStr?'<span>'+reminderStr+'</span>':''}
+                    </div>
+                </div>
+                <button class="habit-check-btn ${isDone?'checked':''}" title="${isDone?'Mark incomplete':'Mark complete'}" onclick="toggleHabit(${i})">
+                    ${isDone?'&#10003;':''}
+                </button>
+                <div class="habit-actions">
+                    <button class="habit-act-btn" title="Edit" onclick="editHabit(${i})"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button class="habit-act-btn" title="Delete" style="color:#ef4444" onclick="deleteHabit(${i})"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function calcStreak(h){
+        let streak=0;const today=new Date();let day=new Date(today);
+        const startDate=h.startDate?.seconds?new Date(h.startDate.seconds*1000):new Date();
+        const startOnly=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate());
+        const selectedDays=h.selectedDays||[1,2,3,4,5,6,7];
+        const completions=h.completions||{};
+        const volume=h.dailyVolume||1;
+        function isScheduled(d){
+            const dOnly=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+            if(dOnly<startOnly)return false;
+            const dow=d.getDay();const isoDay=dow===0?7:dow;
+            return selectedDays.includes(isoDay);
+        }
+        function isCompleted(d){
+            const c=completions[habitDateKey(d)]||0;
+            return h.executionType==='multiple'||h.executionType==='trackVolume'?c>=volume:c>=1;
+        }
+        if(!isScheduled(day))day.setDate(day.getDate()-1);
+        for(let i=0;i<365;i++){
+            const dOnly=new Date(day.getFullYear(),day.getMonth(),day.getDate());
+            if(dOnly<startOnly)break;
+            if(!isScheduled(day)){day.setDate(day.getDate()-1);continue;}
+            if(isCompleted(day)){streak++;day.setDate(day.getDate()-1);}
+            else break;
+        }
+        return streak;
+    }
+
+    window.toggleHabit=async(i)=>{
+        const h=dashData.habits[i];if(!h||!currentUid)return;
+        const today=new Date();const todayKey=habitDateKey(today);
+        const completions=h.completions||{};const count=completions[todayKey]||0;
+        const volume=h.dailyVolume||1;
+        const isDone=h.executionType==='multiple'||h.executionType==='trackVolume'?count>=volume:count>=1;
+        let newCount;
+        if(isDone){newCount=0;}
+        else{
+            if(h.executionType==='multiple'||h.executionType==='trackVolume'){newCount=Math.min(count+(h.volumePerPress||1),volume);}
+            else{newCount=1;}
+        }
+        const newCompletions={...completions,[todayKey]:newCount};
+        try{
+            await updateDoc(doc(db,'users',currentUid,'habits',h.id),{completions:newCompletions,updatedAt:Timestamp.now()});
+            h.completions=newCompletions;h.updatedAt=Timestamp.now();
+            renderHabits();
+        }catch(err){console.error('Toggle habit:',err);alert('Failed to update habit.');}
+    };
+
+    window.editHabit=(i)=>{
+        const h=dashData.habits[i];if(!h)return;
+        $('habit-modal-title').textContent='Edit Habit';
+        $('habit-name').value=h.name||'';
+        $('habit-icon').value=h.icon||'🎯';
+        $('habit-edit-id').value=h.id;
+        $('habit-reminder-toggle').checked=!!h.reminderEnabled;
+        $('habit-reminder-time').style.display=h.reminderEnabled?'':'none';
+        $('habit-hour').value=h.reminderHour||9;
+        $('habit-minute').value=h.reminderMinute||0;
+        const days=h.selectedDays||[1,2,3,4,5,6,7];
+        document.querySelectorAll('#habit-days-input .habit-day-chip').forEach(el=>{
+            const d=parseInt(el.dataset.day);
+            el.classList.toggle('active',days.includes(d));
+        });
+        $('habit-modal').style.display='flex';
+    };
+
+    window.deleteHabit=async(i)=>{
+        const h=dashData.habits[i];if(!h||!currentUid)return;
+        if(!confirm('Delete habit "'+h.name+'"?'))return;
+        try{await deleteDoc(doc(db,'users',currentUid,'habits',h.id));await loadHabits(currentUid);}
+        catch(err){console.error('Delete habit:',err);alert('Failed to delete habit.');}
+    };
+
+    // Habit modal
+    const habitModal=$('habit-modal');
+    $('habit-add-btn').onclick=()=>{
+        $('habit-modal-title').textContent='Add Habit';
+        $('habit-form').reset();$('habit-edit-id').value='';
+        $('habit-reminder-time').style.display='none';
+        $('habit-icon').value='🎯';$('habit-hour').value='9';$('habit-minute').value='0';
+        document.querySelectorAll('#habit-days-input .habit-day-chip').forEach(el=>el.classList.add('active'));
+        habitModal.style.display='flex';
+    };
+    $('habit-modal-close').onclick=()=>{habitModal.style.display='none';};
+    habitModal.onclick=e=>{if(e.target===habitModal)habitModal.style.display='none';};
+
+    // Day chip toggle
+    document.querySelectorAll('#habit-days-input .habit-day-chip').forEach(el=>{
+        el.onclick=()=>el.classList.toggle('active');
+    });
+    // Reminder toggle
+    $('habit-reminder-toggle').onchange=e=>{$('habit-reminder-time').style.display=e.target.checked?'':'none';};
+
+    $('habit-form').onsubmit=async e=>{
+        e.preventDefault();if(!currentUid)return;
+        const name=$('habit-name').value.trim();
+        const icon=$('habit-icon').value.trim()||'🎯';
+        if(!name){$('habit-error').textContent='Name is required.';$('habit-error').style.display='block';return;}
+        const selectedDays=[];
+        document.querySelectorAll('#habit-days-input .habit-day-chip.active').forEach(el=>selectedDays.push(parseInt(el.dataset.day)));
+        if(!selectedDays.length){$('habit-error').textContent='Select at least one day.';$('habit-error').style.display='block';return;}
+        const reminderEnabled=$('habit-reminder-toggle').checked;
+        const reminderHour=parseInt($('habit-hour').value)||9;
+        const reminderMinute=parseInt($('habit-minute').value)||0;
+        const editId=$('habit-edit-id').value;
+        $('habit-submit').disabled=true;$('habit-submit').textContent='Saving...';
+        try{
+            const now=Timestamp.now();
+            if(editId){
+                await updateDoc(doc(db,'users',currentUid,'habits',editId),{
+                    name,icon,selectedDays,reminderEnabled,reminderHour,reminderMinute,
+                    reminderDays:selectedDays,updatedAt:now
+                });
+            }else{
+                await addDoc(collection(db,'users',currentUid,'habits'),{
+                    ownerId:currentUid,name,icon,
+                    executionType:'oneTime',dailyVolume:1,volumePerPress:1,
+                    startDate:now,endDate:null,
+                    frequencyMode:'byDays',selectedDays,timesPerWeek:7,
+                    reminderEnabled,reminderHour,reminderMinute,reminderDays:selectedDays,
+                    completions:{},meanings:{},isArchived:false,
+                    createdAt:now,updatedAt:now
+                });
+            }
+            habitModal.style.display='none';$('habit-form').reset();$('habit-error').style.display='none';
+            await loadHabits(currentUid);
+        }catch(err){$('habit-error').textContent='Failed to save habit.';$('habit-error').style.display='block';console.error('Save habit:',err);}
+        finally{$('habit-submit').disabled=false;$('habit-submit').textContent='Save Habit';}
     };
 
     function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
