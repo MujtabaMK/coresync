@@ -12,16 +12,24 @@ enum ExerciseDifficulty {
   }
 }
 
+class CommonMistake {
+  final String title;
+  final String description;
+  const CommonMistake({required this.title, required this.description});
+}
+
 class ExerciseModel {
   final String id;
   final String name;
-  final String lottieAsset;
+  final String? lottieAsset;
+  final String? videoAsset;
   final String category;
   final ExerciseDifficulty difficulty;
   final List<String> muscleGroups;
   final List<String> instructions;
-  final List<String> commonMistakes;
-  final String breathingTip;
+  final String description;
+  final List<CommonMistake> commonMistakes;
+  final List<String> breathingTips;
   final int defaultReps;
   final int defaultDurationSecs;
   final bool isTimeBased;
@@ -29,13 +37,15 @@ class ExerciseModel {
   const ExerciseModel({
     required this.id,
     required this.name,
-    required this.lottieAsset,
+    this.lottieAsset,
+    this.videoAsset,
     required this.category,
     required this.difficulty,
     this.muscleGroups = const [],
     this.instructions = const [],
+    this.description = '',
     this.commonMistakes = const [],
-    this.breathingTip = '',
+    this.breathingTips = const [],
     this.defaultReps = 12,
     this.defaultDurationSecs = 30,
     this.isTimeBased = false,

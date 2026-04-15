@@ -16,7 +16,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>CoreSync</string>
+		<string>CoreSync Go</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -66,7 +66,23 @@
 		<key>NSMotionUsageDescription</key>
 		<string>This app uses motion sensors to count your steps.</string>
 		<key>NSContactsUsageDescription</key>
-		<string>CoreSync needs access to your contacts to share tasks with people from your phonebook.</string>
+		<string>CoreSync Go needs access to your contacts to share tasks with people from your phonebook.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>CoreSync Go needs camera access to scan documents, QR codes, and analyze your food.</string>
+		<key>NFCReaderUsageDescription</key>
+		<string>CoreSync Go uses NFC to read NFC tags and cards.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>CoreSync Go needs photo library access to select food images for analysis.</string>
+		<key>NSSpeechRecognitionUsageDescription</key>
+		<string>CoreSync Go uses speech recognition to log food by voice.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>CoreSync Go needs microphone access to listen when you speak your food.</string>
+		<key>NSFaceIDUsageDescription</key>
+		<string>CoreSync Go uses Face ID to protect your saved passwords.</string>
+		<key>NSHealthShareUsageDescription</key>
+		<string>CoreSync Go reads your health data such as step count to track your daily fitness progress.</string>
+		<key>NSHealthUpdateUsageDescription</key>
+		<string>CoreSync Go saves your workout and step data to Apple Health to keep your fitness records in sync.</string>
 		<key>UIStatusBarHidden</key>
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>

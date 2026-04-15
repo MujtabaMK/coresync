@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app.dart';
+import 'core/services/push_notification_service.dart';
 import 'features/gym/domain/attendance_model.dart';
 import 'features/gym/domain/membership_model.dart';
 import 'features/passwords/domain/password_entry_model.dart';
+import 'features/qr_scanner/domain/scan_result_model.dart';
+import 'features/scanner/domain/scanned_document_model.dart';
 import 'firebase_options.dart';
 
 /// Top-level background message handler for FCM.
@@ -28,8 +31,15 @@ Future<void> main() async {
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+  // Initialize FCM early — must happen before the app widget calls
+  // saveTokenForUser() in its initState, so the permission dialog has
+  // already been shown and the APNs/FCM token is available.
+  await PushNotificationService.init();
+
   Hive.registerAdapter(PasswordEntryModelAdapter());
   Hive.registerAdapter(MembershipModelAdapter());
   Hive.registerAdapter(AttendanceModelAdapter());
+  Hive.registerAdapter(ScannedDocumentModelAdapter());
+  Hive.registerAdapter(ScanResultModelAdapter());
   runApp(const CoreSyncApp());
 }

@@ -15,15 +15,25 @@ class GymHomeScreen extends StatefulWidget {
   State<GymHomeScreen> createState() => _GymHomeScreenState();
 }
 
-class _GymHomeScreenState extends State<GymHomeScreen> {
+class _GymHomeScreenState extends State<GymHomeScreen>
+    with WidgetsBindingObserver {
   final _stepService = StepCounterService.instance;
   StreamSubscription<int>? _stepSub;
   int _liveSteps = 0;
+  bool _stepsLoading = true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initSteps();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _stepService.refreshOnResume();
+    }
   }
 
   Future<void> _initSteps() async {
@@ -31,29 +41,31 @@ class _GymHomeScreenState extends State<GymHomeScreen> {
     final gymCubit = context.read<GymCubit>();
     try {
       final saved = await gymCubit.repository.getStepsForDate(DateTime.now());
-      if (mounted) setState(() => _liveSteps = saved);
       _stepService.setMinSteps(saved);
     } catch (_) {}
 
     // Initialize the sensor (no-op if already initialized)
     await _stepService.initialize();
 
-    // Use current value from service
-    if (_stepService.currentSteps > 0 && mounted) {
-      setState(() => _liveSteps = _stepService.currentSteps);
+    // Use the best known value now that both Firestore + native service are read
+    if (mounted) {
+      setState(() {
+        _liveSteps = _stepService.currentSteps;
+        _stepsLoading = false;
+      });
     }
 
-    // Listen for live updates
+    // Listen for live updates (display only — StepsScreen handles Firestore saves)
     _stepSub = _stepService.stepsStream.listen((steps) {
       if (mounted) {
         setState(() => _liveSteps = steps);
-        gymCubit.saveSteps(DateTime.now(), steps);
       }
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _stepSub?.cancel();
     super.dispose();
   }
@@ -143,16 +155,35 @@ class _GymHomeScreenState extends State<GymHomeScreen> {
                         final absentCount =
                             (daysSinceStart - state.presentCount)
                                 .clamp(0, daysSinceStart);
-                        const stepsGoal = 10000;
-                        final stepsColor = _liveSteps == 0
-                            ? Colors.red
-                            : _liveSteps >= stepsGoal
-                                ? Colors.green
-                                : Colors.amber.shade700;
+                        // Personalized step goal based on BMI
+                        int stepsGoal = 10000;
+                        final heightCm = state.userHeight;
+                        if (heightCm != null && state.userWeight != null) {
+                          final heightM = heightCm / 100;
+                          final bmi = state.userWeight! / (heightM * heightM);
+                          if (bmi < 18.5) {
+                            stepsGoal = 8000;
+                          } else if (bmi < 25) {
+                            stepsGoal = 10000;
+                          } else if (bmi < 30) {
+                            stepsGoal = 12000;
+                          } else {
+                            stepsGoal = 15000;
+                          }
+                        }
+                        final stepsColor = _stepsLoading
+                            ? Colors.grey
+                            : _liveSteps == 0
+                                ? Colors.red
+                                : _liveSteps >= stepsGoal
+                                    ? Colors.green
+                                    : Colors.amber.shade700;
                         final weight = state.userWeight ?? 70.0;
-                        final calories =
+                        final stepCalories =
                             (_liveSteps * 0.04 * weight / 70).round();
-                        final minutes = (_liveSteps / 100).round();
+                        final workoutCalories =
+                            state.todayWorkoutCalories.round();
+                        final totalBurnt = stepCalories + workoutCalories;
                         return Column(
                           children: [
                             Row(
@@ -179,7 +210,7 @@ class _GymHomeScreenState extends State<GymHomeScreen> {
                                   child: _QuickStatCard(
                                     icon: Icons.water_drop,
                                     label: 'Water',
-                                    value: '${state.waterGlasses}',
+                                    value: (state.waterMl / 250).toStringAsFixed(1),
                                     color: Colors.blue,
                                   ),
                                 ),
@@ -192,26 +223,58 @@ class _GymHomeScreenState extends State<GymHomeScreen> {
                                   child: _QuickStatCard(
                                     icon: Icons.directions_walk,
                                     label: 'Steps',
-                                    value: '$_liveSteps',
+                                    value: _stepsLoading ? '...' : '$_liveSteps',
                                     color: stepsColor,
                                   ),
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: _QuickStatCard(
-                                    icon: Icons.timer_outlined,
-                                    label: 'Minutes',
-                                    value: '$minutes',
-                                    color: Colors.blue,
+                                    icon: Icons.restaurant,
+                                    label: 'Food Cal',
+                                    value:
+                                        '${state.trackedCalories.round()}',
+                                    color: Colors.green,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _QuickStatCard(
+                                    icon: Icons.bedtime,
+                                    label: 'Sleep',
+                                    value: state.todaySleepFormatted,
+                                    color: Colors.indigo,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _QuickStatCard(
+                                    icon: Icons.local_fire_department,
+                                    label: 'Step kcal',
+                                    value: _stepsLoading ? '...' : '$stepCalories',
+                                    color: _stepsLoading ? Colors.grey : Colors.teal,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _QuickStatCard(
+                                    icon: Icons.fitness_center,
+                                    label: 'Workout kcal',
+                                    value: '$workoutCalories',
+                                    color: Colors.deepOrange,
                                   ),
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: _QuickStatCard(
                                     icon: Icons.local_fire_department,
-                                    label: 'Calories',
-                                    value: '$calories',
-                                    color: Colors.orange,
+                                    label: 'Total Burnt',
+                                    value: _stepsLoading ? '...' : '$totalBurnt',
+                                    color: _stepsLoading ? Colors.grey : Colors.orange,
                                   ),
                                 ),
                               ],
@@ -235,30 +298,41 @@ class _GymHomeScreenState extends State<GymHomeScreen> {
                 const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    childAspectRatio: 1.3,
                     children: [
-                      _NavCard(
+                      _DashCard(
                         icon: Icons.fitness_center,
                         label: 'Exercises',
-                        subtitle: 'Browse workout routines',
+                        subtitle: 'Fitness routines',
                         color: Colors.orange,
                         onTap: () => context.go('/gym/exercises'),
                       ),
-                      const SizedBox(height: 10),
-                      _NavCard(
+                      _DashCard(
                         icon: Icons.notifications_active,
                         label: 'Reminders',
-                        subtitle: 'Set workout & health reminders',
+                        subtitle: 'Health reminders',
                         color: Colors.blue,
                         onTap: () => context.go('/gym/reminders'),
                       ),
-                      const SizedBox(height: 10),
-                      _NavCard(
+                      _DashCard(
                         icon: Icons.medication,
-                        label: 'Medicine Cabinet',
-                        subtitle: 'Track your supplements & meds',
+                        label: 'Medicine',
+                        subtitle: 'Supplements & meds',
                         color: Colors.green,
                         onTap: () => context.go('/gym/medicines'),
+                      ),
+                      _DashCard(
+                        icon: Icons.monitor_weight,
+                        label: 'Weight Plan',
+                        subtitle: 'Lose, gain, maintain',
+                        color: Colors.purple,
+                        onTap: () => context.go('/gym/weight-loss'),
                       ),
                     ],
                   ),
@@ -322,14 +396,14 @@ class _QuickStatCard extends StatelessWidget {
   }
 }
 
-class _NavCard extends StatelessWidget {
+class _DashCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String subtitle;
   final Color color;
   final VoidCallback onTap;
 
-  const _NavCard({
+  const _DashCard({
     required this.icon,
     required this.label,
     required this.subtitle,
@@ -347,7 +421,8 @@ class _NavCard extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
@@ -355,33 +430,26 @@ class _NavCard extends StatelessWidget {
                   color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, size: 28, color: color),
+                child: Icon(icon, size: 24, color: color),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: theme.colorScheme.onSurfaceVariant,
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

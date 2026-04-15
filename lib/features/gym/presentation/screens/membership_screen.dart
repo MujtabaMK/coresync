@@ -14,7 +14,6 @@ class MembershipScreen extends StatefulWidget {
 }
 
 class _MembershipScreenState extends State<MembershipScreen> {
-  String? _selectedPlan;
   bool _isSaving = false;
 
   Future<void> _onPlanTapped(String planKey) async {
@@ -49,7 +48,6 @@ class _MembershipScreenState extends State<MembershipScreen> {
 
     setState(() {
       _isSaving = false;
-      _selectedPlan = null;
     });
 
     if (mounted) {
@@ -159,98 +157,84 @@ class _MembershipScreenState extends State<MembershipScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Plan cards grid
-              ...MembershipModel.planLabels.entries.map((entry) {
-                final planKey = entry.key;
-                final planName = entry.value;
-                final duration = MembershipModel.planDurations[planKey]!;
-                final isActive = activePlan == planKey;
-                final isSelected = _selectedPlan == planKey;
+              // Plan cards in 2-column grid
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 2.2,
+                ),
+                itemCount: MembershipModel.displayPlanKeys.length,
+                itemBuilder: (context, index) {
+                  final planKey = MembershipModel.displayPlanKeys[index];
+                  final planName = MembershipModel.planLabels[planKey]!;
+                  final duration = MembershipModel.planDurations[planKey]!;
+                  final isActive = activePlan == planKey;
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Card(
+                  return Card(
                     clipBehavior: Clip.antiAlias,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
                         color: isActive
                             ? theme.colorScheme.primary
-                            : isSelected
-                            ? theme.colorScheme.primary.withValues(alpha: 0.5)
                             : Colors.transparent,
-                        width: isActive ? 2 : 1.5,
+                        width: isActive ? 2 : 0,
                       ),
                     ),
                     child: InkWell(
-                      onTap: _isSaving ? null : () => _onPlanTapped(planKey),
+                      onTap: _isSaving
+                          ? null
+                          : () => _onPlanTapped(planKey),
+                      borderRadius: BorderRadius.circular(12),
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        planName,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      if (isActive) ...[
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: theme
-                                                .colorScheme
-                                                .primaryContainer,
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Active',
-                                            style: theme.textTheme.labelSmall
-                                                ?.copyWith(
-                                                  color:
-                                                      theme.colorScheme.primary,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '$duration days',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    planName,
+                                    style: theme.textTheme.titleSmall
+                                        ?.copyWith(
+                                      fontWeight: FontWeight.bold,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ],
+                                ),
+                                if (isActive)
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: theme.colorScheme.primary,
+                                    size: 18,
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '$duration days',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color:
+                                    theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
-                            if (isSelected)
-                              Icon(
-                                Icons.check_circle,
-                                color: theme.colorScheme.primary,
-                              ),
                           ],
                         ),
                       ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                },
+              ),
 
               const SizedBox(height: 32),
             ],

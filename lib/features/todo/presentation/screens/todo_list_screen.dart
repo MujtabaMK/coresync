@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../../core/widgets/confirm_dialog.dart';
+import '../../../../core/widgets/main_shell_drawer.dart';
 import '../../../../core/widgets/error_widget.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../domain/task_model.dart';
@@ -114,6 +115,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   ],
                 )
               : AppBar(
+                  leading: IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: MainShellDrawer.of(context),
+                  ),
                   title: const Text('Todo'),
                   actions: [
                     IconButton(

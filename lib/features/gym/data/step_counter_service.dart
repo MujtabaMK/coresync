@@ -23,8 +23,6 @@ class StepCounterService {
   static const _kDate = 'saved_date';
   static const _kRaw = 'saved_raw';
   static const _kSteps = 'saved_steps';
-  static const _kRebootSteps = 'reboot_carry';
-
   static const _channel = MethodChannel('com.mujtaba.coresync/step_counter');
 
   final _pedometer = Pedometer();
@@ -32,7 +30,7 @@ class StepCounterService {
   StreamSubscription<PedestrianStatus>? _statusSub;
 
   bool _initialized = false;
-  bool _firstAndroidEvent = true;
+  bool _isRefreshing = false;
 
   // iOS specific
   int _platformBaseline = 0;
@@ -95,9 +93,9 @@ class StepCounterService {
     }
 
     _initialized = true;
-    _firstAndroidEvent = true;
 
     if (Platform.isAndroid) {
+      _isRefreshing = true;
       // Start the native foreground service so steps are tracked 24/7.
       await startNativeService();
 
@@ -123,6 +121,7 @@ class StepCounterService {
       await box.put(_kSteps, _currentSteps);
       await box.put(_kDate, _todayKey());
       await box.delete(_kRaw);
+      _isRefreshing = false;
     }
 
     _stepSub = _pedometer.stepCountStream().listen(
@@ -176,6 +175,7 @@ class StepCounterService {
   // ── Android ──
 
   Future<void> _refreshAndroidOnResume() async {
+    _isRefreshing = true;
     // 1. Read from native foreground service (primary)
     final nativeSteps = await getNativeSteps();
     if (nativeSteps > _currentSteps) {
@@ -199,7 +199,7 @@ class StepCounterService {
     await box.put(_kSteps, _currentSteps);
     await box.put(_kDate, _todayKey());
     await box.delete(_kRaw);
-    _firstAndroidEvent = true;
+    _isRefreshing = false;
 
     // 4. Re-subscribe to the sensor stream in case the OS killed it
     _stepSub?.cancel();
@@ -210,6 +210,8 @@ class StepCounterService {
   }
 
   Future<void> _handleAndroidSensorEvent(int rawSteps) async {
+    // Skip events while refreshing to prevent reading stale Hive state
+    if (_isRefreshing) return;
     final box = await Hive.openBox(_boxName);
     final todayKey = _todayKey();
 
@@ -226,23 +228,25 @@ class StepCounterService {
       } else {
         // Device rebooted
         todaySteps = savedSteps + rawSteps;
-        await box.put(_kRebootSteps, savedSteps);
       }
     } else {
-      // New day
-      if (_firstAndroidEvent) {
-        // Try native service first, then Health Connect
-        final nativeSteps = await getNativeSteps();
-        final hcSteps = await _getHealthConnectSteps();
-        todaySteps = max(nativeSteps, max(hcSteps ?? 0, 0));
-        _firstAndroidEvent = false;
-      } else {
-        todaySteps = 0;
-      }
+      // New day — always read native service + Health Connect to bootstrap
+      final nativeSteps = await getNativeSteps();
+      final hcSteps = await _getHealthConnectSteps();
+      todaySteps = max(nativeSteps, max(hcSteps ?? 0, 0));
+      // Reset _currentSteps for the new day so max() below doesn't carry
+      // yesterday's value forward.
+      _currentSteps = 0;
     }
 
     // Never go below previously known value
     todaySteps = max(todaySteps, _currentSteps);
+
+    // Sanity check: cap at 100k steps/day to prevent raw sensor value leak
+    if (todaySteps > 100000) {
+      debugPrint('Step count suspiciously high ($todaySteps), capping to previous value');
+      todaySteps = _currentSteps;
+    }
 
     await box.put(_kDate, todayKey);
     await box.put(_kRaw, rawSteps);

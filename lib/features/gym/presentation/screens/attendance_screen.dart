@@ -14,8 +14,11 @@ class AttendanceScreen extends StatefulWidget {
 class _AttendanceScreenState extends State<AttendanceScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  bool _isMarking = false;
 
   Future<void> _markPresent() async {
+    if (_isMarking) return;
+
     final membership = context.read<GymCubit>().state.activeMembership;
     if (membership == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -31,6 +34,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       return;
     }
 
+    setState(() => _isMarking = true);
+
     await context.read<GymCubit>().markAttendance(_selectedDay!, true);
 
     if (mounted) {
@@ -38,6 +43,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         const SnackBar(content: Text('Marked as Present')),
       );
     }
+
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (mounted) setState(() => _isMarking = false);
   }
 
   @override
@@ -115,14 +123,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               ],
 
               // Mark present button
-              Padding(
+              Builder(builder: (context) {
+                final alreadyPresent = _selectedDay != null &&
+                    attendanceMap[DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day)] == true;
+                return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: membership != null ? _markPresent : null,
-                    icon: const Icon(Icons.check_circle_outline),
-                    label: const Text('Present'),
+                    onPressed: membership != null && !_isMarking && !alreadyPresent ? _markPresent : null,
+                    icon: Icon(alreadyPresent ? Icons.check_circle : Icons.check_circle_outline),
+                    label: Text(alreadyPresent ? 'Already Marked' : 'Present'),
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
@@ -130,7 +141,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     ),
                   ),
                 ),
-              ),
+              );
+              }),
               const SizedBox(height: 32),
             ],
           ),

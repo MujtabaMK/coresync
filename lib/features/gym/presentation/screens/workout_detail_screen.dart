@@ -6,6 +6,7 @@ import '../../data/exercise_data.dart';
 import '../../domain/exercise_model.dart';
 import '../../domain/workout_program_model.dart';
 import '../widgets/exercise_info_sheet.dart';
+import '../widgets/exercise_video_player.dart';
 
 class WorkoutDetailScreen extends StatelessWidget {
   final WorkoutProgram program;
@@ -15,6 +16,22 @@ class WorkoutDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    // Resolve all exercises up-front for navigation
+    final resolvedExercises = <ExerciseModel>[];
+    final resolvedWorkoutExercises = <WorkoutExercise>[];
+    final resolvedIndices = <int>[];
+
+    for (var i = 0; i < program.exercises.length; i++) {
+      final ex = ExerciseData.getById(program.exercises[i].exerciseId);
+      if (ex != null) {
+        resolvedIndices.add(resolvedExercises.length);
+        resolvedExercises.add(ex);
+        resolvedWorkoutExercises.add(program.exercises[i]);
+      } else {
+        resolvedIndices.add(-1);
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -59,11 +76,18 @@ class WorkoutDetailScreen extends StatelessWidget {
                   final we = entry.value;
                   final exercise = ExerciseData.getById(we.exerciseId);
                   if (exercise == null) return const SizedBox.shrink();
+                  final navIndex = resolvedIndices[index];
                   return _ExerciseListTile(
                     index: index,
                     workoutExercise: we,
                     exercise: exercise,
-                    onTap: () => showExerciseInfoSheet(context, exercise),
+                    onTap: () => showExerciseInfoSheet(
+                      context,
+                      exercise,
+                      exercises: resolvedExercises,
+                      workoutExercises: resolvedWorkoutExercises,
+                      initialIndex: navIndex,
+                    ),
                   );
                 }),
               ],
@@ -151,6 +175,18 @@ class _ExerciseListTile extends StatelessWidget {
     required this.onTap,
   });
 
+  static IconData _categoryIcon(String category) {
+    return switch (category) {
+      'Abs' => Icons.sports_martial_arts,
+      'Arm' => Icons.fitness_center,
+      'Chest' => Icons.expand,
+      'Leg' => Icons.directions_run,
+      'Shoulder' => Icons.accessibility_new,
+      'Back' => Icons.straighten,
+      _ => Icons.fitness_center,
+    };
+  }
+
   String get _subtitle {
     if (exercise.isTimeBased || workoutExercise.durationSecs != null) {
       final secs =
@@ -181,11 +217,30 @@ class _ExerciseListTile extends StatelessWidget {
               SizedBox(
                 width: 48,
                 height: 48,
-                child: Lottie.asset(
-                  exercise.lottieAsset,
-                  fit: BoxFit.contain,
-                  repeat: true,
-                ),
+                child: exercise.videoAsset != null
+                    ? ExerciseVideoPlayer(
+                        assetPath: exercise.videoAsset!,
+                        height: 48,
+                        fit: BoxFit.contain,
+                      )
+                    : exercise.lottieAsset != null
+                        ? Lottie.asset(
+                            exercise.lottieAsset!,
+                            fit: BoxFit.contain,
+                            repeat: true,
+                          )
+                        : CircleAvatar(
+                            radius: 24,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primaryContainer,
+                            child: Icon(
+                              _categoryIcon(exercise.category),
+                              size: 24,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
+                          ),
               ),
               const SizedBox(width: 12),
               Expanded(

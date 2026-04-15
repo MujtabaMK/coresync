@@ -60,6 +60,12 @@ class AuthRepository {
       createdAt: DateTime.now(),
     );
     await docRef.set(userModel.toFirestore(), SetOptions(merge: true));
+
+    // Also write minimal data to public lookup collection
+    await _firestore.collection('user_lookup').doc(user.uid).set({
+      'email': user.email ?? '',
+      'phoneNumber': phoneNumber,
+    });
   }
 
   Future<UserModel?> getUserByEmail(String email) async {
@@ -72,6 +78,16 @@ class AuthRepository {
     return UserModel.fromFirestore(query.docs.first);
   }
 
+  /// Check if an email is registered (works without authentication).
+  Future<bool> isEmailRegisteredInLookup(String email) async {
+    final query = await _firestore
+        .collection('user_lookup')
+        .where('email', isEqualTo: email)
+        .limit(1)
+        .get();
+    return query.docs.isNotEmpty;
+  }
+
   Future<UserModel?> getCurrentUserModel() async {
     final user = currentUser;
     if (user == null) return null;
@@ -81,6 +97,28 @@ class AuthRepository {
         .get();
     if (!doc.exists) return null;
     return UserModel.fromFirestore(doc);
+  }
+
+  /// Returns true if the phone number is already used by another account.
+  /// Uses public lookup collection — works without authentication.
+  Future<bool> isPhoneNumberTaken(String phoneNumber) async {
+    final query = await _firestore
+        .collection('user_lookup')
+        .where('phoneNumber', isEqualTo: phoneNumber)
+        .limit(1)
+        .get();
+    return query.docs.isNotEmpty;
+  }
+
+  /// Returns true if the email is registered in Firebase Auth.
+  Future<bool> isEmailRegistered(String email) async {
+    // ignore: deprecated_member_use
+    final methods = await _auth.fetchSignInMethodsForEmail(email);
+    return methods.isNotEmpty;
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
   }
 
   Future<void> signOut() async {

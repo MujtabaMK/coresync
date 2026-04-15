@@ -235,22 +235,37 @@ class GymRepository {
   }
 
   Future<Map<DateTime, int>> getWaterIntakeHistory() async {
+    final result = await getWaterIntakeAndGoalHistory();
+    return result.$1;
+  }
+
+  Future<Map<DateTime, int>> getWaterGoalHistory() async {
+    final result = await getWaterIntakeAndGoalHistory();
+    return result.$2;
+  }
+
+  /// Returns both water intake history and water goal history in a single read.
+  Future<(Map<DateTime, int>, Map<DateTime, int>)> getWaterIntakeAndGoalHistory() async {
     final snapshot = await _waterCol.get();
-    final map = <DateTime, int>{};
+    final intakeMap = <DateTime, int>{};
+    final goalMap = <DateTime, int>{};
     for (final doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
+      final date = DateFormat('yyyy-MM-dd').parse(doc.id);
+      final normalized = DateTime(date.year, date.month, date.day);
+
       int ml;
       if (data.containsKey('ml')) {
-        ml = data['ml'] as int? ?? 0;
+        ml = (data['ml'] as num?)?.toInt() ?? 0;
       } else {
-        ml = ((data['glasses'] as int?) ?? 0) * 250;
+        ml = ((data['glasses'] as num?)?.toInt() ?? 0) * 250;
       }
-      if (ml > 0) {
-        final date = DateFormat('yyyy-MM-dd').parse(doc.id);
-        map[DateTime(date.year, date.month, date.day)] = ml;
-      }
+      if (ml > 0) intakeMap[normalized] = ml;
+
+      final goalMl = (data['goalMl'] as num?)?.toInt();
+      if (goalMl != null && goalMl > 0) goalMap[normalized] = goalMl;
     }
-    return map;
+    return (intakeMap, goalMap);
   }
 
   // ── Steps ──
@@ -263,23 +278,84 @@ class GymRepository {
     return data?['steps'] as int? ?? 0;
   }
 
-  Future<void> saveStepsForDate(DateTime date, int steps) async {
+  Future<void> saveStepsForDate(DateTime date, int steps, {int? goalSteps}) async {
     final key = DateFormat('yyyy-MM-dd').format(date);
-    await _stepsCol.doc(key).set({'steps': steps});
+    // Never downgrade: only write if new steps >= existing
+    final doc = await _stepsCol.doc(key).get();
+    final existing = (doc.data() as Map<String, dynamic>?)?['steps'] as int? ?? 0;
+    final fields = <String, dynamic>{};
+    if (steps > existing) fields['steps'] = steps;
+    if (goalSteps != null) fields['goalSteps'] = goalSteps;
+    if (fields.isNotEmpty) {
+      await _stepsCol.doc(key).set(fields, SetOptions(merge: true));
+    }
   }
 
   Future<Map<DateTime, int>> getStepsHistory() async {
+    final result = await getStepsAndGoalHistory();
+    return result.$1;
+  }
+
+  Future<Map<DateTime, int>> getStepsGoalHistory() async {
+    final result = await getStepsAndGoalHistory();
+    return result.$2;
+  }
+
+  /// Removes backfilled goalSteps from all step documents so that
+  /// the report falls back to the default goal for historical dates.
+  Future<void> clearAllStepGoals() async {
     final snapshot = await _stepsCol.get();
-    final map = <DateTime, int>{};
     for (final doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
-      final steps = data['steps'] as int? ?? 0;
-      if (steps > 0) {
-        final date = DateFormat('yyyy-MM-dd').parse(doc.id);
-        map[DateTime(date.year, date.month, date.day)] = steps;
+      if (data.containsKey('goalSteps')) {
+        await doc.reference.update({'goalSteps': FieldValue.delete()});
       }
     }
-    return map;
+  }
+
+  /// Removes goalSteps from step documents dated before [cutoff].
+  Future<void> clearStepGoalsBefore(DateTime cutoff) async {
+    final cutoffKey = DateFormat('yyyy-MM-dd').format(cutoff);
+    final snapshot = await _stepsCol.get();
+    for (final doc in snapshot.docs) {
+      if (doc.id.compareTo(cutoffKey) < 0) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('goalSteps')) {
+          await doc.reference.update({'goalSteps': FieldValue.delete()});
+        }
+      }
+    }
+  }
+
+  /// Removes backfilled goalMl from all water documents so that
+  /// the report falls back to the default goal for historical dates.
+  Future<void> clearAllWaterGoals() async {
+    final snapshot = await _waterCol.get();
+    for (final doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      if (data.containsKey('goalMl')) {
+        await doc.reference.update({'goalMl': FieldValue.delete()});
+      }
+    }
+  }
+
+  /// Returns both steps history and steps goal history in a single read.
+  Future<(Map<DateTime, int>, Map<DateTime, int>)> getStepsAndGoalHistory() async {
+    final snapshot = await _stepsCol.get();
+    final stepsMap = <DateTime, int>{};
+    final goalMap = <DateTime, int>{};
+    for (final doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final date = DateFormat('yyyy-MM-dd').parse(doc.id);
+      final normalized = DateTime(date.year, date.month, date.day);
+
+      final steps = (data['steps'] as num?)?.toInt() ?? 0;
+      if (steps > 0) stepsMap[normalized] = steps;
+
+      final goal = (data['goalSteps'] as num?)?.toInt();
+      if (goal != null && goal > 0) goalMap[normalized] = goal;
+    }
+    return (stepsMap, goalMap);
   }
 
   // ── User Metrics ──
@@ -410,6 +486,30 @@ class GymRepository {
       final cal = (data['calories'] as num?)?.toDouble() ?? 0;
       final qty = (data['quantity'] as num?)?.toDouble() ?? 1;
       map[normalized] = (map[normalized] ?? 0) + (cal * qty);
+    }
+    return map;
+  }
+
+  // ── Calorie Goals (per-day) ──
+
+  CollectionReference get _calorieGoalsCol =>
+      _userDoc.collection('gym_calorie_goals');
+
+  Future<void> saveCalorieGoalForDate(DateTime date, double goal) async {
+    final key = DateFormat('yyyy-MM-dd').format(date);
+    await _calorieGoalsCol.doc(key).set({'goalCalories': goal}, SetOptions(merge: true));
+  }
+
+  Future<Map<DateTime, double>> getCalorieGoalHistory() async {
+    final snapshot = await _calorieGoalsCol.get();
+    final map = <DateTime, double>{};
+    for (final doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final goal = (data['goalCalories'] as num?)?.toDouble();
+      if (goal != null && goal > 0) {
+        final date = DateFormat('yyyy-MM-dd').parse(doc.id);
+        map[DateTime(date.year, date.month, date.day)] = goal;
+      }
     }
     return map;
   }

@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 
 import '../../domain/workout_program_model.dart';
 import '../providers/workout_provider.dart';
+import '../widgets/exercise_video_player.dart';
 
 class WorkoutExecutionScreen extends StatelessWidget {
   final WorkoutProgram program;
@@ -123,6 +124,52 @@ class _ExerciseView extends StatelessWidget {
   final WorkoutState state;
   const _ExerciseView({required this.state});
 
+  static IconData _categoryIcon(String category) {
+    return switch (category) {
+      'Abs' => Icons.sports_martial_arts,
+      'Arm' => Icons.fitness_center,
+      'Chest' => Icons.expand,
+      'Leg' => Icons.directions_run,
+      'Shoulder' => Icons.accessibility_new,
+      'Back' => Icons.straighten,
+      _ => Icons.fitness_center,
+    };
+  }
+
+  static Widget _buildLottieOrIcon(
+    ThemeData theme,
+    dynamic exercise,
+    bool isPaused,
+  ) {
+    if (exercise.videoAsset != null) {
+      return ExerciseVideoPlayer(
+        assetPath: exercise.videoAsset!,
+        height: double.infinity,
+        fit: BoxFit.contain,
+        isPlaying: !isPaused,
+      );
+    }
+    if (exercise.lottieAsset != null) {
+      return Lottie.asset(
+        exercise.lottieAsset!,
+        fit: BoxFit.contain,
+        repeat: true,
+        animate: !isPaused,
+      );
+    }
+    return Center(
+      child: CircleAvatar(
+        radius: 80,
+        backgroundColor: theme.colorScheme.primaryContainer,
+        child: Icon(
+          _categoryIcon(exercise.category),
+          size: 80,
+          color: theme.colorScheme.onPrimaryContainer,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -147,12 +194,7 @@ class _ExerciseView extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Lottie.asset(
-              exercise.lottieAsset,
-              fit: BoxFit.contain,
-              repeat: true,
-              animate: !isPaused,
-            ),
+            child: _buildLottieOrIcon(theme, exercise, isPaused),
           ),
           Text(
             exercise.name,

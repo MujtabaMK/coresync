@@ -43,25 +43,34 @@ class MembershipModel extends HiveObject {
     );
   }
 
-  static const Map<String, int> planPrices = {
-    '1month': 500,
-    '3months': 1200,
-    '6months': 2000,
-    '1year': 3500,
+  static String _planKey(int months) =>
+      months == 1 ? '1month' : '${months}months';
+
+  /// Ordered list of plan keys for display (1–24 months).
+  static final List<String> displayPlanKeys = [
+    for (int i = 1; i <= 24; i++) _planKey(i),
+  ];
+
+  static final Map<String, int> planPrices = {
+    for (int i = 1; i <= 24; i++) _planKey(i): i * 500,
+    '1year': 6000, // backward compat
   };
 
-  static const Map<String, int> planDurations = {
-    '1month': 30,
-    '3months': 90,
-    '6months': 180,
-    '1year': 365,
+  static final Map<String, int> planDurations = {
+    for (int i = 1; i <= 24; i++) _planKey(i): i * 30,
+    '1year': 365, // backward compat
   };
 
-  static const Map<String, String> planLabels = {
-    '1month': '1 Month',
-    '3months': '3 Months',
-    '6months': '6 Months',
-    '1year': '1 Year',
+  static final Map<String, String> planLabels = {
+    for (int i = 1; i <= 24; i++)
+      _planKey(i): i == 12
+          ? '1 Year (12 Months)'
+          : i == 24
+              ? '2 Years (24 Months)'
+              : i == 1
+                  ? '1 Month'
+                  : '$i Months',
+    '1year': '1 Year', // backward compat
   };
 
   bool get isExpired => DateTime.now().isAfter(endDate);

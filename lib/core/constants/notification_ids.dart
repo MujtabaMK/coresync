@@ -26,8 +26,17 @@ class NotificationIds {
     return 2000 + (medicineId.hashCode.abs() % 10000) * 10 + doseIndex;
   }
 
+  // Smart reminders (5000+ range)
+  static const int attendanceReminder = 5007;
+  static const int gymTimeReminder = 5008;
+
   // Task alarms (3000+ range)
   static int taskAlarm(String taskId) {
     return 3000 + (taskId.hashCode.abs() % 10000);
+  }
+
+  // Habit reminders (4000+ range)
+  static int habitReminder(String habitId, int dayIndex) {
+    return 4000 + (habitId.hashCode.abs() % 1000) * 7 + dayIndex;
   }
 }

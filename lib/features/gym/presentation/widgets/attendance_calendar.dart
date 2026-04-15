@@ -26,6 +26,19 @@ class AttendanceCalendar extends StatelessWidget {
       lastDay: DateTime.utc(2030, 12, 31),
       focusedDay: focusedDay,
       selectedDayPredicate: (day) => isSameDay(selectedDay, day),
+      enabledDayPredicate: (day) {
+        final normalizedDay = DateTime(day.year, day.month, day.day);
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        if (normalizedDay.isAfter(today)) return false;
+        if (membershipStartDate == null) return true;
+        final start = DateTime(
+          membershipStartDate!.year,
+          membershipStartDate!.month,
+          membershipStartDate!.day,
+        );
+        return !normalizedDay.isBefore(start);
+      },
       onDaySelected: onDaySelected,
       calendarFormat: CalendarFormat.month,
       startingDayOfWeek: StartingDayOfWeek.monday,

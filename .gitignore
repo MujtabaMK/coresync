@@ -3,6 +3,7 @@
 *.log
 *.pyc
 *.swp
+*.bak
 .DS_Store
 .atom/
 .build/
@@ -11,6 +12,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+node_modules/
 
 # IntelliJ related
 *.iml
@@ -47,3 +49,6 @@ app.*.map.json
 # Release signing
 android/key.properties
 android/app/upload-keystore.jks
+
+# Service account credentials
+assets/service-account.json

@@ -2,6 +2,16 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Public lookup: stores only {email, phoneNumber} per user for
+    // unauthenticated checks (forgot password, signup phone validation).
+    match /user_lookup/{docId} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+                            && request.auth.uid == docId;
+      allow delete: if request.auth != null
+                    && request.auth.uid == docId;
+    }
+
     // Users: any authenticated user can read (needed for phone lookup when sharing),
     // only the owner can write their own document.
     match /users/{userId} {
@@ -29,12 +39,36 @@ service cloud.firestore {
       match /medicines/{docId} {
         allow read, write: if request.auth.uid == userId;
       }
+      match /gym_food_scans/{docId} {
+        allow read, write: if request.auth.uid == userId;
+      }
+      match /gym_food_tracking/{docId} {
+        allow read, write: if request.auth.uid == userId;
+      }
+      match /gym_workouts/{docId} {
+        allow read, write: if request.auth.uid == userId;
+      }
+      match /gym_sleep/{docId} {
+        allow read, write: if request.auth.uid == userId;
+      }
+      match /gym_calorie_goals/{docId} {
+        allow read, write: if request.auth.uid == userId;
+      }
+      match /habits/{docId} {
+        allow read, write: if request.auth.uid == userId;
+      }
 
       // Notifications subcollection (legacy)
       match /notifications/{notifId} {
         allow read, update: if request.auth.uid == userId;
         allow create: if request.auth != null;
       }
+    }
+
+    // Recipes: shared global collection, any authenticated user can read or seed
+    match /recipes/{recipeId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
     }
 
     // Top-level notifications: any authenticated user can create, only target can read/update

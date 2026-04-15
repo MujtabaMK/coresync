@@ -52,6 +52,7 @@ class MedicineCubit extends Cubit<MedicineState> {
       await _repository.saveMedicine(medicine);
 
       // Schedule notifications if reminder is enabled
+      await NotificationService.init();
       final reminderEnabled = medicine['reminderEnabled'] as bool? ?? false;
       final schedulerEnabled = medicine['schedulerEnabled'] as bool? ?? false;
       final id = medicine['id'] as String;

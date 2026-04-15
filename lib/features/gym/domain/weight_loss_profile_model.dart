@@ -1,3 +1,5 @@
+import 'tracked_food_model.dart';
+
 enum Gender { male, female }
 
 enum GoalType {
@@ -34,6 +36,10 @@ class WeightLossProfileModel {
     this.weeklyGoalKg = 0.5,
     this.goalType = GoalType.lose,
     this.isVegetarian = false,
+    this.gymTimeHour,
+    this.proteinScoops = 1,
+    this.takesCreatine = false,
+    this.takesMassGainer = false,
   });
 
   final int age;
@@ -45,6 +51,10 @@ class WeightLossProfileModel {
   final double weeklyGoalKg;
   final GoalType goalType;
   final bool isVegetarian;
+  final int? gymTimeHour; // null = no gym time set (0-23)
+  final int proteinScoops; // number of whey protein scoops per day
+  final bool takesCreatine;
+  final bool takesMassGainer; // only relevant for weight gain goal
 
   // Mifflin-St Jeor BMR
   double get bmr {
@@ -255,6 +265,19 @@ class WeightLossProfileModel {
     }
   }
 
+  /// Whether the user goes to gym
+  bool get hasGymTime => gymTimeHour != null;
+
+  /// Meal slot for whey protein based on gym time
+  /// If gym is morning (before 12), put protein in morning snack
+  /// If gym is afternoon/evening (12+), put protein in evening snack
+  /// If no gym time, default to morning snack
+  MealType get wheyProteinMealSlot {
+    if (gymTimeHour == null) return MealType.morningSnack;
+    if (gymTimeHour! < 12) return MealType.morningSnack;
+    return MealType.eveningSnack;
+  }
+
   Map<String, dynamic> toFirestore() => {
         'wl_age': age,
         'wl_gender': gender.name,
@@ -265,6 +288,10 @@ class WeightLossProfileModel {
         'wl_weeklyGoalKg': weeklyGoalKg,
         'wl_goalType': goalType.name,
         'wl_isVegetarian': isVegetarian,
+        'wl_gymTimeHour': gymTimeHour,
+        'wl_proteinScoops': proteinScoops,
+        'wl_takesCreatine': takesCreatine,
+        'wl_takesMassGainer': takesMassGainer,
       };
 
   factory WeightLossProfileModel.fromFirestore(Map<String, dynamic> data) {
@@ -287,6 +314,10 @@ class WeightLossProfileModel {
         orElse: () => GoalType.lose,
       ),
       isVegetarian: data['wl_isVegetarian'] as bool? ?? false,
+      gymTimeHour: (data['wl_gymTimeHour'] as num?)?.toInt(),
+      proteinScoops: (data['wl_proteinScoops'] as num?)?.toInt() ?? 1,
+      takesCreatine: data['wl_takesCreatine'] as bool? ?? false,
+      takesMassGainer: data['wl_takesMassGainer'] as bool? ?? false,
     );
   }
 
@@ -300,6 +331,11 @@ class WeightLossProfileModel {
     double? weeklyGoalKg,
     GoalType? goalType,
     bool? isVegetarian,
+    int? gymTimeHour,
+    bool clearGymTime = false,
+    int? proteinScoops,
+    bool? takesCreatine,
+    bool? takesMassGainer,
   }) {
     return WeightLossProfileModel(
       age: age ?? this.age,
@@ -311,6 +347,10 @@ class WeightLossProfileModel {
       weeklyGoalKg: weeklyGoalKg ?? this.weeklyGoalKg,
       goalType: goalType ?? this.goalType,
       isVegetarian: isVegetarian ?? this.isVegetarian,
+      gymTimeHour: clearGymTime ? null : (gymTimeHour ?? this.gymTimeHour),
+      proteinScoops: proteinScoops ?? this.proteinScoops,
+      takesCreatine: takesCreatine ?? this.takesCreatine,
+      takesMassGainer: takesMassGainer ?? this.takesMassGainer,
     );
   }
 }

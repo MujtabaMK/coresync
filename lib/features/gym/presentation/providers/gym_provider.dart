@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../../../core/services/smart_reminder_service.dart';
 import '../../data/gym_repository.dart';
@@ -21,12 +22,15 @@ class GymState {
     this.waterMl = 0,
     this.dailyWaterGoalMl = 0,
     this.waterHistory = const {},
+    this.waterGoalHistory = const {},
     this.stepsHistory = const {},
+    this.stepsGoalHistory = const {},
     this.foodScans = const [],
     this.dailyCalories = 0,
     this.calorieHistory = const {},
     this.trackedFoods = const [],
     this.trackedFoodCalorieHistory = const {},
+    this.calorieGoalHistory = const {},
     this.userHeight,
     this.userWeight,
     this.weightLossProfile,
@@ -46,12 +50,15 @@ class GymState {
   final int waterMl;
   final int dailyWaterGoalMl;
   final Map<DateTime, int> waterHistory;
+  final Map<DateTime, int> waterGoalHistory;
   final Map<DateTime, int> stepsHistory;
+  final Map<DateTime, int> stepsGoalHistory;
   final List<FoodScanModel> foodScans;
   final double dailyCalories;
   final Map<DateTime, double> calorieHistory;
   final List<TrackedFoodModel> trackedFoods;
   final Map<DateTime, double> trackedFoodCalorieHistory;
+  final Map<DateTime, double> calorieGoalHistory;
   final double? userHeight;
   final double? userWeight;
   final WeightLossProfileModel? weightLossProfile;
@@ -114,7 +121,27 @@ class GymState {
   // ── Water boost from tracked foods ──
   int get waterBoostMl =>
       trackedFoods.fold<int>(0, (sum, f) => sum + waterBoostForFood(f.name));
-  int get effectiveWaterGoalMl => dailyWaterGoalMl + waterBoostMl;
+
+  /// Extra water needed based on activity level (active people sweat more).
+  int get activityWaterBoostMl {
+    final profile = weightLossProfile;
+    if (profile == null) return 0;
+    switch (profile.activityLevel) {
+      case ActivityLevel.sedentary:
+        return 0;
+      case ActivityLevel.light:
+        return 200;
+      case ActivityLevel.moderate:
+        return 400;
+      case ActivityLevel.active:
+        return 600;
+      case ActivityLevel.extreme:
+        return 800;
+    }
+  }
+
+  int get effectiveWaterGoalMl =>
+      dailyWaterGoalMl + waterBoostMl + activityWaterBoostMl;
 
   List<TrackedFoodModel> trackedFoodsForMeal(MealType meal) =>
       trackedFoods.where((f) => f.mealType == meal).toList();
@@ -147,12 +174,15 @@ class GymState {
     int? waterMl,
     int? dailyWaterGoalMl,
     Map<DateTime, int>? waterHistory,
+    Map<DateTime, int>? waterGoalHistory,
     Map<DateTime, int>? stepsHistory,
+    Map<DateTime, int>? stepsGoalHistory,
     List<FoodScanModel>? foodScans,
     double? dailyCalories,
     Map<DateTime, double>? calorieHistory,
     List<TrackedFoodModel>? trackedFoods,
     Map<DateTime, double>? trackedFoodCalorieHistory,
+    Map<DateTime, double>? calorieGoalHistory,
     double? userHeight,
     bool clearHeight = false,
     double? userWeight,
@@ -177,13 +207,16 @@ class GymState {
       waterMl: waterMl ?? this.waterMl,
       dailyWaterGoalMl: dailyWaterGoalMl ?? this.dailyWaterGoalMl,
       waterHistory: waterHistory ?? this.waterHistory,
+      waterGoalHistory: waterGoalHistory ?? this.waterGoalHistory,
       stepsHistory: stepsHistory ?? this.stepsHistory,
+      stepsGoalHistory: stepsGoalHistory ?? this.stepsGoalHistory,
       foodScans: foodScans ?? this.foodScans,
       dailyCalories: dailyCalories ?? this.dailyCalories,
       calorieHistory: calorieHistory ?? this.calorieHistory,
       trackedFoods: trackedFoods ?? this.trackedFoods,
       trackedFoodCalorieHistory:
           trackedFoodCalorieHistory ?? this.trackedFoodCalorieHistory,
+      calorieGoalHistory: calorieGoalHistory ?? this.calorieGoalHistory,
       userHeight: clearHeight ? null : (userHeight ?? this.userHeight),
       userWeight: clearWeight ? null : (userWeight ?? this.userWeight),
       weightLossProfile: clearWeightLossProfile
@@ -207,6 +240,114 @@ class GymCubit extends Cubit<GymState> {
 
   GymRepository get repository => _repository;
 
+  /// Saves today's water, steps, and calorie goals to Firestore AND updates
+  /// the in-memory goal history maps so the report sees them immediately.
+  void _saveTodaysGoals() {
+    final today = DateTime.now();
+    final norm = DateTime(today.year, today.month, today.day);
+
+    final newWaterGoalHistory = Map<DateTime, int>.from(state.waterGoalHistory);
+    final newStepsGoalHistory = Map<DateTime, int>.from(state.stepsGoalHistory);
+    final newCalorieGoalHistory = Map<DateTime, double>.from(state.calorieGoalHistory);
+
+    // Water goal (includes protein/food water boost)
+    final waterGoal = state.effectiveWaterGoalMl;
+    if (waterGoal > 0) {
+      _repository.saveWaterGoal(today, waterGoal).ignore();
+      newWaterGoalHistory[norm] = waterGoal;
+    }
+
+    // Steps goal (BMI-based) — save for today
+    final h = state.userHeight;
+    final w = state.userWeight;
+    if (h != null && w != null) {
+      final bmi = w / ((h / 100) * (h / 100));
+      int stepsGoal;
+      if (bmi < 18.5) {
+        stepsGoal = 8000;
+      } else if (bmi < 25) {
+        stepsGoal = 10000;
+      } else if (bmi < 30) {
+        stepsGoal = 12000;
+      } else {
+        stepsGoal = 15000;
+      }
+      final todaySteps = state.stepsHistory[norm] ?? 0;
+      _repository
+          .saveStepsForDate(norm, todaySteps, goalSteps: stepsGoal)
+          .ignore();
+      newStepsGoalHistory[norm] = stepsGoal;
+    }
+
+    // Calorie goal from weight loss profile
+    final calGoal = state.weightLossProfile?.dailyCalorieTarget;
+    if (calGoal != null) {
+      _repository.saveCalorieGoalForDate(today, calGoal).ignore();
+      newCalorieGoalHistory[norm] = calGoal;
+    }
+
+    emit(state.copyWith(
+      waterGoalHistory: newWaterGoalHistory,
+      stepsGoalHistory: newStepsGoalHistory,
+      calorieGoalHistory: newCalorieGoalHistory,
+    ));
+  }
+
+  /// Backfill goalMl / goalSteps / goalCalories for old days that were
+  /// recorded before the per-day goal feature was added. Uses the current
+  /// goal as the best approximation and saves it to Firestore so it
+  /// becomes permanent and won't change if the user later updates metrics.
+  void _backfillMissingGoals() {
+    final today = DateTime.now();
+    final norm = DateTime(today.year, today.month, today.day);
+
+    final newWaterGoalHistory =
+        Map<DateTime, int>.from(state.waterGoalHistory);
+    final newStepsGoalHistory =
+        Map<DateTime, int>.from(state.stepsGoalHistory);
+    final newCalorieGoalHistory =
+        Map<DateTime, double>.from(state.calorieGoalHistory);
+    bool changed = false;
+
+    // Water: backfill days with intake but no stored goal
+    final waterGoal = state.dailyWaterGoalMl; // base goal (weight*33)
+    if (waterGoal > 0) {
+      for (final date in state.waterHistory.keys) {
+        if (date == norm) continue; // today is handled by _saveTodaysGoals
+        if (!newWaterGoalHistory.containsKey(date)) {
+          newWaterGoalHistory[date] = waterGoal;
+          _repository.saveWaterGoal(date, waterGoal).ignore();
+          changed = true;
+        }
+      }
+    }
+
+    // Steps: do NOT backfill — the user's BMI (and therefore goal) may have
+    // been different on each historical day.  Only today's goal is set by
+    // _saveTodaysGoals(); past goals are preserved as originally saved.
+
+    // Calories: backfill days with tracked food but no stored goal
+    final calGoal = state.weightLossProfile?.dailyCalorieTarget;
+    if (calGoal != null) {
+      for (final date in state.trackedFoodCalorieHistory.keys) {
+        if (date == norm) continue;
+        if (!newCalorieGoalHistory.containsKey(date)) {
+          _repository.saveCalorieGoalForDate(date, calGoal).ignore();
+          newCalorieGoalHistory[date] = calGoal;
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) {
+      emit(state.copyWith(
+        waterGoalHistory: newWaterGoalHistory,
+        stepsGoalHistory: newStepsGoalHistory,
+        calorieGoalHistory: newCalorieGoalHistory,
+      ));
+    }
+  }
+
   Future<void> loadAll() async {
     emit(state.copyWith(isLoading: true, clearError: true));
     try {
@@ -224,9 +365,23 @@ class GymCubit extends Cubit<GymState> {
         loadTodaySleep(),
         loadSleepHistory(),
       ]);
+      // One-time fix: remove incorrectly backfilled step goals for dates
+      // before the BMI-based goal feature was introduced (April 6, 2026).
+      // Those days should fall back to the default 10000.
+      final settingsBox = Hive.box('app_settings');
+      if (settingsBox.get('step_goals_pre_apr6_cleaned') != true) {
+        await _repository.clearStepGoalsBefore(DateTime(2026, 4, 6));
+        await settingsBox.put('step_goals_pre_apr6_cleaned', true);
+        await loadStepsHistory();
+      }
+
       emit(state.copyWith(isLoading: false));
+      // Persist today's goals so they're locked for this day
+      _saveTodaysGoals();
+      // Backfill goals for old days that don't have them stored yet
+      _backfillMissingGoals();
       // Schedule smart reminders after all data is loaded
-      await SmartReminderService.scheduleAll(state);
+      await SmartReminderService.scheduleAll(state, uid: _repository.uid);
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
     }
@@ -312,8 +467,12 @@ class GymCubit extends Cubit<GymState> {
   Future<void> loadWaterIntake() async {
     try {
       final ml = await _repository.getWaterIntakeForDate(DateTime.now());
-      final history = await _repository.getWaterIntakeHistory();
-      emit(state.copyWith(waterMl: ml, waterHistory: history));
+      final (history, goalHistory) = await _repository.getWaterIntakeAndGoalHistory();
+      emit(state.copyWith(
+        waterMl: ml,
+        waterHistory: history,
+        waterGoalHistory: goalHistory,
+      ));
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
@@ -374,6 +533,8 @@ class GymCubit extends Cubit<GymState> {
     try {
       await _repository.saveUserMetrics(height: height, weight: weight);
       await loadUserMetrics();
+      // Re-save today's goals with the new weight/BMI
+      _saveTodaysGoals();
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
@@ -381,20 +542,25 @@ class GymCubit extends Cubit<GymState> {
 
   Future<void> loadStepsHistory() async {
     try {
-      final history = await _repository.getStepsHistory();
-      emit(state.copyWith(stepsHistory: history));
+      final (history, goalHistory) = await _repository.getStepsAndGoalHistory();
+      emit(state.copyWith(
+        stepsHistory: history,
+        stepsGoalHistory: goalHistory,
+      ));
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
   }
 
-  Future<void> saveSteps(DateTime date, int steps) async {
+  Future<void> saveSteps(DateTime date, int steps, {int? goalSteps}) async {
     try {
       final normalized = DateTime(date.year, date.month, date.day);
-      await _repository.saveStepsForDate(normalized, steps);
+      await _repository.saveStepsForDate(normalized, steps, goalSteps: goalSteps);
       final newHistory = Map<DateTime, int>.from(state.stepsHistory);
       newHistory[normalized] = steps;
-      emit(state.copyWith(stepsHistory: newHistory));
+      final newGoalHistory = Map<DateTime, int>.from(state.stepsGoalHistory);
+      if (goalSteps != null) newGoalHistory[normalized] = goalSteps;
+      emit(state.copyWith(stepsHistory: newHistory, stepsGoalHistory: newGoalHistory));
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
@@ -448,7 +614,20 @@ class GymCubit extends Cubit<GymState> {
   Future<void> saveWeightLossProfile(WeightLossProfileModel profile) async {
     try {
       await _repository.saveWeightLossProfile(profile);
-      emit(state.copyWith(weightLossProfile: profile));
+      // Sync height/weight from the profile to user metrics so BMI-based
+      // step goals and water goals update immediately.
+      await _repository.saveUserMetrics(
+        height: profile.heightCm,
+        weight: profile.currentWeight,
+      );
+      emit(state.copyWith(
+        weightLossProfile: profile,
+        userHeight: profile.heightCm,
+        userWeight: profile.currentWeight,
+        dailyWaterGoalMl: (profile.currentWeight * 33).round(),
+      ));
+      // Re-save today's goals with the new profile + metrics
+      _saveTodaysGoals();
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
@@ -478,10 +657,8 @@ class GymCubit extends Cubit<GymState> {
     try {
       await _repository.saveTrackedFood(food);
       await Future.wait([loadTrackedFood(), loadTrackedFoodCalorieHistory()]);
-      // Update water goal in Firestore (food changes affect water boost)
-      _repository
-          .saveWaterGoal(DateTime.now(), state.effectiveWaterGoalMl)
-          .ignore();
+      // Update today's goals in Firestore + state (food changes affect water boost)
+      _saveTodaysGoals();
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
@@ -491,10 +668,8 @@ class GymCubit extends Cubit<GymState> {
     try {
       await _repository.deleteTrackedFood(id);
       await Future.wait([loadTrackedFood(), loadTrackedFoodCalorieHistory()]);
-      // Update water goal in Firestore (food changes affect water boost)
-      _repository
-          .saveWaterGoal(DateTime.now(), state.effectiveWaterGoalMl)
-          .ignore();
+      // Update today's goals in Firestore + state (food changes affect water boost)
+      _saveTodaysGoals();
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
@@ -503,7 +678,15 @@ class GymCubit extends Cubit<GymState> {
   Future<void> loadTrackedFoodCalorieHistory() async {
     try {
       final history = await _repository.getTrackedFoodCalorieHistory();
-      emit(state.copyWith(trackedFoodCalorieHistory: history));
+      // Load calorie goal history separately so a failure doesn't break food data
+      Map<DateTime, double> goalHistory = {};
+      try {
+        goalHistory = await _repository.getCalorieGoalHistory();
+      } catch (_) {}
+      emit(state.copyWith(
+        trackedFoodCalorieHistory: history,
+        calorieGoalHistory: goalHistory,
+      ));
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }

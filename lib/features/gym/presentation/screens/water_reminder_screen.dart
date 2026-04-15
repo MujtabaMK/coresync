@@ -150,10 +150,10 @@ class _WaterReminderScreenState extends State<WaterReminderScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 SwitchListTile(
-                  title: const Text('Turn off Reminders'),
-                  value: !_masterEnabled,
+                  title: const Text('Enable Reminders'),
+                  value: _masterEnabled,
                   onChanged: (val) {
-                    setState(() => _masterEnabled = !val);
+                    setState(() => _masterEnabled = val);
                     _saveAndSchedule();
                   },
                 ),
@@ -227,16 +227,26 @@ class _WaterReminderScreenState extends State<WaterReminderScreen> {
                     style: TextStyle(color: _masterEnabled ? null : theme.disabledColor),
                   ),
                   secondary: SizedBox(
-                    width: 80,
+                    width: 120,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         SizedBox(
-                          width: 40,
+                          width: 56,
                           child: TextFormField(
                             initialValue: _count.toString(),
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.center,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              isDense: true,
+                            ),
                             enabled: _masterEnabled && _intervalMode == 'count',
                             onChanged: (val) {
                               _count = int.tryParse(val) ?? _count;
@@ -244,8 +254,8 @@ class _WaterReminderScreenState extends State<WaterReminderScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        Text('Times', style: theme.textTheme.bodySmall),
+                        const SizedBox(width: 6),
+                        Text('Times', style: theme.textTheme.bodyMedium),
                       ],
                     ),
                   ),
@@ -265,16 +275,26 @@ class _WaterReminderScreenState extends State<WaterReminderScreen> {
                     style: TextStyle(color: _masterEnabled ? null : theme.disabledColor),
                   ),
                   secondary: SizedBox(
-                    width: 100,
+                    width: 130,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         SizedBox(
-                          width: 40,
+                          width: 56,
                           child: TextFormField(
                             initialValue: _intervalMinutes.toString(),
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.center,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              isDense: true,
+                            ),
                             enabled: _masterEnabled && _intervalMode == 'minutes',
                             onChanged: (val) {
                               _intervalMinutes = int.tryParse(val) ?? _intervalMinutes;
@@ -282,8 +302,8 @@ class _WaterReminderScreenState extends State<WaterReminderScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        Text('Minutes', style: theme.textTheme.bodySmall),
+                        const SizedBox(width: 6),
+                        Text('Min', style: theme.textTheme.bodyMedium),
                       ],
                     ),
                   ),

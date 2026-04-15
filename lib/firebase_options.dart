@@ -55,7 +55,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAHCdbgJrhKau9OWs6pjflGFlc8oD3CtFs',
-    appId: '1:954417312512:android:81fceb96075cf33f3079e5',
+    appId: '1:954417312512:android:d92cb32bf556db1c3079e5',
     messagingSenderId: '954417312512',
     projectId: 'coresync-e7fb5',
     storageBucket: 'coresync-e7fb5.firebasestorage.app',
@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCC0rVmDxtaSfGY7dEHac4kE6o3StlO920',
-    appId: '1:954417312512:ios:a48f80c8b8ebf9523079e5',
+    appId: '1:954417312512:ios:ee9ecbd135b76c123079e5',
     messagingSenderId: '954417312512',
     projectId: 'coresync-e7fb5',
     storageBucket: 'coresync-e7fb5.firebasestorage.app',
@@ -72,10 +72,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCC0rVmDxtaSfGY7dEHac4kE6o3StlO920',
-    appId: '1:954417312512:ios:a48f80c8b8ebf9523079e5',
+    appId: '1:954417312512:ios:ee9ecbd135b76c123079e5',
     messagingSenderId: '954417312512',
     projectId: 'coresync-e7fb5',
     storageBucket: 'coresync-e7fb5.firebasestorage.app',
     iosBundleId: 'com.mujtaba.coresync',
   );
+
 }

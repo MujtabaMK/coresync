@@ -1,82 +1,110 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class MainShell extends StatelessWidget {
+import 'main_shell_drawer.dart';
+
+class MainShell extends StatefulWidget {
   const MainShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  @override
+  State<MainShell> createState() => _MainShellState();
+}
+
+class _MainShellState extends State<MainShell> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   static const _destinations = [
     (
-      icon: Icon(Icons.checklist_outlined),
-      selectedIcon: Icon(Icons.checklist),
+      icon: Icons.home_outlined,
+      selectedIcon: Icons.home,
+      label: 'Home',
+    ),
+    (
+      icon: Icons.checklist_outlined,
+      selectedIcon: Icons.checklist,
       label: 'Todo',
     ),
     (
-      icon: Icon(Icons.lock_outlined),
-      selectedIcon: Icon(Icons.lock),
+      icon: Icons.lock_outlined,
+      selectedIcon: Icons.lock,
       label: 'Passwords',
     ),
     (
-      icon: Icon(Icons.fitness_center_outlined),
-      selectedIcon: Icon(Icons.fitness_center),
-      label: 'Gym',
+      icon: Icons.fitness_center_outlined,
+      selectedIcon: Icons.fitness_center,
+      label: 'Fitness',
+    ),
+    (
+      icon: Icons.track_changes_outlined,
+      selectedIcon: Icons.track_changes,
+      label: 'Habits',
+    ),
+    (
+      icon: Icons.document_scanner_outlined,
+      selectedIcon: Icons.document_scanner,
+      label: 'Scanner',
+    ),
+    (
+      icon: Icons.qr_code_scanner_outlined,
+      selectedIcon: Icons.qr_code_scanner,
+      label: 'QR / Barcode',
+    ),
+    (
+      icon: Icons.calculate_outlined,
+      selectedIcon: Icons.calculate,
+      label: 'Calculator',
+    ),
+    (
+      icon: Icons.translate_outlined,
+      selectedIcon: Icons.translate,
+      label: 'Translator',
     ),
   ];
 
   void _onDestinationSelected(int index) {
-    navigationShell.goBranch(
+    _scaffoldKey.currentState?.closeDrawer();
+    widget.navigationShell.goBranch(
       index,
-      initialLocation: index == navigationShell.currentIndex,
+      initialLocation: index == widget.navigationShell.currentIndex,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isWide = MediaQuery.sizeOf(context).width >= 600;
+    final theme = Theme.of(context);
+    final currentIndex = widget.navigationShell.currentIndex;
 
-    if (isWide) {
-      return Scaffold(
-        body: Row(
+    return MainShellDrawer(
+      openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+      child: Scaffold(
+        key: _scaffoldKey,
+        drawer: NavigationDrawer(
+          selectedIndex: currentIndex,
+          onDestinationSelected: _onDestinationSelected,
           children: [
-            NavigationRail(
-              selectedIndex: navigationShell.currentIndex,
-              onDestinationSelected: _onDestinationSelected,
-              labelType: NavigationRailLabelType.all,
-              destinations: _destinations
-                  .map((d) => NavigationRailDestination(
-                        icon: d.icon,
-                        selectedIcon: d.selectedIcon,
-                        label: Text(d.label),
-                      ))
-                  .toList(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
+              child: Text(
+                'CoreSync Go',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: navigationShell),
+            const Divider(indent: 28, endIndent: 28),
+            ..._destinations.map(
+              (d) => NavigationDrawerDestination(
+                icon: Icon(d.icon),
+                selectedIcon: Icon(d.selectedIcon),
+                label: Text(d.label),
+              ),
+            ),
           ],
         ),
-      );
-    }
-
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          labelTextStyle: WidgetStateProperty.all(
-            const TextStyle(fontSize: 11),
-          ),
-        ),
-        child: NavigationBar(
-          selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: _onDestinationSelected,
-          destinations: _destinations
-              .map((d) => NavigationDestination(
-                    icon: d.icon,
-                    selectedIcon: d.selectedIcon,
-                    label: d.label,
-                  ))
-              .toList(),
-        ),
+        body: widget.navigationShell,
       ),
     );
   }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/widgets/main_shell_drawer.dart';
 import 'attendance_screen.dart';
 import 'gym_home_screen.dart';
 import 'membership_screen.dart';
 import 'report_screen.dart';
 import 'steps_screen.dart';
+import 'track_food_screen.dart';
 import 'water_intake_screen.dart';
 
 class GymShellScreen extends StatefulWidget {
@@ -24,6 +26,7 @@ class _GymShellScreenState extends State<GymShellScreen>
     Tab(icon: Icon(Icons.card_membership_rounded), text: 'Plans'),
     Tab(icon: Icon(Icons.calendar_month_rounded), text: 'Attendance'),
     Tab(icon: Icon(Icons.water_drop_rounded), text: 'Water'),
+    Tab(icon: Icon(Icons.restaurant_rounded), text: 'Food'),
     Tab(icon: Icon(Icons.directions_walk_rounded), text: 'Steps'),
     Tab(icon: Icon(Icons.bar_chart_rounded), text: 'Report'),
   ];
@@ -33,6 +36,7 @@ class _GymShellScreenState extends State<GymShellScreen>
     MembershipScreen(),
     AttendanceScreen(),
     WaterIntakeScreen(),
+    TrackFoodScreen(),
     StepsScreen(),
     ReportScreen(),
   ];
@@ -51,12 +55,13 @@ class _GymShellScreenState extends State<GymShellScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Gym Tracker'),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: MainShellDrawer.of(context),
+        ),
+        title: const Text('Fitness Tracker'),
         actions: [
           IconButton(
             icon: const Icon(Icons.person),

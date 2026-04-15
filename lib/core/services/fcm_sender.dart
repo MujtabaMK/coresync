@@ -44,6 +44,20 @@ class FcmSender {
           'title': title,
           'body': body,
         },
+        // APNs config ensures iOS displays the notification even when the
+        // app is killed/terminated.
+        'apns': {
+          'headers': {
+            'apns-priority': '10',
+            'apns-push-type': 'alert',
+          },
+          'payload': {
+            'aps': {
+              'sound': 'default',
+              'mutable-content': 1,
+            },
+          },
+        },
         if (data != null) 'data': data,
       },
     };

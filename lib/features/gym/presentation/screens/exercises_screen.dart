@@ -13,7 +13,7 @@ class ExercisesScreen extends StatefulWidget {
 }
 
 class _ExercisesScreenState extends State<ExercisesScreen> {
-  String _selectedCategory = 'Chest';
+  String _selectedCategory = 'Abs';
 
   @override
   Widget build(BuildContext context) {

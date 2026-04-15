@@ -1,7 +1,7 @@
 name: coresync
 description: "A multi-module productivity app with TodoList, Password Manager, and Gym Tracker."
 publish_to: 'none'
-version: 1.0.4+5
+version: 1.0.6+8
 
 environment:
   sdk: ^3.10.4
@@ -26,6 +26,8 @@ dependencies:
   # Local Database
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  sqflite: ^2.4.1
+  path: ^1.9.0
 
   # Security
   flutter_secure_storage: ^9.2.4
@@ -47,10 +49,33 @@ dependencies:
   firebase_messaging: ^15.2.10
   flutter_contacts: ^1.1.9+2
   pedometer_2: ^5.0.4
+  flutter_activity_recognition: ^3.0.1
   permission_handler: ^11.3.1
   health: ^13.3.1
   googleapis_auth: ^1.6.0
   http: ^1.2.2
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
+  google_generative_ai: ^0.4.6
+  flutter_doc_scanner: ^0.0.18
+  pdf: ^3.11.1
+  share_plus: ^10.1.4
+  printing: ^5.13.4
+  google_mlkit_text_recognition: ^0.15.1
+  translator: ^1.0.0
+  image_cropper: ^8.0.2
+  image: ^4.5.2
+  crypto: ^3.0.6
+  mobile_scanner: ^7.0.0
+  nfc_manager: ^3.5.0
+  math_expressions: ^2.6.0
+  url_launcher: ^6.3.2
+  speech_to_text: ^7.0.0
+  flutter_tts: ^4.2.0
+  local_auth: ^2.3.0
+  cached_network_image: ^3.4.1
+  video_player: ^2.11.1
+  archive: ^4.0.4
 
 dev_dependencies:
   flutter_test:
@@ -62,7 +87,7 @@ dev_dependencies:
   flutter_native_splash: ^2.4.5
 
 flutter_launcher_icons:
-  android: false
+  android: true
   ios: true
   image_path: "assets/app_icon.png"
   remove_alpha_ios: true
@@ -83,7 +108,7 @@ flutter_launcher_icons:
     image_path: "assets/app_icon.png"
 
 flutter_native_splash:
-  background_image: "assets/splash_screen.png"
+  background_image: "assets/splash_screen.jpg"
   fullscreen: true
   android: true
   ios: true
@@ -92,6 +117,9 @@ flutter_native_splash:
 flutter:
   uses-material-design: true
   assets:
-    - assets/splash_screen.png
+    - assets/splash_screen.jpg
     - assets/service-account.json
     - assets/lottie/exercises/
+    - assets/videos/exercises/
+    - assets/recipes/
+    - assets/foods/

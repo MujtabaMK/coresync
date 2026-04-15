@@ -207,13 +207,18 @@ class DietChartPdfService {
             ],
           ),
         ),
-        footer: (ctx) => pw.Container(
-          alignment: pw.Alignment.centerRight,
-          margin: const pw.EdgeInsets.only(top: 8),
-          child: pw.Text(
-            'Page ${ctx.pageNumber} of ${ctx.pagesCount}',
-            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey),
-          ),
+        footer: (ctx) => pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text(
+              '\u00a9 CoreSync Go',
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey),
+            ),
+            pw.Text(
+              'Page ${ctx.pageNumber} of ${ctx.pagesCount}',
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey),
+            ),
+          ],
         ),
         build: (ctx) => [
           // ── 1. Profile Summary ──
@@ -288,26 +293,43 @@ class DietChartPdfService {
           pw.SizedBox(height: 8),
           pw.Row(children: [
             pw.Expanded(
-                child: statBox('Water Goal',
-                    '${(chart.waterGoalMl / 1000).toStringAsFixed(1)} L (${(chart.waterGoalMl / 250).round()} glasses)',
+                child: statBox('Base Water',
+                    '${(chart.waterGoalMl / 1000).toStringAsFixed(1)} L',
+                    accent: waterColor)),
+            pw.SizedBox(width: 8),
+            pw.Expanded(
+                child: statBox('Water (dynamic)',
+                    'Varies by day',
                     accent: waterColor)),
             pw.SizedBox(width: 8),
             pw.Expanded(
                 child: statBox('Steps Goal',
                     _formatNumber(chart.stepsGoal),
                     accent: stepsColor)),
-            pw.SizedBox(width: 8),
-            pw.Expanded(child: pw.SizedBox()),
           ]),
           pw.SizedBox(height: 16),
 
           // ── 3. Seven Day Meal Plans ──
           ...chart.days.expand((day) => [
                 sectionHeader(
-                  '${day.dayLabel} (Total: ${day.totalCalories} / ${profile.dailyCalorieTarget.round()} kcal)',
+                  '${day.dayLabel} (${day.totalCalories} / ${profile.dailyCalorieTarget.round()} kcal)',
                   dayColor,
                 ),
-                pw.SizedBox(height: 8),
+                pw.SizedBox(height: 4),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 4),
+                  child: pw.Row(children: [
+                    pw.Text(
+                      'Water Goal: ${(day.waterGoalMl / 1000).toStringAsFixed(1)} L (${(day.waterGoalMl / 250).round()} glasses)',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                        color: waterColor,
+                      ),
+                    ),
+                  ]),
+                ),
+                pw.SizedBox(height: 6),
                 ...day.meals.expand((meal) => [
                       mealTable(meal),
                       pw.SizedBox(height: 6),

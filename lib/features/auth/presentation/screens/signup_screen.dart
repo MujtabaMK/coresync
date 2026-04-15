@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -32,6 +33,23 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
+  String _friendlyAuthError(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'email-already-in-use':
+        return 'An account with this email already exists. Please log in.';
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'weak-password':
+        return 'Password is too weak. Use at least 6 characters.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      case 'network-request-failed':
+        return 'No internet connection. Please check your network.';
+      default:
+        return 'Sign up failed. Please try again.';
+    }
+  }
+
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -39,23 +57,45 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       final authRepository = context.read<AuthCubit>().repository;
+
+      // Check if phone number is already taken (before creating account)
+      final phone = _phoneController.text.trim();
+      final phoneTaken = await authRepository.isPhoneNumberTaken(phone);
+      if (phoneTaken) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          showErrorSnackBar(
+            context,
+            'This phone number is already registered. Try a different number.',
+          );
+        }
+        return;
+      }
+
       final userCredential = await authRepository.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+
       if (userCredential.user != null) {
         await authRepository.createUserDocument(
           userCredential.user!,
           firstName: _firstNameController.text.trim(),
           lastName: _lastNameController.text.trim(),
-          phoneNumber: _phoneController.text.trim(),
+          phoneNumber: phone,
         );
       }
-      if (mounted) context.go('/todo');
+
+      if (mounted) context.go('/home');
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        showErrorSnackBar(context, _friendlyAuthError(e));
+      }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        showErrorSnackBar(context, e.toString());
+        showErrorSnackBar(context, 'Sign up failed. Please try again.');
       }
     }
   }
@@ -90,7 +130,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign up to get started with CoreSync',
+                    'Sign up to get started with CoreSync Go',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

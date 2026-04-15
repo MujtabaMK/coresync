@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -57,6 +58,10 @@ class _SetupFormState extends State<_SetupForm> {
   ActivityLevel _activityLevel = ActivityLevel.moderate;
   double _weeklyGoal = 0.5;
   bool _isVegetarian = false;
+  int? _gymTimeHour;
+  int _proteinScoops = 1;
+  bool _takesCreatine = false;
+  bool _takesMassGainer = false;
 
   @override
   void initState() {
@@ -90,6 +95,17 @@ class _SetupFormState extends State<_SetupForm> {
     );
   }
 
+  void _pickGymTime() async {
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: _gymTimeHour ?? 7, minute: 0),
+      helpText: 'Select your gym time',
+    );
+    if (time != null) {
+      setState(() => _gymTimeHour = time.hour);
+    }
+  }
+
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     final currentW = double.parse(_currentWeightCtrl.text.trim());
@@ -106,6 +122,10 @@ class _SetupFormState extends State<_SetupForm> {
       heightCm: double.parse(_heightCtrl.text.trim()),
       weeklyGoalKg: _goalType == GoalType.maintain ? 0 : _weeklyGoal,
       isVegetarian: _isVegetarian,
+      gymTimeHour: _gymTimeHour,
+      proteinScoops: _proteinScoops,
+      takesCreatine: _takesCreatine,
+      takesMassGainer: _takesMassGainer,
     );
     context.read<GymCubit>().saveWeightLossProfile(profile);
   }
@@ -323,6 +343,77 @@ class _SetupFormState extends State<_SetupForm> {
               onSelectionChanged: (s) =>
                   setState(() => _isVegetarian = s.first),
             ),
+            const SizedBox(height: 24),
+
+            // ── Supplements & Gym ───
+            Text('Supplements & Gym', style: theme.textTheme.titleSmall),
+            const SizedBox(height: 12),
+
+            // Gym Time (optional)
+            InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: _pickGymTime,
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Gym Time (Optional)',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_gymTimeHour != null)
+                        IconButton(
+                          icon: const Icon(Icons.clear, size: 18),
+                          onPressed: () =>
+                              setState(() => _gymTimeHour = null),
+                        ),
+                      const Icon(Icons.access_time),
+                      const SizedBox(width: 12),
+                    ],
+                  ),
+                ),
+                child: Text(_gymTimeHour != null
+                    ? _formatHour(_gymTimeHour!)
+                    : 'Not set'),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Protein Scoops
+            Text('Whey Protein Scoops/Day',
+                style: theme.textTheme.titleSmall),
+            const SizedBox(height: 8),
+            SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 1, label: Text('1 Scoop')),
+                ButtonSegment(value: 2, label: Text('2 Scoops')),
+              ],
+              selected: {_proteinScoops},
+              onSelectionChanged: (s) =>
+                  setState(() => _proteinScoops = s.first),
+            ),
+            const SizedBox(height: 12),
+
+            // Creatine
+            SwitchListTile(
+              title: const Text('Taking Creatine?'),
+              subtitle:
+                  const Text('5g creatine monohydrate daily'),
+              value: _takesCreatine,
+              onChanged: (v) => setState(() => _takesCreatine = v),
+              contentPadding: EdgeInsets.zero,
+            ),
+
+            // Mass Gainer (only for weight gain)
+            if (_goalType == GoalType.gain)
+              SwitchListTile(
+                title: const Text('Taking Mass Gainer?'),
+                subtitle: const Text(
+                    'High calorie supplement for weight gain'),
+                value: _takesMassGainer,
+                onChanged: (v) =>
+                    setState(() => _takesMassGainer = v),
+                contentPadding: EdgeInsets.zero,
+              ),
             const SizedBox(height: 32),
 
             SizedBox(
@@ -375,7 +466,22 @@ class _DashboardState extends State<_Dashboard> {
     setState(() => _exporting = true);
     try {
       final authState = context.read<AuthCubit>().state;
-      final userName = authState.user?.displayName ?? 'CoreSync Go User';
+      final uid = authState.user?.uid;
+      String userName = authState.user?.displayName ?? 'User';
+      if (uid != null) {
+        final snap = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .get();
+        final d = snap.data();
+        if (d != null) {
+          final full = [d['firstName'], d['lastName']]
+              .where((s) => s != null && s.toString().isNotEmpty)
+              .join(' ');
+          if (full.isNotEmpty) userName = full;
+          else if (d['displayName'] != null) userName = d['displayName'];
+        }
+      }
 
       // Use app's actual daily goals
       final waterGoal = state.effectiveWaterGoalMl > 0
@@ -599,6 +705,16 @@ class _DashboardState extends State<_Dashboard> {
                   _SummaryRow('Activity', profile.activityLevel.label),
                   _SummaryRow('Diet',
                       profile.isVegetarian ? 'Vegetarian' : 'Non-Vegetarian'),
+                  if (profile.hasGymTime)
+                    _SummaryRow(
+                        'Gym Time', _formatHour(profile.gymTimeHour!)),
+                  _SummaryRow(
+                      'Whey Protein', '${profile.proteinScoops} scoop/day'),
+                  if (profile.takesCreatine)
+                    const _SummaryRow('Creatine', 'Yes'),
+                  if (profile.takesMassGainer &&
+                      profile.goalType == GoalType.gain)
+                    const _SummaryRow('Mass Gainer', 'Yes'),
                   _SummaryRow('Est. Duration',
                       '~${profile.estimatedWeeks} weeks'),
                   _SummaryRow('TDEE',
@@ -812,6 +928,12 @@ class _ActionCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _formatHour(int hour) {
+  final period = hour >= 12 ? 'PM' : 'AM';
+  final h = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+  return '$h:00 $period';
 }
 
 class _ActivityPickerDialog extends StatefulWidget {

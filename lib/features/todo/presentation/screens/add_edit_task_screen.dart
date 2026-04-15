@@ -26,7 +26,7 @@ class AddEditTaskScreen extends StatefulWidget {
 
 class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
+  final _titleControllers = <TextEditingController>[TextEditingController()];
   final _descriptionController = TextEditingController();
   final _phoneShareController = TextEditingController();
   TaskStatus _status = TaskStatus.notStarted;
@@ -69,7 +69,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
   void _populateFields(TaskModel task) {
     setState(() {
       _existingTask = task;
-      _titleController.text = task.title;
+      _titleControllers.first.text = task.title;
       _descriptionController.text = task.description;
       _status = task.status;
       _dueDate = task.dueDate;
@@ -103,9 +103,25 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
     }
   }
 
+  void _addTitleField() {
+    setState(() {
+      _titleControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeTitleField(int index) {
+    if (_titleControllers.length <= 1) return;
+    setState(() {
+      _titleControllers[index].dispose();
+      _titleControllers.removeAt(index);
+    });
+  }
+
   @override
   void dispose() {
-    _titleController.dispose();
+    for (final c in _titleControllers) {
+      c.dispose();
+    }
     _descriptionController.dispose();
     _phoneShareController.dispose();
     super.dispose();
@@ -199,7 +215,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
           setState(() {
             _isLoading = false;
             _phoneError =
-                'This phone number is not registered in CoreSync.';
+                'This phone number is not registered in CoreSync Go.';
           });
         }
         return;
@@ -236,7 +252,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
 
       if (_isEditing && _existingTask != null) {
         final updatedTask = _existingTask!.copyWith(
-          title: _titleController.text.trim(),
+          title: _titleControllers.first.text.trim(),
           description: _descriptionController.text.trim(),
           status: _status,
           dueDate: dueDateTime,
@@ -249,7 +265,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
         await NotificationService.scheduleOnceAlarm(
           id: alarmId,
           title: 'Task Reminder',
-          body: _titleController.text.trim(),
+          body: _titleControllers.first.text.trim(),
           scheduledDate: dueDateTime,
         );
 
@@ -258,55 +274,66 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
           context.pop();
         }
       } else {
-        final newTask = TaskModel(
-          id: '',
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim(),
-          status: _status,
-          ownerId: user.uid,
-          ownerEmail: user.email ?? '',
-          dueDate: dueDateTime,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-        final taskId = await cubit.addTask(newTask);
+        // Collect all non-empty titles
+        final titles = _titleControllers
+            .map((c) => c.text.trim())
+            .where((t) => t.isNotEmpty)
+            .toList();
 
-        // Schedule alarm for the due date
-        await NotificationService.scheduleOnceAlarm(
-          id: NotificationIds.taskAlarm(taskId),
-          title: 'Task Reminder',
-          body: _titleController.text.trim(),
-          scheduledDate: dueDateTime,
-        );
+        // Look up share target once if phone provided
+        Map<String, dynamic>? shareTarget;
+        if (phone.isNotEmpty) {
+          shareTarget = await cubit.shareRepository.findUserByPhone(phone);
+        }
 
-        // Share with phone if provided
-        if (phone.isNotEmpty && mounted) {
-          final shareRepo = cubit.shareRepository;
-          final foundUser = await shareRepo.findUserByPhone(phone);
-          if (foundUser != null) {
-            final targetUid = foundUser['uid'] as String;
-            await shareRepo.shareTask(taskId, targetUid);
+        for (final title in titles) {
+          final newTask = TaskModel(
+            id: '',
+            title: title,
+            description: _descriptionController.text.trim(),
+            status: _status,
+            ownerId: user.uid,
+            ownerEmail: user.email ?? '',
+            dueDate: dueDateTime,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+          final taskId = await cubit.addTask(newTask);
 
-            // Send push notification to the target user
-            try {
-              final senderName = user.displayName ?? 'Someone';
-              await PushNotificationService.sendNotification(
-                targetUid: targetUid,
-                title: 'Task Shared',
-                body: '$senderName shared a task with you',
-              );
-            } catch (_) {}
+          // Schedule alarm for the due date
+          await NotificationService.scheduleOnceAlarm(
+            id: NotificationIds.taskAlarm(taskId),
+            title: 'Task Reminder',
+            body: title,
+            scheduledDate: dueDateTime,
+          );
 
-            if (mounted) {
-              showSuccessSnackBar(context, 'Task created and shared');
-              context.pop();
-              return;
-            }
+          // Share with phone if provided
+          if (shareTarget != null) {
+            final targetUid = shareTarget['uid'] as String;
+            await cubit.shareRepository.shareTask(taskId, targetUid);
           }
         }
 
+        // Send push notification once if shared
+        if (shareTarget != null && mounted) {
+          try {
+            final targetUid = shareTarget['uid'] as String;
+            final senderName = user.displayName ?? 'Someone';
+            final taskWord = titles.length == 1 ? 'a task' : '${titles.length} tasks';
+            await PushNotificationService.sendNotification(
+              targetUid: targetUid,
+              title: 'Task Shared',
+              body: '$senderName shared $taskWord with you',
+            );
+          } catch (_) {}
+        }
+
         if (mounted) {
-          showSuccessSnackBar(context, 'Task created');
+          final msg = titles.length == 1
+              ? 'Task created${phone.isNotEmpty ? ' and shared' : ''}'
+              : '${titles.length} tasks created${phone.isNotEmpty ? ' and shared' : ''}';
+          showSuccessSnackBar(context, msg);
           context.pop();
         }
       }
@@ -335,17 +362,46 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Title',
-                        hintText: 'Enter task title',
-                        border: OutlineInputBorder(),
+                    // Title fields
+                    for (int i = 0; i < _titleControllers.length; i++) ...[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _titleControllers[i],
+                              decoration: InputDecoration(
+                                labelText: _titleControllers.length > 1
+                                    ? 'Title ${i + 1}'
+                                    : 'Title',
+                                hintText: 'Enter task title',
+                                border: const OutlineInputBorder(),
+                              ),
+                              validator: (v) =>
+                                  Validators.requiredField(v, 'Title'),
+                              textInputAction: TextInputAction.next,
+                            ),
+                          ),
+                          if (!_isEditing && _titleControllers.length > 1)
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle_outline),
+                              tooltip: 'Remove',
+                              onPressed: () => _removeTitleField(i),
+                            ),
+                        ],
                       ),
-                      validator: (v) => Validators.requiredField(v, 'Title'),
-                      textInputAction: TextInputAction.next,
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 8),
+                    ],
+                    if (!_isEditing)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: _addTitleField,
+                          icon: const Icon(Icons.add, size: 20),
+                          label: const Text('Add another title'),
+                        ),
+                      ),
+                    const SizedBox(height: 8),
                     TextFormField(
                       controller: _descriptionController,
                       decoration: const InputDecoration(
@@ -444,7 +500,11 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                                 color: Colors.white,
                               ),
                             )
-                          : Text(_isEditing ? 'Update Task' : 'Create Task'),
+                          : Text(_isEditing
+                              ? 'Update Task'
+                              : _titleControllers.length > 1
+                                  ? 'Create ${_titleControllers.length} Tasks'
+                                  : 'Create Task'),
                     ),
                   ],
                 ),

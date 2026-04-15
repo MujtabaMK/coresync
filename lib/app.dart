@@ -16,6 +16,16 @@ import 'features/gym/presentation/providers/medicine_provider.dart';
 import 'features/passwords/data/password_repository.dart';
 import 'features/passwords/data/password_sync_repository.dart';
 import 'features/passwords/presentation/providers/password_provider.dart';
+import 'features/calculator/presentation/providers/calculator_provider.dart';
+import 'features/translator/presentation/providers/translator_provider.dart';
+import 'features/gym/data/recipe_repository.dart';
+import 'features/gym/presentation/providers/recipe_provider.dart';
+import 'features/habits/data/habit_repository.dart';
+import 'features/habits/presentation/providers/habit_provider.dart';
+import 'features/qr_scanner/data/qr_scanner_repository.dart';
+import 'features/qr_scanner/presentation/providers/qr_scanner_provider.dart';
+import 'features/scanner/data/scanner_repository.dart';
+import 'features/scanner/presentation/providers/scanner_provider.dart';
 import 'features/todo/data/share_repository.dart';
 import 'features/todo/data/todo_repository.dart';
 import 'features/todo/presentation/providers/report_provider.dart';
@@ -136,7 +146,47 @@ class _CoreSyncAppState extends State<CoreSyncApp> {
                   return cubit;
                 },
               ),
+              BlocProvider<ScannerCubit>(
+                key: ValueKey('scanner_$uid'),
+                create: (_) {
+                  final cubit = ScannerCubit(
+                    repository: ScannerRepository(uid: uid),
+                  );
+                  if (uid.isNotEmpty) cubit.loadDocuments();
+                  return cubit;
+                },
+              ),
               BlocProvider<ReportCubit>(create: (_) => ReportCubit()),
+              BlocProvider<QrScannerCubit>(
+                create: (_) {
+                  final cubit = QrScannerCubit(
+                    repository: QrScannerRepository(),
+                  );
+                  cubit.loadHistory();
+                  return cubit;
+                },
+              ),
+              BlocProvider<CalculatorCubit>(
+                create: (_) => CalculatorCubit(),
+              ),
+              BlocProvider<TranslatorCubit>(
+                create: (_) => TranslatorCubit(),
+              ),
+              BlocProvider<RecipeCubit>(
+                create: (_) => RecipeCubit(
+                  repository: RecipeRepository(),
+                ),
+              ),
+              BlocProvider<HabitCubit>(
+                key: ValueKey('habits_$uid'),
+                create: (_) {
+                  final cubit = HabitCubit(
+                    repository: HabitRepository(uid: uid),
+                  );
+                  if (uid.isNotEmpty) cubit.loadHabits();
+                  return cubit;
+                },
+              ),
             ],
             child: BlocBuilder<ThemeCubit, ThemeMode>(
               builder: (context, themeMode) {
@@ -144,7 +194,7 @@ class _CoreSyncAppState extends State<CoreSyncApp> {
                   onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
                   behavior: HitTestBehavior.translucent,
                   child: MaterialApp.router(
-                    title: 'CoreSync',
+                    title: 'CoreSync Go',
                     debugShowCheckedModeBanner: false,
                     theme: AppTheme.lightTheme,
                     darkTheme: AppTheme.darkTheme,

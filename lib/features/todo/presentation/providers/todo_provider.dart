@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/constants/notification_ids.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../data/share_repository.dart';
 import '../../data/todo_repository.dart';
 import '../../domain/task_model.dart';
@@ -85,6 +87,7 @@ class TodoCubit extends Cubit<TodoState> {
 
   StreamSubscription<List<TaskModel>>? _myTasksSub;
   StreamSubscription<List<TaskModel>>? _sharedTasksSub;
+  bool _alarmsScheduled = false;
 
   /// Public getters so screens can perform one-off repository operations.
   TodoRepository get repository => _todoRepository;
@@ -96,11 +99,31 @@ class TodoCubit extends Cubit<TodoState> {
     _myTasksSub = _todoRepository.watchMyTasks(_uid).listen(
       (tasks) {
         emit(state.copyWith(myTasks: tasks, isLoading: false, error: () => null));
+        if (!_alarmsScheduled) {
+          _alarmsScheduled = true;
+          _rescheduleTaskAlarms(tasks);
+        }
       },
       onError: (Object e) {
         emit(state.copyWith(isLoading: false, error: () => e.toString()));
       },
     );
+  }
+
+  /// Re-schedule alarms for all future incomplete tasks on login/app start.
+  Future<void> _rescheduleTaskAlarms(List<TaskModel> tasks) async {
+    final now = DateTime.now();
+    for (final task in tasks) {
+      if (task.status != TaskStatus.completed &&
+          task.dueDate.isAfter(now)) {
+        await NotificationService.scheduleOnceAlarm(
+          id: NotificationIds.taskAlarm(task.id),
+          title: 'Task Reminder',
+          body: task.title,
+          scheduledDate: task.dueDate,
+        );
+      }
+    }
   }
 
   /// Subscribe to tasks shared with the current user.
@@ -140,6 +163,7 @@ class TodoCubit extends Cubit<TodoState> {
 
   /// Delete a task and update local state immediately.
   Future<void> deleteTask(String taskId) async {
+    await NotificationService.cancel(NotificationIds.taskAlarm(taskId));
     await _todoRepository.deleteTask(taskId);
     emit(state.copyWith(
       myTasks: state.myTasks.where((t) => t.id != taskId).toList(),
@@ -150,6 +174,10 @@ class TodoCubit extends Cubit<TodoState> {
   /// Delete multiple tasks and update local state immediately.
   Future<void> deleteTasks(List<String> taskIds) async {
     final idSet = taskIds.toSet();
+    // Cancel alarms for deleted tasks
+    for (final id in taskIds) {
+      await NotificationService.cancel(NotificationIds.taskAlarm(id));
+    }
     // Optimistically remove from local state
     emit(state.copyWith(
       myTasks: state.myTasks.where((t) => !idSet.contains(t.id)).toList(),
@@ -164,6 +192,9 @@ class TodoCubit extends Cubit<TodoState> {
 
   /// Update task status and update local state immediately.
   Future<void> updateTaskStatus(String taskId, TaskStatus status) async {
+    if (status == TaskStatus.completed) {
+      await NotificationService.cancel(NotificationIds.taskAlarm(taskId));
+    }
     await _todoRepository.updateTaskStatus(taskId, status);
     TaskModel updater(TaskModel t) {
       if (t.id == taskId) {

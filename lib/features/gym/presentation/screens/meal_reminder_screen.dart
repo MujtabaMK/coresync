@@ -147,10 +147,10 @@ class _MealReminderScreenState extends State<MealReminderScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 SwitchListTile(
-                  title: const Text('Turn off Reminders'),
-                  value: !_masterEnabled,
+                  title: const Text('Enable Reminders'),
+                  value: _masterEnabled,
                   onChanged: (val) {
-                    setState(() => _masterEnabled = !val);
+                    setState(() => _masterEnabled = val);
                     _saveAndSchedule();
                   },
                 ),
