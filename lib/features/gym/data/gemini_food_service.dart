@@ -7,6 +7,13 @@ import '../../../core/constants/app_constants.dart';
 import '../domain/food_scan_model.dart';
 import 'common_foods_data.dart';
 
+class GeminiApiException implements Exception {
+  final String userMessage;
+  GeminiApiException(this.userMessage);
+  @override
+  String toString() => userMessage;
+}
+
 class GeminiFoodService {
   GeminiFoodService._();
   static final instance = GeminiFoodService._();
@@ -14,11 +21,37 @@ class GeminiFoodService {
   GenerativeModel? _model;
 
   GenerativeModel get _gemini {
+    if (AppConstants.geminiApiKey.isEmpty) {
+      throw GeminiApiException(
+        'Gemini API key not configured. Pass GEMINI_API_KEY via --dart-define.',
+      );
+    }
     _model ??= GenerativeModel(
       model: AppConstants.geminiModel,
       apiKey: AppConstants.geminiApiKey,
     );
     return _model!;
+  }
+
+  /// Converts raw exceptions into user-friendly messages.
+  Never _handleError(Object e) {
+    final msg = e.toString().toLowerCase();
+    if (msg.contains('quota') || msg.contains('resource_exhausted') || msg.contains('rate limit')) {
+      throw GeminiApiException(
+        'Gemini AI quota exceeded. Please check your billing at ai.google.dev or try again later.',
+      );
+    }
+    if (msg.contains('api key not valid') || msg.contains('unregistered callers')) {
+      throw GeminiApiException(
+        'Gemini API key is invalid. Please update your key in dart_defines.json.',
+      );
+    }
+    if (msg.contains('permission denied') || msg.contains('forbidden')) {
+      throw GeminiApiException(
+        'Gemini API access denied. Ensure the Generative Language API is enabled for your project.',
+      );
+    }
+    throw GeminiApiException('AI service unavailable. Please try again later.');
   }
 
   Future<List<FoodItem>> analyzeFoodImage(Uint8List imageBytes) async {
@@ -31,14 +64,20 @@ class GeminiFoodService {
 
     final imagePart = DataPart('image/jpeg', imageBytes);
 
-    final response = await _gemini.generateContent([
-      Content.multi([prompt, imagePart]),
-    ]);
+    try {
+      final response = await _gemini.generateContent([
+        Content.multi([prompt, imagePart]),
+      ]);
 
-    final text = response.text;
-    if (text == null || text.isEmpty) return [];
+      final text = response.text;
+      if (text == null || text.isEmpty) return [];
 
-    return _parseResponse(text);
+      return _parseResponse(text);
+    } on GeminiApiException {
+      rethrow;
+    } catch (e) {
+      _handleError(e);
+    }
   }
 
   /// Search for food nutrition data by name using Gemini AI.
@@ -55,14 +94,20 @@ class GeminiFoodService {
       'Return ONLY a valid JSON array with no extra text.',
     );
 
-    final response = await _gemini.generateContent([
-      Content.text(prompt.text),
-    ]);
+    try {
+      final response = await _gemini.generateContent([
+        Content.text(prompt.text),
+      ]);
 
-    final text = response.text;
-    if (text == null || text.isEmpty) return [];
+      final text = response.text;
+      if (text == null || text.isEmpty) return [];
 
-    return _parseFoodSearchResponse(text);
+      return _parseFoodSearchResponse(text);
+    } on GeminiApiException {
+      rethrow;
+    } catch (e) {
+      _handleError(e);
+    }
   }
 
   List<CommonFoodItem> _parseFoodSearchResponse(String text) {

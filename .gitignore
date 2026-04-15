@@ -1,4 +1,4 @@
-# Miscellaneous
+I # Miscellaneous
 *.class
 *.log
 *.pyc
@@ -56,3 +56,6 @@ assets/service-account.json
 # Environment files
 .env
 .env.*
+
+# Secret keys (env.dart contains API keys — never commit)
+lib/core/constants/env.dart

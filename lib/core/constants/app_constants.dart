@@ -1,3 +1,7 @@
+import 'env.dart' as env;
+
+const String _envGeminiApiKey = env.geminiApiKey;
+
 class AppConstants {
   AppConstants._();
 
@@ -23,7 +27,7 @@ class AppConstants {
   static const String encryptionKeyName = 'coresync_hive_key';
 
   // Gemini AI
-  static const String geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
+  static const String geminiApiKey = _envGeminiApiKey;
   static const String geminiModel = 'gemini-2.0-flash';
 
   // Task status values
