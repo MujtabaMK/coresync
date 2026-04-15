@@ -329,19 +329,6 @@
         .habit-check-btn{width:36px;height:36px;border-radius:50%;border:2px solid rgba(0,0,0,.12);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;font-size:1rem}
         .habit-check-btn.checked{background:var(--green);border-color:var(--green);color:#fff}
         .habit-check-btn:hover{border-color:var(--green)}
-        .habit-actions{display:flex;gap:6px;flex-shrink:0}
-        .habit-act-btn{width:32px;height:32px;border-radius:8px;border:none;background:rgba(0,0,0,.04);color:#6B7280;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-        .habit-act-btn:hover{background:rgba(0,0,0,.08);color:#1E2432}
-        .habit-act-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
-        .habit-days-row{display:flex;gap:4px;margin-top:6px}
-        .habit-day-chip{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#6B7280;cursor:pointer;transition:all .2s}
-        .habit-day-chip.active{background:rgba(74,95,224,.12);border-color:rgba(74,95,224,.3);color:#4A5FE0}
-        .form-label{font-size:.82rem;font-weight:600;color:#6B7280;margin-bottom:4px;display:block}
-        .form-time-row{display:flex;gap:8px;align-items:center}
-        .form-time-row input{width:70px;text-align:center}
-        .form-switch{display:flex;align-items:center;gap:10px;margin:10px 0}
-        .form-switch label{font-size:.85rem;color:#6B7280;cursor:pointer}
-        .form-switch input[type="checkbox"]{width:18px;height:18px;accent-color:#4A5FE0;cursor:pointer}
 
         /* ══ LANDING LIGHT GLASSMORPHISM THEME ══ */
         #landing-content{background:linear-gradient(170deg,#F2F4F8 0%,#E8ECF5 50%,#F0F2F8 100%);color:#1E2432;min-height:100vh}
@@ -476,36 +463,6 @@
 <!-- Copied toast -->
 <div class="copied-toast" id="copied-toast">Copied!</div>
 
-<!-- ═══ HABIT ADD/EDIT MODAL ═══ -->
-<div id="habit-modal" class="modal-overlay"><div class="modal">
-    <button class="modal-close" id="habit-modal-close">&times;</button>
-    <h2 class="modal-title" id="habit-modal-title">Add Habit</h2>
-    <div id="habit-error" class="form-error"></div>
-    <form id="habit-form" novalidate>
-        <div class="form-group"><label class="form-label">Name</label><input type="text" id="habit-name" class="form-input" placeholder="e.g. Drink Water" required></div>
-        <div class="form-group"><label class="form-label">Icon (emoji)</label><input type="text" id="habit-icon" class="form-input" placeholder="🎯" maxlength="4" style="width:80px"></div>
-        <div class="form-group">
-            <label class="form-label">Days</label>
-            <div class="habit-days-row" id="habit-days-input">
-                <div class="habit-day-chip active" data-day="1">Mo</div>
-                <div class="habit-day-chip active" data-day="2">Tu</div>
-                <div class="habit-day-chip active" data-day="3">We</div>
-                <div class="habit-day-chip active" data-day="4">Th</div>
-                <div class="habit-day-chip active" data-day="5">Fr</div>
-                <div class="habit-day-chip active" data-day="6">Sa</div>
-                <div class="habit-day-chip active" data-day="7">Su</div>
-            </div>
-        </div>
-        <div class="form-switch"><input type="checkbox" id="habit-reminder-toggle"><label for="habit-reminder-toggle">Enable Reminder</label></div>
-        <div class="form-group" id="habit-reminder-time" style="display:none">
-            <label class="form-label">Reminder Time</label>
-            <div class="form-time-row"><input type="number" id="habit-hour" class="form-input" min="0" max="23" value="9" placeholder="HH"> : <input type="number" id="habit-minute" class="form-input" min="0" max="59" value="0" placeholder="MM"></div>
-        </div>
-        <input type="hidden" id="habit-edit-id">
-        <button type="submit" id="habit-submit" class="form-btn">Save Habit</button>
-    </form>
-</div></div>
-
 <!-- ═══ DASHBOARD ═══ -->
 <div id="dashboard" style="display:none">
     <nav class="dash-topbar"><div class="dash-brand">CoreSync Go</div><div class="dash-user"><span class="dash-user-email" id="user-email"></span><button id="logout-btn" class="nav-btn">Logout</button></div></nav>
@@ -611,7 +568,6 @@
         <div class="section-panel" id="habit-section">
             <div class="panel-header">
                 <div style="display:flex;align-items:center;gap:10px"><h3 class="panel-title">Habits</h3><span class="panel-badge" id="habit-count" style="background:rgba(249,115,22,.1);color:#FB923C">0</span></div>
-                <button class="panel-add-btn" id="habit-add-btn">+ Add Habit</button>
             </div>
             <div class="habit-list" id="habit-list"><div class="placeholder-text">Loading habits...</div></div>
         </div>
@@ -1715,10 +1671,6 @@ async function ensureLibs(){
                 <button class="habit-check-btn ${isDone?'checked':''}" title="${isDone?'Mark incomplete':'Mark complete'}" onclick="toggleHabit(${i})">
                     ${isDone?'&#10003;':''}
                 </button>
-                <div class="habit-actions">
-                    <button class="habit-act-btn" title="Edit" onclick="editHabit(${i})"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                    <button class="habit-act-btn" title="Delete" style="color:#ef4444" onclick="deleteHabit(${i})"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
-                </div>
             </div>`;
         }).join('');
     }
@@ -1769,88 +1721,6 @@ async function ensureLibs(){
             h.completions=newCompletions;h.updatedAt=Timestamp.now();
             renderHabits();
         }catch(err){console.error('Toggle habit:',err);alert('Failed to update habit.');}
-    };
-
-    window.editHabit=(i)=>{
-        const h=dashData.habits[i];if(!h)return;
-        $('habit-modal-title').textContent='Edit Habit';
-        $('habit-name').value=h.name||'';
-        $('habit-icon').value=h.icon||'🎯';
-        $('habit-edit-id').value=h.id;
-        $('habit-reminder-toggle').checked=!!h.reminderEnabled;
-        $('habit-reminder-time').style.display=h.reminderEnabled?'':'none';
-        $('habit-hour').value=h.reminderHour||9;
-        $('habit-minute').value=h.reminderMinute||0;
-        const days=h.selectedDays||[1,2,3,4,5,6,7];
-        document.querySelectorAll('#habit-days-input .habit-day-chip').forEach(el=>{
-            const d=parseInt(el.dataset.day);
-            el.classList.toggle('active',days.includes(d));
-        });
-        $('habit-modal').style.display='flex';
-    };
-
-    window.deleteHabit=async(i)=>{
-        const h=dashData.habits[i];if(!h||!currentUid)return;
-        if(!confirm('Delete habit "'+h.name+'"?'))return;
-        try{await deleteDoc(doc(db,'users',currentUid,'habits',h.id));await loadHabits(currentUid);}
-        catch(err){console.error('Delete habit:',err);alert('Failed to delete habit.');}
-    };
-
-    // Habit modal
-    const habitModal=$('habit-modal');
-    $('habit-add-btn').onclick=()=>{
-        $('habit-modal-title').textContent='Add Habit';
-        $('habit-form').reset();$('habit-edit-id').value='';
-        $('habit-reminder-time').style.display='none';
-        $('habit-icon').value='🎯';$('habit-hour').value='9';$('habit-minute').value='0';
-        document.querySelectorAll('#habit-days-input .habit-day-chip').forEach(el=>el.classList.add('active'));
-        habitModal.style.display='flex';
-    };
-    $('habit-modal-close').onclick=()=>{habitModal.style.display='none';};
-    habitModal.onclick=e=>{if(e.target===habitModal)habitModal.style.display='none';};
-
-    // Day chip toggle
-    document.querySelectorAll('#habit-days-input .habit-day-chip').forEach(el=>{
-        el.onclick=()=>el.classList.toggle('active');
-    });
-    // Reminder toggle
-    $('habit-reminder-toggle').onchange=e=>{$('habit-reminder-time').style.display=e.target.checked?'':'none';};
-
-    $('habit-form').onsubmit=async e=>{
-        e.preventDefault();if(!currentUid)return;
-        const name=$('habit-name').value.trim();
-        const icon=$('habit-icon').value.trim()||'🎯';
-        if(!name){$('habit-error').textContent='Name is required.';$('habit-error').style.display='block';return;}
-        const selectedDays=[];
-        document.querySelectorAll('#habit-days-input .habit-day-chip.active').forEach(el=>selectedDays.push(parseInt(el.dataset.day)));
-        if(!selectedDays.length){$('habit-error').textContent='Select at least one day.';$('habit-error').style.display='block';return;}
-        const reminderEnabled=$('habit-reminder-toggle').checked;
-        const reminderHour=parseInt($('habit-hour').value)||9;
-        const reminderMinute=parseInt($('habit-minute').value)||0;
-        const editId=$('habit-edit-id').value;
-        $('habit-submit').disabled=true;$('habit-submit').textContent='Saving...';
-        try{
-            const now=Timestamp.now();
-            if(editId){
-                await updateDoc(doc(db,'users',currentUid,'habits',editId),{
-                    name,icon,selectedDays,reminderEnabled,reminderHour,reminderMinute,
-                    reminderDays:selectedDays,updatedAt:now
-                });
-            }else{
-                await addDoc(collection(db,'users',currentUid,'habits'),{
-                    ownerId:currentUid,name,icon,
-                    executionType:'oneTime',dailyVolume:1,volumePerPress:1,
-                    startDate:now,endDate:null,
-                    frequencyMode:'byDays',selectedDays,timesPerWeek:7,
-                    reminderEnabled,reminderHour,reminderMinute,reminderDays:selectedDays,
-                    completions:{},meanings:{},isArchived:false,
-                    createdAt:now,updatedAt:now
-                });
-            }
-            habitModal.style.display='none';$('habit-form').reset();$('habit-error').style.display='none';
-            await loadHabits(currentUid);
-        }catch(err){$('habit-error').textContent='Failed to save habit.';$('habit-error').style.display='block';console.error('Save habit:',err);}
-        finally{$('habit-submit').disabled=false;$('habit-submit').textContent='Save Habit';}
     };
 
     function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
