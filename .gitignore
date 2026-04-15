@@ -52,3 +52,7 @@ android/app/upload-keystore.jks
 
 # Service account credentials
 assets/service-account.json
+
+# Environment files
+.env
+.env.*

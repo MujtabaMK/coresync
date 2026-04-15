@@ -23,7 +23,7 @@ class AppConstants {
   static const String encryptionKeyName = 'coresync_hive_key';
 
   // Gemini AI
-  static const String geminiApiKey = 'AIzaSyBIz78WEnVerSQxP0NbfNuMb7TyFF6TeuY';
+  static const String geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
   static const String geminiModel = 'gemini-2.0-flash';
 
   // Task status values
