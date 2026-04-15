@@ -1230,7 +1230,7 @@ async function ensureLibs(){
 
         // ── Footer on all pages ──
         const pc=pdf.internal.getNumberOfPages();
-        for(let i=1;i<=pc;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(150,150,150);pdf.text('Page '+i+' of '+pc,190,287,{align:'right'});}
+        for(let i=1;i<=pc;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(150,150,150);pdf.text('\u00A9 CoreSync Go',20,287);pdf.text('Page '+i+' of '+pc,190,287,{align:'right'});}
         pdf.save('CoreSync_Go_Fitness_Report.pdf');
     };
 
@@ -1242,7 +1242,7 @@ async function ensureLibs(){
 
         const{jsPDF}=window.jspdf;const pdf=new jsPDF();
         const marg={left:20,right:20};
-        const userName=p.displayName||p.firstName||'User';
+        const userName=[p.firstName,p.lastName].filter(Boolean).join(' ')||p.displayName||'User';
         const todayStr=new Date().toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
         const C={header:[26,26,46],profile:[98,0,234],meal:[76,175,80],water:[33,150,243],steps:[0,150,136],tips:[255,152,0],rda:[63,81,181]};
 
@@ -1683,7 +1683,7 @@ async function ensureLibs(){
 
         // ── Footer on all pages ──
         const pc=pdf.internal.getNumberOfPages();
-        for(let i=1;i<=pc;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(150,150,150);pdf.text('Page '+i+' of '+pc,190,287,{align:'right'});}
+        for(let i=1;i<=pc;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(150,150,150);pdf.text('\u00A9 CoreSync Go',20,287);pdf.text('Page '+i+' of '+pc,190,287,{align:'right'});}
         pdf.save('CoreSync_Go_Diet_Chart.pdf');
     };
 
