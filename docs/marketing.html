@@ -154,26 +154,77 @@
         .footer-links a:hover { color: var(--primary); }
         footer .copyright { color: rgba(107,114,128,.45); font-size: .8rem; }
 
-        /* ═══ SCROLL TEXT ANIMATIONS ═══ */
-        .hero h1, .hero p, .hero-badge, .hero-cta { will-change: transform, opacity; }
+        /* ═══ AURORA HERO ═══ */
+        .hero { overflow: hidden; }
+        .hero-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .hero > *:not(.hero-canvas) { position: relative; z-index: 1; }
+        .hero-glow { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; opacity: 0; animation: glowIn 1.5s ease-out forwards; }
+        @keyframes glowIn { to { opacity: 1; } }
+        .glow-1 { width: 500px; height: 500px; top: -20%; left: -10%; background: rgba(74,95,224,.18); animation-delay: 0s; }
+        .glow-2 { width: 400px; height: 400px; bottom: -25%; right: -5%; background: rgba(124,92,230,.15); animation-delay: .3s; }
+        .glow-3 { width: 300px; height: 300px; top: 10%; right: 15%; background: rgba(59,130,246,.1); animation-delay: .6s; }
+        @keyframes driftA { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(40px,-30px) scale(1.1); } 66% { transform: translate(-20px,20px) scale(0.95); } }
+        @keyframes driftB { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(-30px,40px) scale(0.9); } 66% { transform: translate(25px,-15px) scale(1.08); } }
+        .glow-1 { animation: glowIn 1.5s ease-out forwards, driftA 12s ease-in-out infinite 1.5s; }
+        .glow-2 { animation: glowIn 1.5s ease-out .3s forwards, driftB 14s ease-in-out infinite 1.8s; }
+        .glow-3 { animation: glowIn 1.5s ease-out .6s forwards, driftA 10s ease-in-out infinite 2.1s; }
+        .mouse-glow { position: fixed; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(74,95,224,.06) 0%, transparent 70%); pointer-events: none; z-index: 0; transform: translate(-50%,-50%); transition: left .3s ease-out, top .3s ease-out; }
 
-        /* Scroll-triggered directions */
-        .scroll-up { opacity: 0; transform: translateY(60px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
-        .scroll-up.visible { opacity: 1; transform: translateY(0); }
-        .scroll-left { opacity: 0; transform: translateX(-80px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
-        .scroll-left.visible { opacity: 1; transform: translateX(0); }
-        .scroll-right { opacity: 0; transform: translateX(80px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
-        .scroll-right.visible { opacity: 1; transform: translateX(0); }
-        .scroll-scale { opacity: 0; transform: scale(0.85); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
-        .scroll-scale.visible { opacity: 1; transform: scale(1); }
+        /* ═══ ANIMATED GRADIENT TEXT ═══ */
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .hero h1 { background: linear-gradient(135deg, #1E2432, #4A5FE0, #7C5CE6, #4A5FE0, #1E2432); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: gradientShift 6s ease infinite; }
 
-        /* Feature rows alternate slide direction */
-        .feature-row { transition: all .4s; }
-        .feature-row:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(74,95,224,.1); background: rgba(255,255,255,.85); }
+        /* ═══ HERO ENTRANCE ═══ */
+        @keyframes heroUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .hero-badge { opacity: 0; animation: heroUp .8s cubic-bezier(.16,1,.3,1) .2s forwards; }
+        .hero h1 { opacity: 0; animation: heroUp .8s cubic-bezier(.16,1,.3,1) .35s forwards; }
+        .hero p { opacity: 0; animation: heroUp .8s cubic-bezier(.16,1,.3,1) .5s forwards; }
+        .hero-cta { opacity: 0; animation: heroUp .8s cubic-bezier(.16,1,.3,1) .65s forwards; }
 
-        /* Stats */
-        .stat-item { transition: transform .3s; }
-        .stat-item:hover { transform: scale(1.06); }
+        /* ═══ GLASS CARD SHINE ═══ */
+        .feature-row { position: relative; overflow: hidden; transition: all .4s cubic-bezier(.16,1,.3,1); }
+        .feature-row::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.4) 50%, transparent 60%); transform: translateX(-100%) rotate(15deg); transition: none; pointer-events: none; }
+        .feature-row:hover::after { transform: translateX(60%) rotate(15deg); transition: transform .7s ease; }
+        .feature-row:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(74,95,224,.12); background: rgba(255,255,255,.85); }
+
+        /* ═══ PROBLEM/SOLUTION CARDS ═══ */
+        .problem-card, .solution-card { position: relative; overflow: hidden; transition: all .4s; }
+        .problem-card::after, .solution-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.3) 50%, transparent 60%); transform: translateX(-100%) rotate(15deg); transition: none; pointer-events: none; }
+        .problem-card:hover::after, .solution-card:hover::after { transform: translateX(60%) rotate(15deg); transition: transform .7s ease; }
+        .problem-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(239,68,68,.08); }
+        .solution-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(16,185,129,.08); }
+
+        /* ═══ STATS COUNTER ═══ */
+        .stat-item { transition: transform .4s; }
+        .stat-item:hover { transform: scale(1.08); }
+        .stat-item h3 { transition: transform .4s; }
+
+        /* ═══ CTA GLOW PULSE ═══ */
+        @keyframes ctaPulse { 0%,100% { box-shadow: 0 0 40px rgba(74,95,224,.2); } 50% { box-shadow: 0 0 80px rgba(124,92,230,.35); } }
+        .cta-box { animation: ctaPulse 3s ease-in-out infinite; }
+        .cta-box:hover { transform: scale(1.02); transition: transform .3s; }
+
+        /* ═══ SCROLL REVEAL ═══ */
+        .reveal-3d { opacity: 0; transform: translateY(40px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+        .reveal-3d.visible { opacity: 1; transform: translateY(0); }
+
+        /* ═══ FEATURE ROW STAGGER ═══ */
+        .feature-row { opacity: 0; transform: translateY(30px); }
+        .feature-row.visible { opacity: 1; transform: translateY(0); transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); }
+        .feature-row.visible:nth-child(2) { transition-delay: .08s; }
+        .feature-row.visible:nth-child(3) { transition-delay: .16s; }
+        .feature-row.visible:nth-child(4) { transition-delay: .24s; }
+        .feature-row.visible:nth-child(5) { transition-delay: .32s; }
+        .feature-row.visible:nth-child(6) { transition-delay: .4s; }
+        .feature-row.visible:nth-child(7) { transition-delay: .48s; }
+        .feature-row.visible:nth-child(8) { transition-delay: .56s; }
+
+        /* ANIMATIONS */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate { opacity: 0; animation: fadeInUp .6s ease-out forwards; }
+        .delay-1 { animation-delay: .1s; }
+        .delay-2 { animation-delay: .2s; }
+        .delay-3 { animation-delay: .3s; }
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
@@ -209,24 +260,31 @@
         </div>
     </nav>
 
+    <!-- MOUSE GLOW -->
+    <div class="mouse-glow" id="mouseGlow"></div>
+
     <!-- HERO -->
     <section class="hero">
-        <div class="hero-badge scroll-up">8 Apps in 1</div>
-        <h1 class="scroll-up">Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
-        <p class="scroll-up">CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
-        <div class="hero-cta scroll-up">
+        <div class="hero-glow glow-1"></div>
+        <div class="hero-glow glow-2"></div>
+        <div class="hero-glow glow-3"></div>
+        <canvas class="hero-canvas" id="hero3d"></canvas>
+        <div class="hero-badge">8 Apps in 1</div>
+        <h1>Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
+        <p>CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
+        <div class="hero-cta">
             <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
             <a href="#features" class="btn-secondary">See All Features</a>
         </div>
     </section>
 
     <!-- PROBLEM / SOLUTION -->
-    <section>
-        <p class="section-tag scroll-up">The Problem &amp; Solution</p>
-        <h2 class="section-title scroll-up">Before &amp; After CoreSync Go</h2>
-        <p class="section-subtitle scroll-up">Most people use 8+ different apps daily. That means 8 logins, 8 interfaces, and zero integration.</p>
+    <section class="reveal-3d">
+        <p class="section-tag">The Problem &amp; Solution</p>
+        <h2 class="section-title">Before &amp; After CoreSync Go</h2>
+        <p class="section-subtitle">Most people use 8+ different apps daily. That means 8 logins, 8 interfaces, and zero integration.</p>
         <div class="problem-grid">
-            <div class="problem-card scroll-left">
+            <div class="problem-card">
                 <h3>Without CoreSync Go</h3>
                 <ul class="ps-list">
                     <li><span>&#10060;</span> Switching between 8+ separate apps daily</li>
@@ -236,7 +294,7 @@
                     <li><span>&#10060;</span> Storage bloat from multiple heavy apps</li>
                 </ul>
             </div>
-            <div class="solution-card scroll-right">
+            <div class="solution-card">
                 <h3>With CoreSync Go</h3>
                 <ul class="ps-list">
                     <li><span>&#9989;</span> One unified app for everything</li>
@@ -260,10 +318,10 @@
     </section>
 
     <!-- FEATURES DEEP DIVE -->
-    <section id="features">
-        <p class="section-tag scroll-up">Features</p>
-        <h2 class="section-title scroll-up">Everything You Need, Nothing You Don't</h2>
-        <p class="section-subtitle scroll-up">Each module is designed to work independently or together, giving you a complete productivity ecosystem.</p>
+    <section id="features" class="reveal-3d">
+        <p class="section-tag">Features</p>
+        <h2 class="section-title">Everything You Need, Nothing You Don't</h2>
+        <p class="section-subtitle">Each module is designed to work independently or together, giving you a complete productivity ecosystem.</p>
         <div class="features-list">
             <div class="feature-row">
                 <div class="feature-icon icon-tasks"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
@@ -301,10 +359,10 @@
     </section>
 
     <!-- COMPARISON TABLE -->
-    <section id="compare">
-        <p class="section-tag scroll-up">Compare</p>
-        <h2 class="section-title scroll-up">CoreSync Go vs. Using Separate Apps</h2>
-        <p class="section-subtitle scroll-up">See how one app can replace your entire toolkit.</p>
+    <section id="compare" class="reveal-3d">
+        <p class="section-tag">Compare</p>
+        <h2 class="section-title">CoreSync Go vs. Using Separate Apps</h2>
+        <p class="section-subtitle">See how one app can replace your entire toolkit.</p>
         <div class="comparison-wrap">
             <table class="comparison-table">
                 <thead>
@@ -355,46 +413,82 @@
 
 <script>
 (function(){
-    // ── Add alternating scroll classes to feature rows ──
-    document.querySelectorAll('.feature-row').forEach((row, i) => {
-        row.classList.add(i % 2 === 0 ? 'scroll-left' : 'scroll-right');
+    // ── Mouse glow follow ──
+    const glow = document.getElementById('mouseGlow');
+    document.addEventListener('mousemove', e => {
+        glow.style.left = e.clientX + 'px';
+        glow.style.top = e.clientY + 'px';
     });
 
-    // ── Add scroll-scale to comparison table and CTA ──
-    document.querySelectorAll('.comparison-wrap, .cta-box').forEach(el => {
-        el.classList.add('scroll-scale');
-    });
+    // ── Floating particles canvas ──
+    const canvas = document.getElementById('hero3d');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    const dots = [];
+    for (let i = 0; i < 40; i++) {
+        dots.push({
+            x: Math.random(), y: Math.random(),
+            r: 1.5 + Math.random() * 3,
+            vx: (Math.random() - 0.5) * 0.0004,
+            vy: (Math.random() - 0.5) * 0.0003,
+            opacity: 0.15 + Math.random() * 0.3,
+            color: Math.random() < 0.5 ? '74,95,224' : '124,92,230',
+        });
+    }
+    function resize() {
+        const hero = canvas.parentElement;
+        W = canvas.width = hero.offsetWidth;
+        H = canvas.height = hero.offsetHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
 
-    // ── Add scroll-up to stat items ──
-    document.querySelectorAll('.stat-item').forEach((el, i) => {
-        el.classList.add('scroll-up');
-        el.style.transitionDelay = (i * 0.1) + 's';
-    });
+    function animateCanvas() {
+        ctx.clearRect(0, 0, W, H);
+        dots.forEach(d => {
+            d.x += d.vx; d.y += d.vy;
+            if (d.x < 0 || d.x > 1) d.vx *= -1;
+            if (d.y < 0 || d.y > 1) d.vy *= -1;
+            const x = d.x * W, y = d.y * H;
+            // Glow
+            const grad = ctx.createRadialGradient(x, y, 0, x, y, d.r * 8);
+            grad.addColorStop(0, `rgba(${d.color},${d.opacity * 0.5})`);
+            grad.addColorStop(1, `rgba(${d.color},0)`);
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(x, y, d.r * 8, 0, Math.PI * 2);
+            ctx.fill();
+            // Core dot
+            ctx.fillStyle = `rgba(${d.color},${d.opacity})`;
+            ctx.beginPath();
+            ctx.arc(x, y, d.r, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        // Connection lines
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < dots.length; i++) {
+            for (let j = i + 1; j < dots.length; j++) {
+                const dx = (dots[i].x - dots[j].x) * W;
+                const dy = (dots[i].y - dots[j].y) * H;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 150) {
+                    ctx.strokeStyle = `rgba(74,95,224,${(1 - dist / 150) * 0.08})`;
+                    ctx.beginPath();
+                    ctx.moveTo(dots[i].x * W, dots[i].y * H);
+                    ctx.lineTo(dots[j].x * W, dots[j].y * H);
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animateCanvas);
+    }
+    animateCanvas();
 
-    // ── Scroll observer — triggers all scroll-* animations ──
+    // ── Scroll reveal + feature stagger ──
     const obs = new IntersectionObserver(entries => {
         entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-    document.querySelectorAll('.scroll-up, .scroll-left, .scroll-right, .scroll-scale').forEach(el => obs.observe(el));
-
-    // ── Hero parallax on scroll — text moves at different speed ──
-    const hero = document.querySelector('.hero');
-    const heroH1 = hero.querySelector('h1');
-    const heroP = hero.querySelector('p');
-    const heroBadge = hero.querySelector('.hero-badge');
-    const heroCta = hero.querySelector('.hero-cta');
-
-    window.addEventListener('scroll', () => {
-        const scrollY = window.scrollY;
-        const heroBottom = hero.offsetTop + hero.offsetHeight;
-        if (scrollY > heroBottom) return;
-
-        // Different speeds for each element — creates depth
-        if (heroBadge) heroBadge.style.transform = `translateY(${scrollY * 0.15}px)`;
-        if (heroH1) heroH1.style.transform = `translateY(${scrollY * 0.25}px)`;
-        if (heroP) heroP.style.transform = `translateY(${scrollY * 0.35}px)`;
-        if (heroCta) heroCta.style.transform = `translateY(${scrollY * 0.45}px)`;
-    }, { passive: true });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal-3d, .feature-row').forEach(el => obs.observe(el));
 
     // ── Animated stat counters ──
     const statObs = new IntersectionObserver(entries => {
@@ -418,6 +512,19 @@
         });
     }, { threshold: 0.5 });
     document.querySelectorAll('.stat-item').forEach(el => statObs.observe(el));
+
+    // ── Card tilt on mouse ──
+    document.querySelectorAll('.feature-row').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            card.style.transform = `perspective(800px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) translateY(-4px)`;
+        });
+        card.addEventListener('mouseleave', e => {
+            card.style.transform = '';
+        });
+    });
 })();
 </script>
 </body>
