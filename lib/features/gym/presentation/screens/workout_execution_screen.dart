@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
+
+import '../widgets/exercise_animation.dart';
 
 import '../../domain/workout_program_model.dart';
 import '../providers/workout_provider.dart';
@@ -124,18 +125,6 @@ class _ExerciseView extends StatelessWidget {
   final WorkoutState state;
   const _ExerciseView({required this.state});
 
-  static IconData _categoryIcon(String category) {
-    return switch (category) {
-      'Abs' => Icons.sports_martial_arts,
-      'Arm' => Icons.fitness_center,
-      'Chest' => Icons.expand,
-      'Leg' => Icons.directions_run,
-      'Shoulder' => Icons.accessibility_new,
-      'Back' => Icons.straighten,
-      _ => Icons.fitness_center,
-    };
-  }
-
   static Widget _buildLottieOrIcon(
     ThemeData theme,
     dynamic exercise,
@@ -149,24 +138,10 @@ class _ExerciseView extends StatelessWidget {
         isPlaying: !isPaused,
       );
     }
-    if (exercise.lottieAsset != null) {
-      return Lottie.asset(
-        exercise.lottieAsset!,
-        fit: BoxFit.contain,
-        repeat: true,
-        animate: !isPaused,
-      );
-    }
-    return Center(
-      child: CircleAvatar(
-        radius: 80,
-        backgroundColor: theme.colorScheme.primaryContainer,
-        child: Icon(
-          _categoryIcon(exercise.category),
-          size: 80,
-          color: theme.colorScheme.onPrimaryContainer,
-        ),
-      ),
+    return ExerciseAnimation(
+      exercise: exercise,
+      fit: BoxFit.contain,
+      animate: !isPaused,
     );
   }
 

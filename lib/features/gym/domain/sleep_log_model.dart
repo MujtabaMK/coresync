@@ -27,6 +27,16 @@ class SleepLogModel {
 
   Duration get duration => wakeTime.difference(sleepTime);
 
+  /// Auto-detect period label from bedtime hour.
+  String get period {
+    final h = sleepTime.hour;
+    if (h >= 21 || h < 4) return 'Night';
+    if (h >= 4 && h < 6) return 'Dawn';
+    if (h >= 6 && h < 12) return 'Morning';
+    if (h >= 12 && h < 17) return 'Afternoon';
+    return 'Evening'; // 17-20
+  }
+
   String get durationFormatted {
     final d = duration;
     final hours = d.inHours;

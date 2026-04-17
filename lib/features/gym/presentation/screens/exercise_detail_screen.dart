@@ -76,21 +76,24 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
         ],
       );
     }
+    // Lottie with play/pause
     if (exercise.lottieAsset != null) {
       return Stack(
         alignment: Alignment.bottomRight,
         children: [
-          Lottie.asset(
-            exercise.lottieAsset!,
-            controller: _controller,
+          SizedBox(
             width: double.infinity,
             height: 300,
-            fit: BoxFit.contain,
-            onLoaded: (composition) {
-              _controller
-                ..duration = composition.duration
-                ..repeat();
-            },
+            child: Lottie.asset(
+              exercise.lottieAsset!,
+              controller: _controller,
+              fit: BoxFit.contain,
+              onLoaded: (composition) {
+                _controller
+                  ..duration = composition.duration
+                  ..repeat();
+              },
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(12),

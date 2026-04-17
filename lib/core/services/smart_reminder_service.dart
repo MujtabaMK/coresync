@@ -148,54 +148,12 @@ class SmartReminderService {
   }
 
   static Future<void> _scheduleSleepReminder(GymState state) async {
-    int sleepHour = 23; // default 11 PM
-    int sleepMinute = 0;
-
-    if (state.todaySleep.isNotEmpty) {
-      final lastSleep = state.todaySleep.first.sleepTime;
-      sleepHour = lastSleep.hour;
-      sleepMinute = lastSleep.minute;
-    }
-
-    // Subtract 30 minutes for the reminder
-    int reminderHour = sleepHour;
-    int reminderMinute = sleepMinute - 30;
-    if (reminderMinute < 0) {
-      reminderMinute += 60;
-      reminderHour -= 1;
-      if (reminderHour < 0) reminderHour += 24;
-    }
-
-    // Format the sleep time for the message
-    final period = sleepHour >= 12 ? 'PM' : 'AM';
-    final displayHour = sleepHour == 0
-        ? 12
-        : sleepHour > 12
-            ? sleepHour - 12
-            : sleepHour;
-    final displayMinute = sleepMinute.toString().padLeft(2, '0');
-    final timeStr = '$displayHour:$displayMinute $period';
-
-    // Schedule as one-time for today (re-scheduled on each app launch)
-    final now = DateTime.now();
-    var scheduledDate = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      reminderHour,
-      reminderMinute,
-    );
-
-    // If time already passed today, schedule for tomorrow
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-
-    await NotificationService.scheduleOnceAlarm(
+    await NotificationService.scheduleDailyNotification(
       id: _sleepId,
-      title: 'Time to Wind Down',
-      body: 'You usually sleep around $timeStr. Start winding down!',
-      scheduledDate: scheduledDate,
+      title: 'Time to Sleep',
+      body: "It's 9:30 PM. Wind down and get a good night's rest!",
+      hour: 21,
+      minute: 30,
     );
   }
 

@@ -923,7 +923,19 @@ class _TodayInsightSection extends StatelessWidget {
     final todayKey =
         DateTime(now.year, now.month, now.day);
     final todaySteps = state.stepsHistory[todayKey] ?? 0;
-    const stepGoal = 10000;
+    // BMI-based step goal (same logic as steps_screen & gym_home_screen)
+    int stepGoal = 10000;
+    final heightM = profile.heightCm / 100;
+    final bmi = profile.currentWeight / (heightM * heightM);
+    if (bmi < 18.5) {
+      stepGoal = 8000;
+    } else if (bmi < 25) {
+      stepGoal = 10000;
+    } else if (bmi < 30) {
+      stepGoal = 12000;
+    } else {
+      stepGoal = 15000;
+    }
 
     // Group tracked foods by meal, only include meals with food
     final mealEntries = <_MealInsightData>[];
@@ -1739,13 +1751,18 @@ class _SleepInsightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final sleep = state.todaySleep.first;
+    final entries = state.todaySleep;
     const goalHours = 8.0;
-    final actualHours = sleep.duration.inMinutes / 60;
+    final totalDuration = state.todaySleepDuration;
+    final actualHours = totalDuration.inMinutes / 60;
     final progress = (actualHours / goalHours).clamp(0.0, 1.0);
 
-    final bedtimeStr = _formatTime(sleep.sleepTime);
-    final wakeStr = _formatTime(sleep.wakeTime);
+    // Show overall quality only when all segments agree
+    final qualities = entries
+        .map((e) => e.quality)
+        .where((q) => q != null)
+        .toSet();
+    final overallQuality = qualities.length == 1 ? qualities.first : null;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -1773,7 +1790,7 @@ class _SleepInsightCard extends StatelessWidget {
               textBaseline: TextBaseline.alphabetic,
               children: [
                 Text(
-                  sleep.durationFormatted,
+                  state.todaySleepFormatted,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -1788,14 +1805,32 @@ class _SleepInsightCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
-            Text(
-              '$bedtimeStr - $wakeStr'
-              '${sleep.quality != null ? ' \u00b7 ${sleep.quality!.label}' : ''}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            if (overallQuality != null || entries.length > 1) ...[
+              const SizedBox(height: 6),
+              Text(
+                '${overallQuality != null ? overallQuality.label : ''}'
+                '${overallQuality != null && entries.length > 1 ? ' · ' : ''}'
+                '${entries.length > 1 ? '${entries.length} segments' : ''}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
               ),
-            ),
+            ],
+            // Individual segment details with per-segment quality
+            if (entries.length > 1) ...[
+              const SizedBox(height: 8),
+              ...entries.map((s) => Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Text(
+                      '${s.period}: ${_formatTime(s.sleepTime)} - ${_formatTime(s.wakeTime)} · ${s.durationFormatted}'
+                      '${s.quality != null ? ' · ${s.quality!.label}' : ''}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface
+                            .withValues(alpha: 0.5),
+                      ),
+                    ),
+                  )),
+            ],
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),

@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/utils/share_utils.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/report_pdf_service.dart';
+import '../../domain/weight_loss_profile_model.dart';
 import '../providers/gym_provider.dart';
 
 class ReportScreen extends StatefulWidget {
@@ -189,13 +190,29 @@ class _ReportScreenState extends State<ReportScreen> {
         int foodDaysTracked = 0;
         int foodDaysGoalMet = 0;
         double totalFoodCal = 0;
+        final goalType = state.weightLossProfile?.goalType;
         for (var d = startDate;
             !d.isAfter(today);
             d = d.add(const Duration(days: 1))) {
           final cal = foodCalHistory[d] ?? 0;
           final dayGoal = state.calorieGoalHistory[d] ?? calorieGoalFallback;
           if (cal > 0) foodDaysTracked++;
-          if (cal > 0 && cal.round() == dayGoal.round()) foodDaysGoalMet++;
+          if (cal > 0) {
+            switch (goalType) {
+              case GoalType.lose:
+                // Weight loss: equal or up to 500 kcal less than goal
+                if (cal <= dayGoal && cal >= dayGoal - 500) foodDaysGoalMet++;
+                break;
+              case GoalType.gain:
+                // Weight gain: equal or up to 500 kcal more than goal
+                if (cal >= dayGoal && cal <= dayGoal + 500) foodDaysGoalMet++;
+                break;
+              default:
+                // Maintain: exact match only
+                if (cal.round() == dayGoal.round()) foodDaysGoalMet++;
+                break;
+            }
+          }
           totalFoodCal += cal;
         }
         final avgFoodCal =
@@ -686,11 +703,20 @@ class _ReportScreenState extends State<ReportScreen> {
                       .map((e) => MapEntry(e.key, e.value.round())),
                 ),
                 formatValue: (cal, goal) => '$cal / $goal kcal',
-                colorForValue: (cal, goal) => cal > goal
-                    ? Colors.red
-                    : cal < goal
-                        ? Colors.orange
-                        : Colors.green,
+                colorForValue: (cal, goal) {
+                  if (cal == 0) return Colors.red;
+                  switch (goalType) {
+                    case GoalType.lose:
+                      if (cal <= goal && cal >= goal - 500) return Colors.green;
+                      return cal > goal ? Colors.red : Colors.orange;
+                    case GoalType.gain:
+                      if (cal >= goal && cal <= goal + 500) return Colors.green;
+                      return cal < goal ? Colors.red : Colors.orange;
+                    default:
+                      if (cal == goal) return Colors.green;
+                      return cal > goal ? Colors.red : Colors.orange;
+                  }
+                },
               ),
 
               const SizedBox(height: 8),

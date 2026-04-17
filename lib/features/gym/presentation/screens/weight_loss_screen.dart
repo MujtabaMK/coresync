@@ -59,7 +59,7 @@ class _SetupFormState extends State<_SetupForm> {
   double _weeklyGoal = 0.5;
   bool _isVegetarian = false;
   int? _gymTimeHour;
-  int _proteinScoops = 1;
+  int _proteinScoops = 0;
   bool _takesCreatine = false;
   bool _takesMassGainer = false;
 
@@ -384,8 +384,10 @@ class _SetupFormState extends State<_SetupForm> {
             const SizedBox(height: 8),
             SegmentedButton<int>(
               segments: const [
-                ButtonSegment(value: 1, label: Text('1 Scoop')),
-                ButtonSegment(value: 2, label: Text('2 Scoops')),
+                ButtonSegment(value: 0, label: Text('0')),
+                ButtonSegment(value: 1, label: Text('1')),
+                ButtonSegment(value: 2, label: Text('2')),
+                ButtonSegment(value: 3, label: Text('3')),
               ],
               selected: {_proteinScoops},
               onSelectionChanged: (s) =>

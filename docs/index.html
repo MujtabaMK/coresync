@@ -976,7 +976,8 @@ async function ensureLibs(){
             let foodGoalMet=0;
             const calGoalByDay={};
             try{const calSnap=await getDocs(collection(db,'users',uid,'gym_calorie_goals'));calSnap.forEach(d=>{const g=d.data().goalCalories;if(g&&g>0)calGoalByDay[d.id]=g;});}catch(e){console.warn('calorie goals:',e);}
-            for(const[day,cal] of Object.entries(foodByDay)){if(cal>0){const dayGoal=calGoalByDay[day]||2000;if(Math.round(cal)===Math.round(dayGoal))foodGoalMet++;}}
+            const rGoalType=userProfile.wl_goalType||'maintain';
+            for(const[day,cal] of Object.entries(foodByDay)){if(cal>0){const dayGoal=calGoalByDay[day]||2000;if(rGoalType==='lose'){if(cal<=dayGoal&&cal>=dayGoal-500)foodGoalMet++;}else if(rGoalType==='gain'){if(cal>=dayGoal&&cal<=dayGoal+500)foodGoalMet++;}else{if(Math.round(cal)===Math.round(dayGoal))foodGoalMet++;}}}
 
             // Sleep
             const sleepSnap=await getDocs(collection(db,'users',uid,'gym_sleep'));
@@ -1270,14 +1271,15 @@ async function ensureLibs(){
         const fatG=Math.round(dailyCal*fatPct/9);
 
         // ── Supplements (same as app's _buildDailySupplements) ──
-        const proteinScoops=p.wl_proteinScoops!=null?p.wl_proteinScoops:1;
+        const proteinScoops=p.wl_proteinScoops!=null?p.wl_proteinScoops:0;
         const takesCreatine=!!p.wl_takesCreatine;
         const takesMassGainer=!!p.wl_takesMassGainer;
         const gymTimeHour=p.wl_gymTimeHour!=null?p.wl_gymTimeHour:null;
         const withMilk=goalType==='gain';
         const supplements=[];
         if(proteinScoops===1){supplements.push({n:withMilk?'Whey Protein (1 scoop with milk)':'Whey Protein (1 scoop with water)',s:withMilk?'1 scoop + 200ml milk':'1 scoop (30g)',cal:withMilk?250:120,p:withMilk?31:24,c:withMilk?13:3,f:withMilk?5.5:1.5});}
-        else if(proteinScoops>=2){supplements.push({n:withMilk?'Whey Protein (2 scoops with milk)':'Whey Protein (2 scoops with water)',s:withMilk?'2 scoops + 300ml milk':'2 scoops (60g)',cal:withMilk?430:240,p:withMilk?58:48,c:withMilk?21:6,f:withMilk?8:3});}
+        else if(proteinScoops===2){supplements.push({n:withMilk?'Whey Protein (2 scoops with milk)':'Whey Protein (2 scoops with water)',s:withMilk?'2 scoops + 300ml milk':'2 scoops (60g)',cal:withMilk?430:240,p:withMilk?58:48,c:withMilk?21:6,f:withMilk?8:3});}
+        else if(proteinScoops>=3){supplements.push({n:withMilk?'Whey Protein (3 scoops with milk)':'Whey Protein (3 scoops with water)',s:withMilk?'3 scoops + 400ml milk':'3 scoops (90g)',cal:withMilk?610:360,p:withMilk?85:72,c:withMilk?29:9,f:withMilk?10.5:4.5});}
         if(takesCreatine){supplements.push({n:'Creatine Monohydrate (1 scoop)',s:'1 scoop (5g)',cal:0,p:0,c:0,f:0});}
         if(takesMassGainer&&goalType==='gain'){supplements.push({n:withMilk?'Mass Gainer (1 scoop with milk)':'Mass Gainer (1 scoop with water)',s:withMilk?'1 scoop + 300ml milk':'1 scoop (75g)',cal:withMilk?430:280,p:withMilk?25:15,c:withMilk?65:50,f:withMilk?7:2.5});}
         const supplementCal=supplements.reduce((s,f)=>s+f.cal,0);
@@ -1323,9 +1325,9 @@ async function ensureLibs(){
         ];
         const dnLose=[
             [{n:'Grilled Chicken',s:'150g',cal:230,p:35,c:0,f:9},{n:'Roti',s:'1 pc',cal:100,p:3,c:18,f:2},{n:'Sauteed Veggies',s:'1 bowl',cal:80,p:3,c:10,f:3}],
-            [{n:'Moong Dal',s:'1 bowl',cal:150,p:10,c:22,f:2},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Bhindi Fry',s:'1 bowl',cal:80,p:2,c:8,f:4}],
+            [{n:'Moong Dal',s:'1 bowl',cal:150,p:10,c:22,f:2},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Bhindi Fry (Air Fryer)',s:'1 bowl',cal:53,p:2,c:8,f:1}],
             [{n:'Egg Bhurji',s:'2 eggs',cal:180,p:12,c:3,f:13},{n:'Roti',s:'1 pc',cal:100,p:3,c:18,f:2},{n:'Mixed Veg Soup',s:'1 bowl',cal:70,p:3,c:10,f:2}],
-            [{n:'Fish Fry',s:'150g',cal:200,p:25,c:5,f:9},{n:'Rice',s:'0.5 cup',cal:100,p:2,c:22,f:0},{n:'Sabji',s:'1 bowl',cal:100,p:3,c:12,f:4}],
+            [{n:'Fish Fry (Grilled)',s:'150g',cal:135,p:25,c:5,f:2},{n:'Rice',s:'0.5 cup',cal:100,p:2,c:22,f:0},{n:'Sabji',s:'1 bowl',cal:100,p:3,c:12,f:4}],
             [{n:'Paneer Tikka',s:'150g',cal:220,p:16,c:6,f:14},{n:'Roti',s:'1 pc',cal:100,p:3,c:18,f:2},{n:'Raita',s:'1 cup',cal:60,p:3,c:5,f:3}],
             [{n:'Chicken Tikka',s:'150g',cal:200,p:30,c:4,f:7},{n:'Roti',s:'1 pc',cal:100,p:3,c:18,f:2},{n:'Salad',s:'1 bowl',cal:50,p:2,c:8,f:1}],
             [{n:'Dal Tadka',s:'1 bowl',cal:170,p:10,c:24,f:4},{n:'Rice',s:'0.5 cup',cal:100,p:2,c:22,f:0},{n:'Aloo Gobi',s:'1 bowl',cal:130,p:3,c:16,f:6}]
@@ -1341,12 +1343,12 @@ async function ensureLibs(){
         ];
         // Gain foods
         const bfGain=[
-            [{n:'Paneer Paratha',s:'2 pcs',cal:380,p:14,c:40,f:18},{n:'Whole Milk',s:'1 glass',cal:150,p:8,c:12,f:8},{n:'Banana',s:'1',cal:105,p:1,c:27,f:0}],
-            [{n:'Aloo Paratha',s:'2 pcs',cal:360,p:8,c:44,f:16},{n:'Curd',s:'1 cup',cal:100,p:5,c:8,f:5},{n:'Mango',s:'1 cup',cal:100,p:1,c:25,f:0}],
+            [{n:'Paneer Paratha (Air Fryer)',s:'2 pcs',cal:259,p:14,c:40,f:5},{n:'Whole Milk',s:'1 glass',cal:150,p:8,c:12,f:8},{n:'Banana',s:'1',cal:105,p:1,c:27,f:0}],
+            [{n:'Aloo Paratha (Air Fryer)',s:'2 pcs',cal:252,p:8,c:44,f:4},{n:'Curd',s:'1 cup',cal:100,p:5,c:8,f:5},{n:'Mango',s:'1 cup',cal:100,p:1,c:25,f:0}],
             [{n:'Masala Dosa',s:'2 pcs',cal:350,p:6,c:50,f:14},{n:'Coconut Chutney',s:'2 tbsp',cal:40,p:1,c:2,f:3},{n:'Banana Shake',s:'1 glass',cal:220,p:6,c:35,f:6}],
             [{n:'Oats with Milk & Nuts',s:'1 bowl',cal:350,p:12,c:45,f:12},{n:'Boiled Eggs',s:'2',cal:140,p:12,c:1,f:10},{n:'Orange Juice',s:'1 glass',cal:110,p:2,c:26,f:0}],
             [{n:'Poha with Peanuts',s:'1 plate',cal:300,p:8,c:42,f:12},{n:'Whole Milk',s:'1 glass',cal:150,p:8,c:12,f:8},{n:'Dates',s:'3 pcs',cal:80,p:1,c:22,f:0}],
-            [{n:'Stuffed Paratha',s:'2 pcs',cal:380,p:10,c:42,f:18},{n:'Lassi',s:'1 glass',cal:170,p:6,c:22,f:6},{n:'Apple',s:'1',cal:95,p:0,c:25,f:0}],
+            [{n:'Stuffed Paratha (Air Fryer)',s:'2 pcs',cal:259,p:10,c:42,f:5},{n:'Lassi',s:'1 glass',cal:170,p:6,c:22,f:6},{n:'Apple',s:'1',cal:95,p:0,c:25,f:0}],
             [{n:'Egg Omelette',s:'3 eggs',cal:270,p:18,c:3,f:21},{n:'Toast with Butter',s:'2 slices',cal:200,p:5,c:26,f:8},{n:'Banana',s:'1',cal:105,p:1,c:27,f:0}]
         ];
         const lnGain=[
@@ -1363,7 +1365,7 @@ async function ensureLibs(){
             [{n:'Mutton Curry',s:'150g',cal:350,p:25,c:6,f:24},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Dal',s:'1 bowl',cal:130,p:8,c:18,f:2}],
             [{n:'Paneer Butter Masala',s:'1 bowl',cal:350,p:16,c:12,f:26},{n:'Naan',s:'2 pcs',cal:260,p:6,c:40,f:8},{n:'Salad',s:'1 bowl',cal:50,p:2,c:8,f:1}],
             [{n:'Chicken Curry',s:'200g',cal:300,p:30,c:8,f:16},{n:'Rice',s:'1 cup',cal:200,p:4,c:44,f:1},{n:'Roti',s:'1 pc',cal:100,p:3,c:18,f:2}],
-            [{n:'Fish Fry',s:'200g',cal:280,p:32,c:8,f:14},{n:'Rice',s:'1 cup',cal:200,p:4,c:44,f:1},{n:'Dal Fry',s:'1 bowl',cal:160,p:9,c:22,f:4}],
+            [{n:'Fish Fry (Grilled)',s:'200g',cal:185,p:32,c:8,f:3},{n:'Rice',s:'1 cup',cal:200,p:4,c:44,f:1},{n:'Dal Fry',s:'1 bowl',cal:160,p:9,c:22,f:4}],
             [{n:'Keema',s:'1 bowl',cal:320,p:24,c:6,f:22},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Raita',s:'1 cup',cal:60,p:3,c:5,f:3}],
             [{n:'Shahi Paneer',s:'1 bowl',cal:300,p:14,c:10,f:22},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Rice',s:'0.5 cup',cal:100,p:2,c:22,f:0}]
         ];
@@ -1382,7 +1384,7 @@ async function ensureLibs(){
             [{n:'Poha',s:'1 plate',cal:250,p:5,c:40,f:8},{n:'Boiled Egg',s:'1',cal:70,p:6,c:0,f:5},{n:'Tea',s:'1 cup',cal:30,p:1,c:5,f:1}],
             [{n:'Dosa',s:'2 pcs',cal:220,p:4,c:32,f:8},{n:'Chutney',s:'2 tbsp',cal:40,p:1,c:2,f:3},{n:'Banana',s:'1',cal:105,p:1,c:27,f:0}],
             [{n:'Oats with Milk',s:'1 bowl',cal:250,p:8,c:38,f:6},{n:'Apple',s:'1',cal:95,p:0,c:25,f:0}],
-            [{n:'Paratha',s:'1 pc',cal:180,p:4,c:22,f:8},{n:'Curd',s:'1 cup',cal:60,p:4,c:5,f:3},{n:'Orange',s:'1',cal:60,p:1,c:15,f:0}],
+            [{n:'Paratha (Air Fryer)',s:'1 pc',cal:126,p:4,c:22,f:2},{n:'Curd',s:'1 cup',cal:60,p:4,c:5,f:3},{n:'Orange',s:'1',cal:60,p:1,c:15,f:0}],
             [{n:'Upma',s:'1 bowl',cal:210,p:5,c:35,f:6},{n:'Boiled Egg',s:'1',cal:70,p:6,c:0,f:5},{n:'Buttermilk',s:'1 glass',cal:40,p:3,c:5,f:1}],
             [{n:'Besan Chilla',s:'2 pcs',cal:220,p:10,c:22,f:9},{n:'Green Tea',s:'1 cup',cal:5,p:0,c:1,f:0},{n:'Papaya',s:'1 cup',cal:55,p:1,c:14,f:0}]
         ];
@@ -1397,7 +1399,7 @@ async function ensureLibs(){
         ];
         const dnMaintain=[
             [{n:'Fish Curry',s:'150g',cal:220,p:28,c:5,f:10},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Mixed Veg',s:'1 bowl',cal:100,p:3,c:12,f:4}],
-            [{n:'Dal Tadka',s:'1 bowl',cal:170,p:10,c:24,f:4},{n:'Rice',s:'1 cup',cal:200,p:4,c:44,f:1},{n:'Bhindi Fry',s:'1 bowl',cal:80,p:2,c:8,f:4}],
+            [{n:'Dal Tadka',s:'1 bowl',cal:170,p:10,c:24,f:4},{n:'Rice',s:'1 cup',cal:200,p:4,c:44,f:1},{n:'Bhindi Fry (Air Fryer)',s:'1 bowl',cal:53,p:2,c:8,f:1}],
             [{n:'Egg Curry',s:'2 eggs',cal:240,p:14,c:8,f:16},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Salad',s:'1 bowl',cal:50,p:2,c:8,f:1}],
             [{n:'Chicken Tikka',s:'150g',cal:200,p:30,c:4,f:7},{n:'Roti',s:'1 pc',cal:100,p:3,c:18,f:2},{n:'Raita',s:'1 cup',cal:60,p:3,c:5,f:3}],
             [{n:'Palak Paneer',s:'1 bowl',cal:180,p:10,c:8,f:12},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Curd',s:'1 cup',cal:60,p:4,c:5,f:3}],
@@ -1434,7 +1436,7 @@ async function ensureLibs(){
         ];
         const dnVegLose=[
             [{n:'Paneer Tikka',s:'150g',cal:220,p:16,c:6,f:14},{n:'Roti',s:'1 pc',cal:100,p:3,c:18,f:2},{n:'Sauteed Veggies',s:'1 bowl',cal:80,p:3,c:10,f:3}],
-            [{n:'Moong Dal',s:'1 bowl',cal:150,p:10,c:22,f:2},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Bhindi Fry',s:'1 bowl',cal:80,p:2,c:8,f:4}],
+            [{n:'Moong Dal',s:'1 bowl',cal:150,p:10,c:22,f:2},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Bhindi Fry (Air Fryer)',s:'1 bowl',cal:53,p:2,c:8,f:1}],
             [{n:'Tofu Stir Fry',s:'150g',cal:170,p:14,c:5,f:10},{n:'Roti',s:'1 pc',cal:100,p:3,c:18,f:2},{n:'Mixed Veg Soup',s:'1 bowl',cal:70,p:3,c:10,f:2}],
             [{n:'Palak Dal',s:'1 bowl',cal:160,p:10,c:20,f:4},{n:'Rice',s:'0.5 cup',cal:100,p:2,c:22,f:0},{n:'Sabji',s:'1 bowl',cal:100,p:3,c:12,f:4}],
             [{n:'Paneer Curry',s:'1 bowl',cal:220,p:14,c:8,f:15},{n:'Roti',s:'1 pc',cal:100,p:3,c:18,f:2},{n:'Raita',s:'1 cup',cal:60,p:3,c:5,f:3}],
@@ -1442,12 +1444,12 @@ async function ensureLibs(){
             [{n:'Dal Tadka',s:'1 bowl',cal:170,p:10,c:24,f:4},{n:'Rice',s:'0.5 cup',cal:100,p:2,c:22,f:0},{n:'Aloo Gobi',s:'1 bowl',cal:130,p:3,c:16,f:6}]
         ];
         const bfVegGain=[
-            [{n:'Paneer Paratha',s:'2 pcs',cal:380,p:14,c:40,f:18},{n:'Whole Milk',s:'1 glass',cal:150,p:8,c:12,f:8},{n:'Banana',s:'1',cal:105,p:1,c:27,f:0}],
-            [{n:'Aloo Paratha',s:'2 pcs',cal:360,p:8,c:44,f:16},{n:'Curd',s:'1 cup',cal:100,p:5,c:8,f:5},{n:'Mango',s:'1 cup',cal:100,p:1,c:25,f:0}],
+            [{n:'Paneer Paratha (Air Fryer)',s:'2 pcs',cal:259,p:14,c:40,f:5},{n:'Whole Milk',s:'1 glass',cal:150,p:8,c:12,f:8},{n:'Banana',s:'1',cal:105,p:1,c:27,f:0}],
+            [{n:'Aloo Paratha (Air Fryer)',s:'2 pcs',cal:252,p:8,c:44,f:4},{n:'Curd',s:'1 cup',cal:100,p:5,c:8,f:5},{n:'Mango',s:'1 cup',cal:100,p:1,c:25,f:0}],
             [{n:'Masala Dosa',s:'2 pcs',cal:350,p:6,c:50,f:14},{n:'Coconut Chutney',s:'2 tbsp',cal:40,p:1,c:2,f:3},{n:'Banana Shake',s:'1 glass',cal:220,p:6,c:35,f:6}],
             [{n:'Oats with Milk & Nuts',s:'1 bowl',cal:350,p:12,c:45,f:12},{n:'Paneer Slice',s:'100g',cal:150,p:10,c:2,f:10},{n:'Orange Juice',s:'1 glass',cal:110,p:2,c:26,f:0}],
             [{n:'Poha with Peanuts',s:'1 plate',cal:300,p:8,c:42,f:12},{n:'Whole Milk',s:'1 glass',cal:150,p:8,c:12,f:8},{n:'Dates',s:'3 pcs',cal:80,p:1,c:22,f:0}],
-            [{n:'Stuffed Paratha',s:'2 pcs',cal:380,p:10,c:42,f:18},{n:'Lassi',s:'1 glass',cal:170,p:6,c:22,f:6},{n:'Apple',s:'1',cal:95,p:0,c:25,f:0}],
+            [{n:'Stuffed Paratha (Air Fryer)',s:'2 pcs',cal:259,p:10,c:42,f:5},{n:'Lassi',s:'1 glass',cal:170,p:6,c:22,f:6},{n:'Apple',s:'1',cal:95,p:0,c:25,f:0}],
             [{n:'Besan Chilla',s:'3 pcs',cal:330,p:15,c:33,f:14},{n:'Curd',s:'1 cup',cal:100,p:5,c:8,f:5},{n:'Banana',s:'1',cal:105,p:1,c:27,f:0}]
         ];
         const lnVegGain=[
@@ -1473,7 +1475,7 @@ async function ensureLibs(){
             [{n:'Poha',s:'1 plate',cal:250,p:5,c:40,f:8},{n:'Sprouts',s:'1 cup',cal:80,p:7,c:10,f:1},{n:'Tea',s:'1 cup',cal:30,p:1,c:5,f:1}],
             [{n:'Dosa',s:'2 pcs',cal:220,p:4,c:32,f:8},{n:'Chutney',s:'2 tbsp',cal:40,p:1,c:2,f:3},{n:'Banana',s:'1',cal:105,p:1,c:27,f:0}],
             [{n:'Oats with Milk',s:'1 bowl',cal:250,p:8,c:38,f:6},{n:'Apple',s:'1',cal:95,p:0,c:25,f:0}],
-            [{n:'Paratha',s:'1 pc',cal:180,p:4,c:22,f:8},{n:'Curd',s:'1 cup',cal:60,p:4,c:5,f:3},{n:'Orange',s:'1',cal:60,p:1,c:15,f:0}],
+            [{n:'Paratha (Air Fryer)',s:'1 pc',cal:126,p:4,c:22,f:2},{n:'Curd',s:'1 cup',cal:60,p:4,c:5,f:3},{n:'Orange',s:'1',cal:60,p:1,c:15,f:0}],
             [{n:'Upma',s:'1 bowl',cal:210,p:5,c:35,f:6},{n:'Paneer Slice',s:'50g',cal:75,p:5,c:1,f:5},{n:'Buttermilk',s:'1 glass',cal:40,p:3,c:5,f:1}],
             [{n:'Besan Chilla',s:'2 pcs',cal:220,p:10,c:22,f:9},{n:'Green Tea',s:'1 cup',cal:5,p:0,c:1,f:0},{n:'Papaya',s:'1 cup',cal:55,p:1,c:14,f:0}]
         ];
@@ -1488,7 +1490,7 @@ async function ensureLibs(){
         ];
         const dnVegMaintain=[
             [{n:'Paneer Tikka',s:'150g',cal:220,p:16,c:6,f:14},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Mixed Veg',s:'1 bowl',cal:100,p:3,c:12,f:4}],
-            [{n:'Dal Tadka',s:'1 bowl',cal:170,p:10,c:24,f:4},{n:'Rice',s:'1 cup',cal:200,p:4,c:44,f:1},{n:'Bhindi Fry',s:'1 bowl',cal:80,p:2,c:8,f:4}],
+            [{n:'Dal Tadka',s:'1 bowl',cal:170,p:10,c:24,f:4},{n:'Rice',s:'1 cup',cal:200,p:4,c:44,f:1},{n:'Bhindi Fry (Air Fryer)',s:'1 bowl',cal:53,p:2,c:8,f:1}],
             [{n:'Tofu Stir Fry',s:'150g',cal:170,p:14,c:5,f:10},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Salad',s:'1 bowl',cal:50,p:2,c:8,f:1}],
             [{n:'Chole',s:'1 bowl',cal:200,p:10,c:28,f:6},{n:'Roti',s:'1 pc',cal:100,p:3,c:18,f:2},{n:'Raita',s:'1 cup',cal:60,p:3,c:5,f:3}],
             [{n:'Palak Paneer',s:'1 bowl',cal:180,p:10,c:8,f:12},{n:'Roti',s:'2 pcs',cal:200,p:6,c:36,f:4},{n:'Curd',s:'1 cup',cal:60,p:4,c:5,f:3}],

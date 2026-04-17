@@ -1,7 +1,7 @@
 name: coresync
 description: "A multi-module productivity app with TodoList, Password Manager, and Gym Tracker."
 publish_to: 'none'
-version: 1.0.6+8
+version: 1.0.7+1
 
 environment:
   sdk: ^3.10.4
@@ -73,7 +73,6 @@ dependencies:
   speech_to_text: ^7.0.0
   flutter_tts: ^4.2.0
   local_auth: ^2.3.0
-  cached_network_image: ^3.4.1
   video_player: ^2.11.1
   archive: ^4.0.4
 

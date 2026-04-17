@@ -16,6 +16,7 @@ enum WorkoutType {
   stretching('Stretching', Icons.accessibility_new, 2.5),
   pilates('Pilates', Icons.sports_gymnastics, 3.8),
   martialArts('Martial Arts', Icons.sports_martial_arts, 10.3),
+  treadmill('Treadmill', Icons.speed, 4.3),
   other('Other', Icons.sports_score, 5.0);
 
   const WorkoutType(this.label, this.icon, this.defaultMET);
@@ -43,6 +44,7 @@ class WorkoutLogModel {
     required this.userWeightKg,
     this.distanceKm,
     this.speedKmh,
+    this.inclinePercent,
     this.caloriesBurnt,
     DateTime? loggedAt,
   }) : loggedAt = loggedAt ?? DateTime.now();
@@ -54,6 +56,7 @@ class WorkoutLogModel {
   final double userWeightKg;
   final double? distanceKm;
   final double? speedKmh;
+  final double? inclinePercent; // treadmill incline %
   final double? caloriesBurnt; // manual override
   final DateTime loggedAt;
 
@@ -73,6 +76,7 @@ class WorkoutLogModel {
         'userWeightKg': userWeightKg,
         'distanceKm': distanceKm,
         'speedKmh': speedKmh,
+        'inclinePercent': inclinePercent,
         'caloriesBurnt': caloriesBurnt,
         'loggedAt': loggedAt.millisecondsSinceEpoch,
       };
@@ -93,6 +97,7 @@ class WorkoutLogModel {
       userWeightKg: (data['userWeightKg'] as num?)?.toDouble() ?? 70,
       distanceKm: (data['distanceKm'] as num?)?.toDouble(),
       speedKmh: (data['speedKmh'] as num?)?.toDouble(),
+      inclinePercent: (data['inclinePercent'] as num?)?.toDouble(),
       caloriesBurnt: (data['caloriesBurnt'] as num?)?.toDouble(),
       loggedAt: data['loggedAt'] != null
           ? DateTime.fromMillisecondsSinceEpoch(

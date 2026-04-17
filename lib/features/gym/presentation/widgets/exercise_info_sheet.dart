@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../domain/exercise_model.dart';
 import '../../domain/workout_program_model.dart';
 import 'body_muscle_diagram.dart';
+import 'exercise_animation.dart';
 import 'exercise_video_player.dart';
 
 /// Shows the redesigned exercise info sheet with navigation.
@@ -501,36 +501,10 @@ class _ExerciseInfoSheetState extends State<_ExerciseInfoSheet> {
         fit: BoxFit.contain,
       );
     }
-    if (exercise.lottieAsset != null) {
-      return Lottie.asset(
-        exercise.lottieAsset!,
-        fit: BoxFit.contain,
-        repeat: true,
-      );
-    }
-    return Center(
-      child: CircleAvatar(
-        radius: 64,
-        backgroundColor: theme.colorScheme.primaryContainer,
-        child: Icon(
-          _categoryIcon(exercise.category),
-          size: 64,
-          color: theme.colorScheme.onPrimaryContainer,
-        ),
-      ),
+    return ExerciseAnimation(
+      exercise: exercise,
+      fit: BoxFit.contain,
     );
   }
 
-  static IconData _categoryIcon(String category) {
-    return switch (category) {
-      'Abs' || 'Core' => Icons.sports_martial_arts,
-      'Arm' || 'Arms' => Icons.fitness_center,
-      'Chest' => Icons.expand,
-      'Leg' || 'Legs' => Icons.directions_run,
-      'Shoulder' || 'Shoulders' => Icons.accessibility_new,
-      'Back' => Icons.straighten,
-      'Cardio' => Icons.directions_run,
-      _ => Icons.fitness_center,
-    };
-  }
 }

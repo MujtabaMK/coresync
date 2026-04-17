@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../domain/weight_loss_profile_model.dart';
 import '../presentation/providers/gym_provider.dart';
 
 class ReportPdfService {
@@ -112,13 +113,26 @@ class ReportPdfService {
     int foodDaysGoalMet = 0;
     double totalFoodCal = 0;
     final foodDaily = <_DailyEntry>[];
+    final goalType = state.weightLossProfile?.goalType;
     for (var d = startDate;
         !d.isAfter(today);
         d = d.add(const Duration(days: 1))) {
       final cal = foodCalHistory[d] ?? 0;
       final dayGoal = state.calorieGoalHistory[d] ?? calorieGoalFallback;
       if (cal > 0) foodDaysTracked++;
-      if (cal > 0 && cal.round() == dayGoal.round()) foodDaysGoalMet++;
+      if (cal > 0) {
+        switch (goalType) {
+          case GoalType.lose:
+            if (cal <= dayGoal && cal >= dayGoal - 500) foodDaysGoalMet++;
+            break;
+          case GoalType.gain:
+            if (cal >= dayGoal && cal <= dayGoal + 500) foodDaysGoalMet++;
+            break;
+          default:
+            if (cal.round() == dayGoal.round()) foodDaysGoalMet++;
+            break;
+        }
+      }
       totalFoodCal += cal;
       foodDaily.add(_DailyEntry(d, cal.round(), dayGoal.round()));
     }

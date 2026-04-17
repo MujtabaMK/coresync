@@ -1,7 +1,6 @@
 import 'env.dart' as env;
 
 const String _envGeminiApiKey = env.geminiApiKey;
-
 class AppConstants {
   AppConstants._();
 

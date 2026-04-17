@@ -140,6 +140,7 @@ class DietChartService {
   }
 
   /// Names that indicate unhealthy / junk food — excluded from diet plans.
+  /// Junk food stays blocked even in Air Fryer / Grilled form (samosa, pakora…).
   static bool _isUnhealthy(String name) {
     final n = name.toLowerCase();
     return n.contains('chocolate') ||
@@ -246,6 +247,31 @@ class DietChartService {
         n.contains('smoothie') && n.contains('ice cream');
   }
 
+  /// Identifies oily / deep-fried originals of foods that were already part of
+  /// the diet plan. These get replaced by their Air Fryer / Grilled versions.
+  /// Does NOT touch foods already blocked by [_isUnhealthy] (samosa, pakora…).
+  static bool _isOilyOriginal(String name) {
+    final n = name.toLowerCase();
+    // Air fryer / grilled versions are the healthy replacements — keep them
+    if (n.contains('(air fryer)') || n.contains('(grilled)')) return false;
+    // Skip dal fry / stir fry / egg pepper fry — these are cooking styles, not
+    // deep-fried dishes
+    if (n.contains('dal fry') ||
+        n.contains('daal fry') ||
+        n.contains('stir fry') ||
+        n.contains('pepper fry')) {
+      return false;
+    }
+    // Oily originals that were previously allowed in the diet pools:
+    // Parathas, puris, fish/meat fry, veggie fry, vada, cutlet
+    return n.contains('paratha') ||
+        n.contains('puri') ||
+        (n.contains('fry') && !n.contains('dal')) ||
+        (n.contains('fried') && !n.contains('dal')) ||
+        n.contains('vada') ||
+        n.contains('cutlet');
+  }
+
   /// Non-veg keywords for filtering when vegetarian mode is on.
   static final _nonVegKeywords = [
     'chicken', 'fish', 'mutton', 'keema', 'prawn', 'meat',
@@ -289,7 +315,7 @@ class DietChartService {
         carbs: withMilk ? 13 : 3,
         fat: withMilk ? 5.5 : 1.5,
       ));
-    } else if (scoops >= 2) {
+    } else if (scoops == 2) {
       supplements.add(DietFoodSuggestion(
         name: withMilk
             ? 'Whey Protein (2 scoops with milk)'
@@ -300,6 +326,18 @@ class DietChartService {
         protein: withMilk ? 58 : 48,
         carbs: withMilk ? 21 : 6,
         fat: withMilk ? 8 : 3,
+      ));
+    } else if (scoops >= 3) {
+      supplements.add(DietFoodSuggestion(
+        name: withMilk
+            ? 'Whey Protein (3 scoops with milk)'
+            : 'Whey Protein (3 scoops with water)',
+        servingSize: withMilk ? '3 scoops + 400ml milk' : '3 scoops (90g)',
+        servings: 1,
+        calories: withMilk ? 610 : 360,
+        protein: withMilk ? 85 : 72,
+        carbs: withMilk ? 29 : 9,
+        fat: withMilk ? 10.5 : 4.5,
       ));
     }
 
@@ -551,7 +589,8 @@ class DietChartService {
             f.calories > 10 &&
             f.calories < 800 &&
             !_isSupplement(f.name) &&
-            !_isUnhealthy(f.name))
+            !_isUnhealthy(f.name) &&
+            !_isOilyOriginal(f.name))
         .toList();
   }
 

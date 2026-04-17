@@ -566,7 +566,7 @@ class GymRepository {
     await _sleepCol.doc(id).delete();
   }
 
-  /// Returns a map of date -> sleep duration in minutes (uses first sleep log per day)
+  /// Returns a map of date -> sleep duration in minutes (sums all entries per day)
   Future<Map<DateTime, int>> getSleepHistory() async {
     final snapshot = await _sleepCol.get();
     final map = <DateTime, int>{};
@@ -576,7 +576,6 @@ class GymRepository {
       final loggedDate = DateTime.fromMillisecondsSinceEpoch(loggedMs.toInt());
       final normalized =
           DateTime(loggedDate.year, loggedDate.month, loggedDate.day);
-      if (map.containsKey(normalized)) continue; // keep first entry per day
       final sleepMs = data['sleepTime'] as num? ?? 0;
       final wakeMs = data['wakeTime'] as num? ?? 0;
       final sleepTime =
@@ -585,7 +584,7 @@ class GymRepository {
           DateTime.fromMillisecondsSinceEpoch(wakeMs.toInt());
       final durationMin = wakeTime.difference(sleepTime).inMinutes;
       if (durationMin > 0) {
-        map[normalized] = durationMin;
+        map[normalized] = (map[normalized] ?? 0) + durationMin;
       }
     }
     return map;

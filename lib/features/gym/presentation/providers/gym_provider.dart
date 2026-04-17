@@ -157,11 +157,16 @@ class GymState {
 
   // ── Sleep helpers ──
   Duration get todaySleepDuration => todaySleep.isNotEmpty
-      ? todaySleep.first.duration
+      ? todaySleep.fold<Duration>(Duration.zero, (s, e) => s + e.duration)
       : Duration.zero;
-  String get todaySleepFormatted => todaySleep.isNotEmpty
-      ? todaySleep.first.durationFormatted
-      : '0h';
+  String get todaySleepFormatted {
+    final d = todaySleepDuration;
+    if (d == Duration.zero) return '0h';
+    final hours = d.inHours;
+    final minutes = d.inMinutes % 60;
+    if (minutes == 0) return '${hours}h';
+    return '${hours}h ${minutes}min';
+  }
 
   GymState copyWith({
     MembershipModel? activeMembership,

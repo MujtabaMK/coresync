@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../data/exercise_data.dart';
 import '../../domain/exercise_model.dart';
 import '../../domain/workout_program_model.dart';
+import '../widgets/exercise_animation.dart';
 import '../widgets/exercise_info_sheet.dart';
 import '../widgets/exercise_video_player.dart';
 
@@ -175,17 +175,6 @@ class _ExerciseListTile extends StatelessWidget {
     required this.onTap,
   });
 
-  static IconData _categoryIcon(String category) {
-    return switch (category) {
-      'Abs' => Icons.sports_martial_arts,
-      'Arm' => Icons.fitness_center,
-      'Chest' => Icons.expand,
-      'Leg' => Icons.directions_run,
-      'Shoulder' => Icons.accessibility_new,
-      'Back' => Icons.straighten,
-      _ => Icons.fitness_center,
-    };
-  }
 
   String get _subtitle {
     if (exercise.isTimeBased || workoutExercise.durationSecs != null) {
@@ -223,24 +212,10 @@ class _ExerciseListTile extends StatelessWidget {
                         height: 48,
                         fit: BoxFit.contain,
                       )
-                    : exercise.lottieAsset != null
-                        ? Lottie.asset(
-                            exercise.lottieAsset!,
-                            fit: BoxFit.contain,
-                            repeat: true,
-                          )
-                        : CircleAvatar(
-                            radius: 24,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primaryContainer,
-                            child: Icon(
-                              _categoryIcon(exercise.category),
-                              size: 24,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
-                            ),
-                          ),
+                    : ExerciseAnimation(
+                        exercise: exercise,
+                        fit: BoxFit.contain,
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(

@@ -27,14 +27,13 @@ class _LogSleepScreenState extends State<LogSleepScreen> {
     _wakeTime = DateTime(now.year, now.month, now.day, 7, 0);
     context.read<GymCubit>().loadTodaySleep();
 
-    // If sleep already logged today, pre-populate with that data
+    // Pre-populate quality/notes from existing entries (per-day fields),
+    // but NOT bedtime/wake time (user is adding a new segment).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<GymCubit>().state;
       if (state.todaySleep.isNotEmpty) {
         final latest = state.todaySleep.first;
         setState(() {
-          _sleepTime = latest.sleepTime;
-          _wakeTime = latest.wakeTime;
           _quality = latest.quality;
           if (latest.notes != null) _notesCtrl.text = latest.notes!;
         });
@@ -151,124 +150,122 @@ class _LogSleepScreenState extends State<LogSleepScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Existing sleep log
+              // Existing sleep log – consolidated expandable card
               if (state.todaySleep.isNotEmpty) ...[
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Today's Sleep",
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ...state.todaySleep.map((s) => Dismissible(
-                              key: Key(s.id),
-                              direction: DismissDirection.endToStart,
-                              background: Container(
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.only(right: 12),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.error,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(Icons.delete,
-                                    color: Colors.white),
-                              ),
-                              onDismissed: (_) {
-                                context
-                                    .read<GymCubit>()
-                                    .deleteSleepLog(s.id);
-                              },
-                              child: ListTile(
-                                dense: true,
-                                contentPadding: EdgeInsets.zero,
-                                leading: const Icon(Icons.bedtime,
-                                    color: Colors.indigo),
-                                title: Text(s.durationFormatted),
-                                subtitle: Text(
-                                  '${_formatTime(s.sleepTime)} - ${_formatTime(s.wakeTime)}'
-                                  '${s.quality != null ? ' \u00b7 ${s.quality!.label}' : ''}',
-                                ),
-                                trailing: s.notes != null
-                                    ? const Icon(Icons.note, size: 18)
-                                    : null,
-                              ),
-                            )),
-                      ],
-                    ),
-                  ),
+                _TodaySleepCard(
+                  entries: state.todaySleep,
+                  totalFormatted: state.todaySleepFormatted,
+                  onDelete: (id) =>
+                      context.read<GymCubit>().deleteSleepLog(id),
                 ),
                 const SizedBox(height: 20),
               ],
 
               // Duration preview
-              Center(
-                child: Card(
-                  color: Colors.indigo.withValues(alpha: 0.08),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 24),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.bedtime,
-                            size: 40, color: Colors.indigo),
-                        const SizedBox(height: 12),
-                        Text(
-                          _durationFormatted,
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.indigo,
-                          ),
+              Card(
+                color: Colors.indigo.withValues(alpha: 0.08),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.bedtime,
+                          size: 32, color: Colors.indigo),
+                      const SizedBox(width: 12),
+                      Text(
+                        _durationFormatted,
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.indigo,
                         ),
-                        Text(
-                          'sleep duration',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.6),
-                          ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'sleep duration',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.6),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
-              // Sleep time picker
-              ListTile(
-                leading: const Icon(Icons.nights_stay, color: Colors.indigo),
-                title: const Text('Bedtime'),
-                subtitle: Text(_formatTime(_sleepTime)),
-                trailing: const Icon(Icons.edit),
-                onTap: _pickSleepTime,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-                ),
+              // Sleep & wake time pickers side by side
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: _pickSleepTime,
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.nights_stay, color: Colors.indigo, size: 22),
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Bedtime', style: theme.textTheme.labelMedium),
+                                Text(
+                                  _formatTime(_sleepTime),
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: _pickWakeTime,
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.wb_sunny, color: Colors.amber, size: 22),
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Wake time', style: theme.textTheme.labelMedium),
+                                Text(
+                                  _formatTime(_wakeTime),
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-
-              // Wake time picker
-              ListTile(
-                leading:
-                    const Icon(Icons.wb_sunny, color: Colors.amber),
-                title: const Text('Wake time'),
-                subtitle: Text(_formatTime(_wakeTime)),
-                trailing: const Icon(Icons.edit),
-                onTap: _pickWakeTime,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-                ),
-              ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // Quality selector
               Text('Sleep Quality (optional)',
@@ -324,5 +321,144 @@ class _LogSleepScreenState extends State<LogSleepScreen> {
             : dt.hour;
     final period = dt.hour >= 12 ? 'PM' : 'AM';
     return '${hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')} $period';
+  }
+}
+
+/// Expandable card showing consolidated daily sleep with individual segments.
+class _TodaySleepCard extends StatefulWidget {
+  const _TodaySleepCard({
+    required this.entries,
+    required this.totalFormatted,
+    required this.onDelete,
+  });
+
+  final List<SleepLogModel> entries;
+  final String totalFormatted;
+  final void Function(String id) onDelete;
+
+  @override
+  State<_TodaySleepCard> createState() => _TodaySleepCardState();
+}
+
+class _TodaySleepCardState extends State<_TodaySleepCard> {
+  bool _expanded = false;
+
+  String _formatTime(DateTime dt) {
+    final hour = dt.hour > 12
+        ? dt.hour - 12
+        : dt.hour == 0
+            ? 12
+            : dt.hour;
+    final period = dt.hour >= 12 ? 'PM' : 'AM';
+    return '${hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')} $period';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    // Show overall quality only when all segments agree
+    final qualities = widget.entries
+        .map((e) => e.quality)
+        .where((q) => q != null)
+        .toSet();
+    final overallQuality = qualities.length == 1 ? qualities.first : null;
+
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => setState(() => _expanded = !_expanded),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header row
+              Row(
+                children: [
+                  const Icon(Icons.bedtime, color: Colors.indigo),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Today's Sleep",
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    widget.totalFormatted,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.indigo,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              // Subtitle: segment count + quality (only if all same)
+              Row(
+                children: [
+                  Text(
+                    '${widget.entries.length} segment${widget.entries.length > 1 ? 's' : ''}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface
+                          .withValues(alpha: 0.6),
+                    ),
+                  ),
+                  if (overallQuality != null) ...[
+                    Text(
+                      ' · ${overallQuality.label}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface
+                            .withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                  const Spacer(),
+                  Icon(
+                    _expanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: theme.colorScheme.onSurface
+                        .withValues(alpha: 0.5),
+                  ),
+                ],
+              ),
+              // Expanded: individual segments with per-segment quality
+              if (_expanded) ...[
+                const Divider(height: 20),
+                ...widget.entries.map((s) => Dismissible(
+                      key: Key(s.id),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.error,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child:
+                            const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      onDismissed: (_) => widget.onDelete(s.id),
+                      child: ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.bedtime,
+                            color: Colors.indigo, size: 20),
+                        title: Text(
+                          '${s.period}: ${_formatTime(s.sleepTime)} - ${_formatTime(s.wakeTime)} · ${s.durationFormatted}'
+                          '${s.quality != null ? ' · ${s.quality!.label}' : ''}',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                    )),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

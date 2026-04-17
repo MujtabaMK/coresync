@@ -37,7 +37,7 @@ class WeightLossProfileModel {
     this.goalType = GoalType.lose,
     this.isVegetarian = false,
     this.gymTimeHour,
-    this.proteinScoops = 1,
+    this.proteinScoops = 0,
     this.takesCreatine = false,
     this.takesMassGainer = false,
   });
@@ -315,7 +315,7 @@ class WeightLossProfileModel {
       ),
       isVegetarian: data['wl_isVegetarian'] as bool? ?? false,
       gymTimeHour: (data['wl_gymTimeHour'] as num?)?.toInt(),
-      proteinScoops: (data['wl_proteinScoops'] as num?)?.toInt() ?? 1,
+      proteinScoops: (data['wl_proteinScoops'] as num?)?.toInt() ?? 0,
       takesCreatine: data['wl_takesCreatine'] as bool? ?? false,
       takesMassGainer: data['wl_takesMassGainer'] as bool? ?? false,
     );

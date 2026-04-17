@@ -251,13 +251,19 @@ class _WorkoutDetailPageState extends State<_WorkoutDetailPage> {
   WorkoutIntensity _intensity = WorkoutIntensity.moderate;
   final _durationCtrl = TextEditingController(text: '30');
   final _distanceCtrl = TextEditingController();
+  final _speedCtrl = TextEditingController();
+  final _inclineCtrl = TextEditingController(text: '0');
   final _caloriesCtrl = TextEditingController();
   bool _manualCalories = false;
+
+  bool get _isTreadmill => widget.workoutType == WorkoutType.treadmill;
 
   @override
   void dispose() {
     _durationCtrl.dispose();
     _distanceCtrl.dispose();
+    _speedCtrl.dispose();
+    _inclineCtrl.dispose();
     _caloriesCtrl.dispose();
     super.dispose();
   }
@@ -298,7 +304,12 @@ class _WorkoutDetailPageState extends State<_WorkoutDetailPage> {
       durationMinutes: _duration,
       userWeightKg: _weight,
       distanceKm: double.tryParse(_distanceCtrl.text),
-      speedKmh: _speed,
+      speedKmh: _isTreadmill
+          ? double.tryParse(_speedCtrl.text)
+          : _speed,
+      inclinePercent: _isTreadmill
+          ? double.tryParse(_inclineCtrl.text)
+          : null,
       caloriesBurnt: _manualCalories
           ? double.tryParse(_caloriesCtrl.text)
           : null,
@@ -373,6 +384,34 @@ class _WorkoutDetailPageState extends State<_WorkoutDetailPage> {
           ),
           const SizedBox(height: 16),
 
+          // Treadmill-specific fields
+          if (_isTreadmill) ...[
+            TextFormField(
+              controller: _speedCtrl,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Speed',
+                suffixText: 'km/h',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _inclineCtrl,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Incline',
+                suffixText: '%',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 16),
+          ],
+
           // Distance (optional)
           TextFormField(
             controller: _distanceCtrl,
@@ -382,7 +421,7 @@ class _WorkoutDetailPageState extends State<_WorkoutDetailPage> {
               labelText: 'Distance (optional)',
               suffixText: 'km',
               border: const OutlineInputBorder(),
-              helperText: _speed != null
+              helperText: !_isTreadmill && _speed != null
                   ? 'Speed: ${_speed!.toStringAsFixed(1)} km/h'
                   : null,
             ),
