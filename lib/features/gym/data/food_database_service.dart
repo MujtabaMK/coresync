@@ -180,6 +180,24 @@ class FoodDatabaseService {
     return rows.map(_fromRow).toList();
   }
 
+  /// Search foods within a calorie range, sorted by closest to target.
+  Future<List<CommonFoodItem>> searchByCalorieRange(
+    int min,
+    int max, {
+    int target = 0,
+    int limit = 50,
+  }) async {
+    final db = await _database;
+    final sortTarget = target > 0 ? target : (min + max) ~/ 2;
+    final rows = await db.rawQuery('''
+      SELECT * FROM $_table
+      WHERE calories BETWEEN ? AND ?
+      ORDER BY ABS(calories - ?) ASC
+      LIMIT ?
+    ''', [min, max, sortTarget, limit]);
+    return rows.map(_fromRow).toList();
+  }
+
   /// Insert a user-created food into the local database.
   /// Skips insert if a food with the same name already exists.
   Future<void> insertFood(CommonFoodItem food) async {

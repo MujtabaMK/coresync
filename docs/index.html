@@ -359,6 +359,33 @@
         #landing-content .footer-links a:hover{color:#4A5FE0}
         #landing-content footer .copyright{color:rgba(107,114,128,.45)}
 
+        /* 3D HERO CANVAS */
+        .hero-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+        .hero>*:not(.hero-canvas){position:relative;z-index:1}
+
+        /* 3D FEATURE CARDS */
+        .feature-card{transform-style:preserve-3d;transition:all .5s cubic-bezier(.03,.98,.52,.99)}
+        #landing-content .feature-card:hover{transform:perspective(800px) rotateY(var(--rx,0deg)) rotateX(var(--ry,0deg)) translateY(-6px) translateZ(10px);box-shadow:0 20px 60px rgba(0,212,255,.1)}
+
+        /* FLOATING TAGLINE */
+        @keyframes float3d{0%,100%{transform:translateY(0) rotateX(0)}50%{transform:translateY(-6px) rotateX(3deg)}}
+        .hero .tagline{animation:float3d 4s ease-in-out infinite;transform-style:preserve-3d}
+
+        /* 3D SECTION REVEAL */
+        @keyframes slideIn3D{from{opacity:0;transform:perspective(800px) rotateX(-8deg) translateY(30px)}to{opacity:1;transform:perspective(800px) rotateX(0) translateY(0)}}
+        .reveal-3d{opacity:0}
+        .reveal-3d.visible{animation:slideIn3D .7s cubic-bezier(.03,.98,.52,.99) forwards}
+
+        /* HIGHLIGHT 3D HOVER */
+        .highlight-item{transition:transform .4s;transform-style:preserve-3d}
+        .highlight-item:hover{transform:perspective(600px) rotateX(-5deg) scale(1.05)}
+        .highlight-icon{transition:transform .4s}
+        .highlight-item:hover .highlight-icon{transform:translateZ(15px) scale(1.15)}
+
+        /* STORE BTN 3D */
+        .store-btn{transform-style:preserve-3d;transition:all .3s cubic-bezier(.03,.98,.52,.99)}
+        #landing-content .store-btn:hover{transform:perspective(600px) rotateY(-3deg) translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.1)}
+
         /* ANIMATIONS */
         @keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
         .dash-main>*{animation:fadeIn .45s ease-out both}
@@ -404,6 +431,7 @@
 <div id="landing-content">
     <nav class="top-nav"><div class="nav-brand">CoreSync Go</div><button id="login-btn" class="nav-btn">Login</button></nav>
     <section class="hero">
+        <canvas class="hero-canvas" id="hero3d"></canvas>
         <img src="app_icon.png" alt="CoreSync Go" class="hero-icon"><h1>CoreSync Go</h1>
         <p class="tagline">Your all-in-one productivity &amp; wellness hub. Tasks, passwords, fitness, scanning, and more — unified in a single app.</p>
         <div class="store-buttons">
@@ -411,7 +439,7 @@
             <a href="#" class="store-btn"><svg viewBox="0 0 24 24"><path d="M3.18 23.48c-.27-.17-.48-.47-.48-.87V1.39c0-.4.21-.7.48-.87L13.55 12 3.18 23.48zm1.44-23L16.08 5.6l-3.3 3.3L4.62.49zM20.16 10.33l-2.95 1.66-3.34-3.33 3.34-3.34 2.95 1.66c.88.49.88 1.86 0 2.35l.01.01-.01-.01zm-4.07 2.33l3.34 3.34-2.95 1.66c-.44.24-.92.24-1.18.12l-.01-.01-8.84-5.12 3.3-3.3 6.34 3.31z"/></svg><span class="store-label"><small>Get it on</small>Google Play</span></a>
         </div>
     </section>
-    <section id="features">
+    <section id="features" class="reveal-3d">
         <h2 class="section-title">Everything You Need</h2><p class="section-subtitle">Eight powerful modules working together so you can focus on what matters.</p>
         <div class="features-grid">
             <div class="feature-card"><div class="feature-icon icon-tasks"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><h3>Task Manager</h3><p>Create, organize, and share tasks. Set reminders, priorities, and never miss a deadline.</p></div>
@@ -424,7 +452,7 @@
             <div class="feature-card"><div class="feature-icon icon-translator"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/><path d="M2 16h4"/><path d="M18 16h4"/><path d="M10 16l2-2 2 2"/></svg></div><h3>Voice Translator</h3><p>Translate speech in real time across 20+ languages. Conversation mode for two-way communication.</p></div>
         </div>
     </section>
-    <section class="highlights"><div class="highlights-grid">
+    <section class="highlights reveal-3d"><div class="highlights-grid">
         <div class="highlight-item"><div class="highlight-icon">&#9729;</div><h4>Cloud Sync</h4><p>Your data, everywhere. Seamlessly synced in real time.</p></div>
         <div class="highlight-item"><div class="highlight-icon">&#128274;</div><h4>Encrypted &amp; Secure</h4><p>Industry-standard encryption for passwords and data.</p></div>
         <div class="highlight-item"><div class="highlight-icon">&#127912;</div><h4>Material 3 Design</h4><p>Modern interface following Material You guidelines.</p></div>
@@ -1783,6 +1811,151 @@ async function ensureLibs(){
     };
 
     function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+</script>
+
+<!-- 3D Animations -->
+<script>
+(function(){
+    const canvas = document.getElementById('hero3d');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W, H, mouseX = 0.5, mouseY = 0.5;
+
+    function resize() {
+        const hero = canvas.parentElement;
+        W = canvas.width = hero.offsetWidth;
+        H = canvas.height = hero.offsetHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    document.addEventListener('mousemove', e => {
+        mouseX = e.clientX / window.innerWidth;
+        mouseY = e.clientY / window.innerHeight;
+    });
+
+    // Particles with 3D depth + connecting lines
+    const particles = [];
+    const PARTICLE_COUNT = 50;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push({
+            x: Math.random() * 100, y: Math.random() * 100, z: Math.random() * 300 + 50,
+            vx: (Math.random() - 0.5) * 0.03,
+            vy: (Math.random() - 0.5) * 0.02,
+            vz: (Math.random() - 0.5) * 0.3,
+            size: 1 + Math.random() * 2.5,
+            isCyan: Math.random() < 0.6,
+        });
+    }
+
+    // 3D wireframe shapes
+    const shapes = [];
+    function cubeVerts(s) { return [[-s,-s,-s],[s,-s,-s],[s,s,-s],[-s,s,-s],[-s,-s,s],[s,-s,s],[s,s,s],[-s,s,s]]; }
+    const cubeEdges = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    function octaVerts(s) { return [[0,-s,0],[s,0,0],[0,0,s],[-s,0,0],[0,0,-s],[0,s,0]]; }
+    const octaEdges = [[0,1],[0,2],[0,3],[0,4],[5,1],[5,2],[5,3],[5,4],[1,2],[2,3],[3,4],[4,1]];
+
+    for (let i = 0; i < 8; i++) {
+        const type = Math.random() < 0.5 ? 'cube' : 'octa';
+        const size = 10 + Math.random() * 18;
+        shapes.push({
+            verts: type === 'cube' ? cubeVerts(size) : octaVerts(size),
+            edges: type === 'cube' ? cubeEdges : octaEdges,
+            x: Math.random() * 100, y: Math.random() * 100, z: Math.random() * 200 + 80,
+            rx: Math.random() * Math.PI * 2, ry: Math.random() * Math.PI * 2, rz: Math.random() * Math.PI * 2,
+            sx: (Math.random() - 0.5) * 0.007, sy: (Math.random() - 0.5) * 0.005, sz: (Math.random() - 0.5) * 0.009,
+            vx: (Math.random() - 0.5) * 0.012, vy: (Math.random() - 0.5) * 0.008,
+            isCyan: Math.random() < 0.5,
+            opacity: 0.08 + Math.random() * 0.12,
+        });
+    }
+
+    function rotX(v, a) { const c=Math.cos(a),s=Math.sin(a); return [v[0], v[1]*c-v[2]*s, v[1]*s+v[2]*c]; }
+    function rotY(v, a) { const c=Math.cos(a),s=Math.sin(a); return [v[0]*c+v[2]*s, v[1], -v[0]*s+v[2]*c]; }
+    function rotZ(v, a) { const c=Math.cos(a),s=Math.sin(a); return [v[0]*c-v[1]*s, v[0]*s+v[1]*c, v[2]]; }
+    function proj(v, cx, cy) { const sc = 400 / (400 + v[2]); return [v[0]*sc+cx, v[1]*sc+cy, sc]; }
+
+    function animate() {
+        ctx.clearRect(0, 0, W, H);
+        const px = (mouseX - 0.5) * 40;
+        const py = (mouseY - 0.5) * 30;
+
+        // Draw particles
+        const projected = particles.map(p => {
+            p.x += p.vx; p.y += p.vy; p.z += p.vz;
+            if (p.x < -2 || p.x > 102) p.vx *= -1;
+            if (p.y < -2 || p.y > 102) p.vy *= -1;
+            if (p.z < 30 || p.z > 400) p.vz *= -1;
+            const sx = (p.x / 100) * W + px / (p.z / 100);
+            const sy = (p.y / 100) * H + py / (p.z / 100);
+            const depth = 1 - (p.z - 30) / 370;
+            const alpha = 0.15 + depth * 0.4;
+            const r = p.size * (0.5 + depth * 0.5);
+            ctx.beginPath();
+            ctx.arc(sx, sy, r, 0, Math.PI * 2);
+            ctx.fillStyle = p.isCyan ? `rgba(0,212,255,${alpha})` : `rgba(168,85,247,${alpha})`;
+            ctx.fill();
+            return { x: sx, y: sy, alpha, p };
+        });
+
+        // Connect nearby particles
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < projected.length; i++) {
+            for (let j = i + 1; j < projected.length; j++) {
+                const dx = projected[i].x - projected[j].x;
+                const dy = projected[i].y - projected[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120) {
+                    const a = (1 - dist / 120) * 0.15;
+                    ctx.strokeStyle = projected[i].p.isCyan ? `rgba(0,212,255,${a})` : `rgba(168,85,247,${a})`;
+                    ctx.beginPath();
+                    ctx.moveTo(projected[i].x, projected[i].y);
+                    ctx.lineTo(projected[j].x, projected[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Draw wireframe shapes
+        shapes.forEach(s => {
+            s.rx += s.sx; s.ry += s.sy; s.rz += s.sz;
+            s.x += s.vx; s.y += s.vy;
+            if (s.x < -5 || s.x > 105) s.vx *= -1;
+            if (s.y < -5 || s.y > 105) s.vy *= -1;
+            const cx = (s.x / 100) * W + px / (s.z / 120);
+            const cy = (s.y / 100) * H + py / (s.z / 120);
+            const pts = s.verts.map(v => { let r = rotX(v, s.rx); r = rotY(r, s.ry); r = rotZ(r, s.rz); r[2] += s.z; return proj(r, cx, cy); });
+            const color = s.isCyan ? `rgba(0,212,255,${s.opacity})` : `rgba(168,85,247,${s.opacity})`;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = Math.max(0.4, pts[0][2] * 1);
+            ctx.beginPath();
+            s.edges.forEach(([a,b]) => { ctx.moveTo(pts[a][0], pts[a][1]); ctx.lineTo(pts[b][0], pts[b][1]); });
+            ctx.stroke();
+            ctx.fillStyle = s.isCyan ? `rgba(0,212,255,${s.opacity + 0.06})` : `rgba(168,85,247,${s.opacity + 0.06})`;
+            pts.forEach(p => { ctx.beginPath(); ctx.arc(p[0], p[1], Math.max(0.8, p[2] * 1.5), 0, Math.PI * 2); ctx.fill(); });
+        });
+
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Scroll reveal
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal-3d').forEach(el => obs.observe(el));
+
+    // 3D card tilt for feature cards
+    document.querySelectorAll('#landing-content .feature-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            card.style.transform = `perspective(800px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-6px) translateZ(10px)`;
+        });
+        card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
+})();
 </script>
 </body>
 </html>

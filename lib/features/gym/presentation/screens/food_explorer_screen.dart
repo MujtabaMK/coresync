@@ -25,6 +25,10 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
   String _nutrientDisplayName = '';
   String _nutrientColumn = '';
 
+  // Calorie mode
+  bool _isCalorieMode = false;
+  int _calorieTarget = 0;
+
   Timer? _debounce;
 
   static const _nutrientMap = {
@@ -98,6 +102,7 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
       setState(() {
         _results = [];
         _isNutrientMode = false;
+        _isCalorieMode = false;
         _searching = false;
       });
       return;
@@ -112,6 +117,30 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
     setState(() => _searching = true);
 
     final lower = query.toLowerCase();
+
+    // Check if query matches a calorie pattern (e.g. "200", "200 kcal", "under 300")
+    final kcalTarget = _parseCalorieQuery(lower);
+    if (kcalTarget != null) {
+      try {
+        final min = (kcalTarget - 50).clamp(0, 99999);
+        final max = kcalTarget + 50;
+        final results = await _foodDb.searchByCalorieRange(
+          min, max, target: kcalTarget, limit: 50,
+        );
+        if (!mounted) return;
+        setState(() {
+          _results = results;
+          _isCalorieMode = true;
+          _calorieTarget = kcalTarget;
+          _isNutrientMode = false;
+          _searching = false;
+        });
+      } catch (_) {
+        if (!mounted) return;
+        setState(() => _searching = false);
+      }
+      return;
+    }
 
     // Check if query matches a nutrient keyword
     String? matchedColumn;
@@ -133,6 +162,7 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
         setState(() {
           _results = results;
           _isNutrientMode = true;
+          _isCalorieMode = false;
           _nutrientColumn = matchedColumn!;
           _nutrientDisplayName = _capitalize(matchedDisplay!);
           _searching = false;
@@ -149,6 +179,7 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
         setState(() {
           _results = results;
           _isNutrientMode = false;
+          _isCalorieMode = false;
           _searching = false;
         });
       } catch (_) {
@@ -156,6 +187,25 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
         setState(() => _searching = false);
       }
     }
+  }
+
+  /// Parses calorie queries like "200", "200 kcal", "200 cal", "under 300", "below 250".
+  int? _parseCalorieQuery(String lower) {
+    // "200 kcal", "200 cal", "200kcal"
+    final kcalMatch = RegExp(r'^(\d+)\s*(?:kcal|cal)$').firstMatch(lower);
+    if (kcalMatch != null) return int.tryParse(kcalMatch.group(1)!);
+
+    // "under 300", "below 250"
+    final underMatch =
+        RegExp(r'^(?:under|below)\s+(\d+)(?:\s*(?:kcal|cal))?$')
+            .firstMatch(lower);
+    if (underMatch != null) return int.tryParse(underMatch.group(1)!);
+
+    // Plain number (3+ digits to avoid matching short nutrient-like queries)
+    final plainMatch = RegExp(r'^(\d{3,})$').firstMatch(lower);
+    if (plainMatch != null) return int.tryParse(plainMatch.group(1)!);
+
+    return null;
   }
 
   String _capitalize(String s) {
@@ -243,7 +293,7 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
               controller: _searchCtrl,
               autofocus: true,
               decoration: InputDecoration(
-                hintText: 'Search food or nutrient (e.g. "chicken", "vitamin d")...',
+                hintText: 'Search food, nutrient, or kcal (e.g. "200 kcal")...',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _query.isNotEmpty
                     ? IconButton(
@@ -266,6 +316,33 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: LinearProgressIndicator(),
+            ),
+          if (_isCalorieMode && _results.isNotEmpty)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.tertiaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.local_fire_department,
+                      size: 16,
+                      color: theme.colorScheme.onTertiaryContainer),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Foods around $_calorieTarget kcal (${(_calorieTarget - 50).clamp(0, 99999)}–${_calorieTarget + 50} kcal)',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onTertiaryContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           if (_isNutrientMode && _results.isNotEmpty)
             Container(
@@ -326,7 +403,7 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Try "chicken", "vitamin d", "iron", "calcium"',
+            'Try "chicken", "vitamin d", "iron", "200 kcal"',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),

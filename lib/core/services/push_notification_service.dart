@@ -16,6 +16,7 @@ class PushNotificationService {
   static StreamSubscription<QuerySnapshot>? _notificationSub;
   static String? _listeningUid;
   static final Set<String> _shownNotificationIds = {};
+  static DateTime? _listenerStartTime;
 
   static const _uuid = Uuid();
 
@@ -27,11 +28,13 @@ class PushNotificationService {
     );
     debugPrint('FCM permission status: ${settings.authorizationStatus}');
 
-    // Required on iOS so foreground FCM messages display as visible banners.
+    // Disable iOS auto-showing FCM banners in foreground — we handle
+    // foreground messages ourselves in _handleForegroundMessage to avoid
+    // duplicate notifications (iOS banner + our local notification).
     await _messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
+      alert: false,
       badge: true,
-      sound: true,
+      sound: false,
     );
 
     // Log APNs token availability (iOS only)
@@ -112,6 +115,7 @@ class PushNotificationService {
     _notificationSub?.cancel();
     _listeningUid = user.uid;
     _shownNotificationIds.clear();
+    _listenerStartTime = DateTime.now();
 
     debugPrint('Starting notification listener for uid: ${user.uid}');
 
@@ -130,30 +134,28 @@ class PushNotificationService {
             final isRead = data['read'] as bool? ?? false;
             if (isRead) continue;
 
-            // Deduplicate: skip if FCM already showed this notification
-            final notifKey = data['notifKey'] as String?;
-            if (notifKey != null && _shownNotificationIds.contains(notifKey)) {
-              // Already shown via FCM foreground handler — just mark read
+            // Skip notifications created before this listener session.
+            // They were already delivered via FCM push while app was closed.
+            final createdAt = data['createdAt'] as Timestamp?;
+            if (createdAt != null &&
+                _listenerStartTime != null &&
+                createdAt.toDate().isBefore(_listenerStartTime!)) {
               doc.reference.update({'read': true}).catchError((e) {
                 debugPrint('Failed to mark notification read: $e');
               });
               continue;
             }
 
-            if (_shownNotificationIds.contains(doc.id)) continue;
-            _shownNotificationIds.add(doc.id);
+            // Track this notification so the FCM foreground handler can
+            // deduplicate if it arrives after this listener fires.
+            final notifKey = data['notifKey'] as String?;
             if (notifKey != null) _shownNotificationIds.add(notifKey);
+            _shownNotificationIds.add(doc.id);
 
-            debugPrint('New notification: ${data['title']}');
-
-            NotificationService.showInstantNotification(
-              id: doc.id.hashCode,
-              title: data['title'] as String? ?? 'CoreSync Go',
-              body: data['body'] as String? ?? '',
-              channelId: 'shared_tasks',
-              channelName: 'Shared Tasks',
-            );
-
+            // Mark as read. Notifications are shown ONLY via FCM push
+            // (OS handles background/closed, _handleForegroundMessage
+            // handles foreground). This listener just keeps Firestore
+            // in sync to avoid re-processing on next app launch.
             doc.reference.update({'read': true}).catchError((e) {
               debugPrint('Failed to mark notification read: $e');
             });

@@ -114,14 +114,20 @@ class TodoCubit extends Cubit<TodoState> {
   Future<void> _rescheduleTaskAlarms(List<TaskModel> tasks) async {
     final now = DateTime.now();
     for (final task in tasks) {
+      final alarmId = NotificationIds.taskAlarm(task.id);
       if (task.status != TaskStatus.completed &&
           task.dueDate.isAfter(now)) {
+        // Cancel first to avoid duplicate notifications
+        await NotificationService.cancel(alarmId);
         await NotificationService.scheduleOnceAlarm(
-          id: NotificationIds.taskAlarm(task.id),
+          id: alarmId,
           title: 'Task Reminder',
           body: task.title,
           scheduledDate: task.dueDate,
         );
+      } else {
+        // Clean up alarms for completed or past tasks
+        await NotificationService.cancel(alarmId);
       }
     }
   }

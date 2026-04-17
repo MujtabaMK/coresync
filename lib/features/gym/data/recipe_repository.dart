@@ -47,5 +47,20 @@ class RecipeRepository {
     }
   }
 
+  /// Loads all categories into cache and returns a flat list of all recipes.
+  Future<List<RecipeModel>> getAll() async {
+    for (final category in RecipeCategory.values) {
+      if (!_cache.containsKey(category)) {
+        final snapshot = await _collection
+            .where('category', isEqualTo: category.name)
+            .get();
+        _cache[category] = snapshot.docs
+            .map((doc) => RecipeModel.fromFirestore(doc.id, doc.data()))
+            .toList();
+      }
+    }
+    return _cache.values.expand((list) => list).toList();
+  }
+
   void clearCache() => _cache.clear();
 }

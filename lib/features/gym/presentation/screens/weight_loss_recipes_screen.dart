@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,6 +18,8 @@ class WeightLossRecipesScreen extends StatefulWidget {
 class _WeightLossRecipesScreenState extends State<WeightLossRecipesScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  final _searchCtrl = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -36,8 +40,26 @@ class _WeightLossRecipesScreenState extends State<WeightLossRecipesScreen>
     context.read<RecipeCubit>().loadCategory(category);
   }
 
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    if (value.trim().isEmpty) {
+      context.read<RecipeCubit>().searchRecipes('');
+      return;
+    }
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      context.read<RecipeCubit>().searchRecipes(value.trim());
+    });
+  }
+
+  void _clearSearch() {
+    _searchCtrl.clear();
+    context.read<RecipeCubit>().searchRecipes('');
+  }
+
   @override
   void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
     _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
@@ -45,75 +67,196 @@ class _WeightLossRecipesScreenState extends State<WeightLossRecipesScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Healthy Recipes'),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          tabs: RecipeCategory.values
-              .map((c) => Tab(text: c.label))
-              .toList(),
+    return BlocBuilder<RecipeCubit, RecipeState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Healthy Recipes'),
+            bottom: state.isInSearchMode
+                ? null
+                : TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    tabs: RecipeCategory.values
+                        .map((c) => Tab(text: c.label))
+                        .toList(),
+                  ),
+          ),
+          body: _buildBody(context, state),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(BuildContext context, RecipeState state) {
+    if (state.isSeeding) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Setting up recipes for the first time...'),
+          ],
         ),
-      ),
-      body: BlocBuilder<RecipeCubit, RecipeState>(
-        builder: (context, state) {
-          if (state.isSeeding) {
-            return const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Setting up recipes for the first time...'),
-                ],
-              ),
-            );
-          }
+      );
+    }
 
-          if (state.error != null) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Something went wrong',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.error!,
-                    style: Theme.of(context).textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    onPressed: () =>
-                        context.read<RecipeCubit>().seedAndLoad(),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
+    if (state.error != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Something went wrong',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state.error!,
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: () => context.read<RecipeCubit>().seedAndLoad(),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
 
-          return TabBarView(
-            controller: _tabController,
-            children: RecipeCategory.values
-                .map((c) => _RecipeList(
-                      category: c,
-                      recipes: state.selectedCategory == c
-                          ? state.recipes
-                          : const [],
-                      isLoading:
-                          state.isLoading && state.selectedCategory == c,
-                    ))
-                .toList(),
-          );
-        },
-      ),
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        // Search bar
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: TextField(
+            controller: _searchCtrl,
+            decoration: InputDecoration(
+              hintText: 'Search by name or kcal (e.g. "200 kcal")...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: state.searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: _clearSearch,
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              filled: true,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            onChanged: _onSearchChanged,
+          ),
+        ),
+        // Sort chips — always visible
+        SizedBox(
+          height: 48,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            children: RecipeSortType.values
+                .where((s) => s != RecipeSortType.none)
+                .map((sort) {
+              final selected = state.sortType == sort;
+              return Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: FilterChip(
+                  label: Text(sort.label),
+                  selected: selected,
+                  onSelected: (_) =>
+                      context.read<RecipeCubit>().sortRecipes(sort),
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        // Calorie search banner
+        if (state.isCalorieSearch && state.searchResults.isNotEmpty)
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.tertiaryContainer,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.local_fire_department,
+                    size: 16,
+                    color: theme.colorScheme.onTertiaryContainer),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Recipes around ${state.calorieTarget} kcal '
+                    '(${(state.calorieTarget - 50).clamp(0, 99999)}–${state.calorieTarget + 50} kcal)',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onTertiaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        // Content
+        Expanded(
+          child: state.isInSearchMode
+              ? _buildSearchResults(state)
+              : TabBarView(
+                  controller: _tabController,
+                  children: RecipeCategory.values
+                      .map((c) => _RecipeList(
+                            category: c,
+                            recipes: state.selectedCategory == c
+                                ? state.recipes
+                                : const [],
+                            isLoading:
+                                state.isLoading && state.selectedCategory == c,
+                          ))
+                      .toList(),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchResults(RecipeState state) {
+    if (state.isSearching) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state.searchResults.isEmpty) {
+      return Center(
+        child: Text(
+          state.searchQuery.isNotEmpty
+              ? 'No recipes found for "${state.searchQuery}"'
+              : 'No recipes found',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.5),
+              ),
+        ),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: state.searchResults.length,
+      itemBuilder: (context, index) {
+        return _RecipeCard(recipe: state.searchResults[index]);
+      },
     );
   }
 }

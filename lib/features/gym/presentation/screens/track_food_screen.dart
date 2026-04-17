@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -2525,9 +2526,8 @@ class _RecipesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Recipes')),
-      body: const _RecipesTab(),
+    return const Scaffold(
+      body: _RecipesTab(),
     );
   }
 }
@@ -3388,6 +3388,18 @@ class _MealSection extends StatelessWidget {
 
 // ─── Recipes Tab ────────────────────────────────────────────────────────────
 
+enum _RecipeSortType {
+  none('None'),
+  highestProtein('Highest Protein'),
+  lowestCalories('Lowest Calories'),
+  highestCarbs('Highest Carbs'),
+  highestFat('Highest Fat'),
+  lowestFat('Lowest Fat');
+
+  const _RecipeSortType(this.label);
+  final String label;
+}
+
 class _RecipesTab extends StatefulWidget {
   const _RecipesTab();
 
@@ -3398,8 +3410,19 @@ class _RecipesTab extends StatefulWidget {
 class _RecipesTabState extends State<_RecipesTab>
     with SingleTickerProviderStateMixin {
   late final TabController _catTabCtrl;
+  final _searchCtrl = TextEditingController();
   Map<RecipeCategory, List<RecipeModel>> _recipes = {};
+  List<RecipeModel> _allRecipes = [];
+  List<RecipeModel> _searchResults = [];
   bool _loading = true;
+  String _searchQuery = '';
+  _RecipeSortType _sortType = _RecipeSortType.none;
+  bool _isCalorieSearch = false;
+  int _calorieTarget = 0;
+  Timer? _debounce;
+
+  bool get _isInSearchMode =>
+      _searchQuery.isNotEmpty || _sortType != _RecipeSortType.none;
 
   static const _categories = RecipeCategory.values;
   static const _assetFiles = {
@@ -3422,6 +3445,8 @@ class _RecipesTabState extends State<_RecipesTab>
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
     _catTabCtrl.dispose();
     super.dispose();
   }
@@ -3432,8 +3457,9 @@ class _RecipesTabState extends State<_RecipesTab>
       try {
         final jsonStr = await rootBundle.loadString(entry.value);
         final list = json.decode(jsonStr) as List;
-        map[entry.key] =
-            list.map((e) => RecipeModel.fromJson(e as Map<String, dynamic>)).toList();
+        map[entry.key] = list
+            .map((e) => RecipeModel.fromJson(e as Map<String, dynamic>))
+            .toList();
       } catch (_) {
         map[entry.key] = [];
       }
@@ -3441,44 +3467,291 @@ class _RecipesTabState extends State<_RecipesTab>
     if (!mounted) return;
     setState(() {
       _recipes = map;
+      _allRecipes = map.values.expand((list) => list).toList();
       _loading = false;
     });
+  }
+
+  int? _parseCalorieQuery(String lower) {
+    final kcalMatch = RegExp(r'^(\d+)\s*(?:kcal|cal)$').firstMatch(lower);
+    if (kcalMatch != null) return int.tryParse(kcalMatch.group(1)!);
+    final underMatch =
+        RegExp(r'^(?:under|below)\s+(\d+)(?:\s*(?:kcal|cal))?$')
+            .firstMatch(lower);
+    if (underMatch != null) return int.tryParse(underMatch.group(1)!);
+    final plainMatch = RegExp(r'^(\d{3,})$').firstMatch(lower);
+    if (plainMatch != null) return int.tryParse(plainMatch.group(1)!);
+    return null;
+  }
+
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      setState(() {
+        _searchQuery = '';
+        _isCalorieSearch = false;
+        _calorieTarget = 0;
+        if (_sortType != _RecipeSortType.none) {
+          _searchResults = _applySorting(List.of(_allRecipes), _sortType);
+        } else {
+          _searchResults = [];
+        }
+      });
+      return;
+    }
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      _performSearch(trimmed);
+    });
+  }
+
+  void _performSearch(String query) {
+    final lower = query.toLowerCase();
+    final kcalTarget = _parseCalorieQuery(lower);
+
+    if (kcalTarget != null) {
+      final min = (kcalTarget - 50).clamp(0, 99999);
+      final max = kcalTarget + 50;
+      var filtered = _allRecipes
+          .where((r) => r.calories >= min && r.calories <= max)
+          .toList()
+        ..sort((a, b) => (a.calories - kcalTarget)
+            .abs()
+            .compareTo((b.calories - kcalTarget).abs()));
+      filtered = _applySorting(filtered, _sortType);
+      setState(() {
+        _searchQuery = query;
+        _searchResults = filtered;
+        _isCalorieSearch = true;
+        _calorieTarget = kcalTarget;
+      });
+    } else {
+      var filtered = _allRecipes
+          .where((r) => r.name.toLowerCase().contains(lower))
+          .toList();
+      filtered = _applySorting(filtered, _sortType);
+      setState(() {
+        _searchQuery = query;
+        _searchResults = filtered;
+        _isCalorieSearch = false;
+        _calorieTarget = 0;
+      });
+    }
+  }
+
+  void _onSortTapped(_RecipeSortType sort) {
+    final newSort = _sortType == sort ? _RecipeSortType.none : sort;
+
+    if (newSort == _RecipeSortType.none && _searchQuery.isEmpty) {
+      setState(() {
+        _sortType = _RecipeSortType.none;
+        _searchResults = [];
+        _isCalorieSearch = false;
+        _calorieTarget = 0;
+      });
+      return;
+    }
+
+    List<RecipeModel> results;
+    if (_searchQuery.isNotEmpty) {
+      final lower = _searchQuery.toLowerCase();
+      final kcalTarget = _parseCalorieQuery(lower);
+      if (kcalTarget != null) {
+        final min = (kcalTarget - 50).clamp(0, 99999);
+        final max = kcalTarget + 50;
+        results = _allRecipes
+            .where((r) => r.calories >= min && r.calories <= max)
+            .toList();
+        if (newSort == _RecipeSortType.none) {
+          results.sort((a, b) => (a.calories - kcalTarget)
+              .abs()
+              .compareTo((b.calories - kcalTarget).abs()));
+        }
+      } else {
+        results = _allRecipes
+            .where((r) => r.name.toLowerCase().contains(lower))
+            .toList();
+      }
+    } else {
+      results = List.of(_allRecipes);
+    }
+
+    results = _applySorting(results, newSort);
+    setState(() {
+      _sortType = newSort;
+      _searchResults = results;
+    });
+  }
+
+  List<RecipeModel> _applySorting(
+      List<RecipeModel> recipes, _RecipeSortType sort) {
+    switch (sort) {
+      case _RecipeSortType.none:
+        return recipes;
+      case _RecipeSortType.highestProtein:
+        return recipes..sort((a, b) => b.protein.compareTo(a.protein));
+      case _RecipeSortType.lowestCalories:
+        return recipes..sort((a, b) => a.calories.compareTo(b.calories));
+      case _RecipeSortType.highestCarbs:
+        return recipes..sort((a, b) => b.carbs.compareTo(a.carbs));
+      case _RecipeSortType.highestFat:
+        return recipes..sort((a, b) => b.fat.compareTo(a.fat));
+      case _RecipeSortType.lowestFat:
+        return recipes..sort((a, b) => a.fat.compareTo(b.fat));
+    }
+  }
+
+  void _clearSearch() {
+    _searchCtrl.clear();
+    _onSearchChanged('');
   }
 
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return Scaffold(
+        appBar: AppBar(title: const Text('Recipes')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
     }
 
-    return Column(
-      children: [
-        TabBar(
-          controller: _catTabCtrl,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          tabs: _categories.map((c) => Tab(text: c.label)).toList(),
-        ),
-        Expanded(
-          child: TabBarView(
-            controller: _catTabCtrl,
-            children: _categories.map((cat) {
-              final recipes = _recipes[cat] ?? [];
-              if (recipes.isEmpty) {
-                return const Center(child: Text('No recipes'));
-              }
-              return ListView.builder(
-                padding: const EdgeInsets.all(12),
-                itemCount: recipes.length,
-                itemBuilder: (context, i) {
-                  final r = recipes[i];
-                  return _RecipeCard(recipe: r);
-                },
-              );
-            }).toList(),
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Recipes'),
+        bottom: _isInSearchMode
+            ? null
+            : TabBar(
+                controller: _catTabCtrl,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                tabs: _categories.map((c) => Tab(text: c.label)).toList(),
+              ),
+      ),
+      body: Column(
+        children: [
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: 'Search by name or kcal (e.g. "200 kcal")...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: _clearSearch,
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              onChanged: _onSearchChanged,
+            ),
+          ),
+          // Sort chips
+          SizedBox(
+            height: 48,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              children: _RecipeSortType.values
+                  .where((s) => s != _RecipeSortType.none)
+                  .map((sort) {
+                final selected = _sortType == sort;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: FilterChip(
+                    label: Text(sort.label),
+                    selected: selected,
+                    onSelected: (_) => _onSortTapped(sort),
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize:
+                        MaterialTapTargetSize.shrinkWrap,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          // Calorie search banner
+          if (_isCalorieSearch && _searchResults.isNotEmpty)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.tertiaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.local_fire_department,
+                      size: 16,
+                      color: theme.colorScheme.onTertiaryContainer),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Recipes around $_calorieTarget kcal '
+                      '(${(_calorieTarget - 50).clamp(0, 99999)}–${_calorieTarget + 50} kcal)',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onTertiaryContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          // Content
+          Expanded(
+            child: _isInSearchMode
+                ? _buildSearchResults(theme)
+                : TabBarView(
+                    controller: _catTabCtrl,
+                    children: _categories.map((cat) {
+                      final recipes = _recipes[cat] ?? [];
+                      if (recipes.isEmpty) {
+                        return const Center(child: Text('No recipes'));
+                      }
+                      return ListView.builder(
+                        padding: const EdgeInsets.all(12),
+                        itemCount: recipes.length,
+                        itemBuilder: (context, i) =>
+                            _RecipeCard(recipe: recipes[i]),
+                      );
+                    }).toList(),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchResults(ThemeData theme) {
+    if (_searchResults.isEmpty) {
+      return Center(
+        child: Text(
+          _searchQuery.isNotEmpty
+              ? 'No recipes found for "$_searchQuery"'
+              : 'No recipes found',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
           ),
         ),
-      ],
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.all(12),
+      itemCount: _searchResults.length,
+      itemBuilder: (context, i) => _RecipeCard(recipe: _searchResults[i]),
     );
   }
 }

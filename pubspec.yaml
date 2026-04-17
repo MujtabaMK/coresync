@@ -1,7 +1,7 @@
 name: coresync
 description: "A multi-module productivity app with TodoList, Password Manager, and Gym Tracker."
 publish_to: 'none'
-version: 1.0.7+1
+version: 1.0.7+2
 
 environment:
   sdk: ^3.10.4
