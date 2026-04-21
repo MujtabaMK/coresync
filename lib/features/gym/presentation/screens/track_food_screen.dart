@@ -9,6 +9,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:uuid/uuid.dart';
 
 import '../../data/food_database_service.dart';
+import '../../data/step_counter_service.dart';
 import '../../data/gemini_food_service.dart';
 import '../../domain/food_scan_model.dart';
 import '../../domain/recipe_model.dart';
@@ -32,14 +33,77 @@ class TrackFoodScreen extends StatefulWidget {
   State<TrackFoodScreen> createState() => _TrackFoodScreenState();
 }
 
-class _TrackFoodScreenState extends State<TrackFoodScreen> {
+class _TrackFoodScreenState extends State<TrackFoodScreen>
+    with WidgetsBindingObserver {
+  final _stepService = StepCounterService.instance;
+  late final GymCubit _gymCubit;
+  StreamSubscription<int>? _stepSub;
+
   @override
   void initState() {
     super.initState();
-    final cubit = context.read<GymCubit>();
-    cubit.loadTrackedFood();
-    cubit.loadTodayWorkouts();
-    cubit.loadTodaySleep();
+    WidgetsBinding.instance.addObserver(this);
+    _gymCubit = context.read<GymCubit>();
+    _gymCubit.loadTrackedFood();
+    _gymCubit.loadTodayWorkouts();
+    _gymCubit.loadTodaySleep();
+    _initSteps();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _stepService.refreshOnResume();
+    }
+  }
+
+  int? _computeStepGoal() {
+    final state = _gymCubit.state;
+    final heightCm = state.userHeight;
+    if (heightCm != null && state.userWeight != null) {
+      final heightM = heightCm / 100;
+      final bmi = state.userWeight! / (heightM * heightM);
+      if (bmi < 18.5) return 8000;
+      if (bmi < 25) return 10000;
+      if (bmi < 30) return 12000;
+      return 15000;
+    }
+    return null;
+  }
+
+  Future<void> _initSteps() async {
+    try {
+      final saved =
+          await _gymCubit.repository.getStepsForDate(DateTime.now());
+      _stepService.setMinSteps(saved);
+    } catch (_) {}
+
+    await _stepService.initialize();
+
+    // Sync current steps to GymState so the UI picks them up immediately
+    if (_stepService.currentSteps > 0) {
+      _gymCubit.saveSteps(DateTime.now(), _stepService.currentSteps,
+          goalSteps: _computeStepGoal());
+    }
+
+    // Listen for live updates and sync to GymState
+    _stepSub = _stepService.stepsStream.listen((steps) {
+      if (mounted) {
+        final now = DateTime.now();
+        final todayKey = DateTime(now.year, now.month, now.day);
+        final current = _gymCubit.state.stepsHistory[todayKey] ?? 0;
+        if (steps > current) {
+          _gymCubit.saveSteps(now, steps, goalSteps: _computeStepGoal());
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _stepSub?.cancel();
+    super.dispose();
   }
 
   @override

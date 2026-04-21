@@ -18,6 +18,7 @@ class GymHomeScreen extends StatefulWidget {
 class _GymHomeScreenState extends State<GymHomeScreen>
     with WidgetsBindingObserver {
   final _stepService = StepCounterService.instance;
+  late final GymCubit _gymCubit;
   StreamSubscription<int>? _stepSub;
   int _liveSteps = 0;
   bool _stepsLoading = true;
@@ -26,7 +27,22 @@ class _GymHomeScreenState extends State<GymHomeScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _gymCubit = context.read<GymCubit>();
     _initSteps();
+  }
+
+  int? _computeStepGoal() {
+    final state = _gymCubit.state;
+    final heightCm = state.userHeight;
+    if (heightCm != null && state.userWeight != null) {
+      final heightM = heightCm / 100;
+      final bmi = state.userWeight! / (heightM * heightM);
+      if (bmi < 18.5) return 8000;
+      if (bmi < 25) return 10000;
+      if (bmi < 30) return 12000;
+      return 15000;
+    }
+    return null;
   }
 
   @override
@@ -38,9 +54,8 @@ class _GymHomeScreenState extends State<GymHomeScreen>
 
   Future<void> _initSteps() async {
     // Load saved steps from Firestore
-    final gymCubit = context.read<GymCubit>();
     try {
-      final saved = await gymCubit.repository.getStepsForDate(DateTime.now());
+      final saved = await _gymCubit.repository.getStepsForDate(DateTime.now());
       _stepService.setMinSteps(saved);
     } catch (_) {}
 
@@ -55,10 +70,22 @@ class _GymHomeScreenState extends State<GymHomeScreen>
       });
     }
 
-    // Listen for live updates (display only — StepsScreen handles Firestore saves)
+    // Sync current steps to GymState so other screens see them
+    if (_stepService.currentSteps > 0) {
+      _gymCubit.saveSteps(DateTime.now(), _stepService.currentSteps,
+          goalSteps: _computeStepGoal());
+    }
+
+    // Listen for live updates and sync to GymState
     _stepSub = _stepService.stepsStream.listen((steps) {
       if (mounted) {
         setState(() => _liveSteps = steps);
+        final now = DateTime.now();
+        final todayKey = DateTime(now.year, now.month, now.day);
+        final current = _gymCubit.state.stepsHistory[todayKey] ?? 0;
+        if (steps > current) {
+          _gymCubit.saveSteps(now, steps, goalSteps: _computeStepGoal());
+        }
       }
     });
   }
