@@ -91,9 +91,6 @@
         .hero h1 { font-size: 3.6rem; font-weight: 800; letter-spacing: -.03em; background: linear-gradient(135deg, #1E2432 30%, #4A5FE0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 16px; line-height: 1.15; max-width: 700px; }
         .hero p { font-size: 1.15rem; color: var(--text2); max-width: 600px; margin: 0 auto 32px; }
         .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-        .hero-scroll-hint { position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text2); font-size: .75rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; }
-        .hero-scroll-hint span { width: 1px; height: 28px; background: linear-gradient(to bottom, var(--primary), transparent); animation: scrollPulse 2s ease-in-out infinite; }
-        @keyframes scrollPulse { 0%, 100% { opacity: .3; transform: scaleY(.6); } 50% { opacity: 1; transform: scaleY(1); } }
         .btn-primary { padding: 14px 32px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; text-decoration: none; font-weight: 600; font-size: .95rem; transition: all .25s; box-shadow: 0 4px 20px rgba(74,95,224,.3); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(74,95,224,.4); }
         .btn-secondary { padding: 14px 32px; border-radius: 14px; background: var(--card-bg); backdrop-filter: blur(12px); color: var(--text); text-decoration: none; font-weight: 600; font-size: .95rem; border: 1px solid var(--card-border); transition: all .25s; }
@@ -178,7 +175,6 @@
             .hero h1 { font-size: 2.2rem; }
             .hero p { font-size: 1rem; }
             .hero-3d-icon { width: 100px; height: 100px; border-radius: 24px; }
-            .hero-scroll-hint { display: none; }
             .problem-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
             .feature-row, .feature-row.reverse { flex-direction: column; text-align: center; gap: 24px; }
@@ -232,7 +228,6 @@
             <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
             <a href="#features" class="btn-secondary">See All Features</a>
         </div>
-        <div class="hero-scroll-hint">Scroll<span></span></div>
     </section>
 
     <!-- PROBLEM / SOLUTION -->
@@ -382,7 +377,7 @@
 
     <script>
     /* ═══════════════════════════════════════════
-       LOADER — progress bar, then init animations
+       LOADER
        ═══════════════════════════════════════════ */
     (function () {
         var fill = document.querySelector('.loader-fill');
@@ -406,7 +401,7 @@
     })();
 
     /* ═══════════════════════════════════════════
-       MAIN INIT — runs once loader finishes
+       MAIN INIT
        ═══════════════════════════════════════════ */
     function startPage() {
         /* ── Lenis smooth scroll ── */
@@ -421,12 +416,14 @@
             }
         }
 
-        /* ── Bail if GSAP didn't load (everything stays visible) ── */
         if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
         gsap.registerPlugin(ScrollTrigger);
 
+        /* replay = animations replay every time you scroll past */
+        var replay = 'restart none restart none';
+
         /* ──────────────────────────────────
-           HERO ENTRANCE (plays immediately)
+           HERO ENTRANCE
            ────────────────────────────────── */
         var heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
         heroTl
@@ -434,30 +431,32 @@
             .from('.hero-badge', { y: 24, opacity: 0, duration: 0.5 }, '-=0.6')
             .from('.hero h1', { y: 40, opacity: 0, duration: 0.7 }, '-=0.4')
             .from('.hero p', { y: 24, opacity: 0, duration: 0.5 }, '-=0.4')
-            .from('.hero-cta', { y: 24, opacity: 0, duration: 0.5 }, '-=0.3')
-            .from('.hero-scroll-hint', { opacity: 0, duration: 0.5 }, '-=0.2');
+            .from('.hero-cta', { y: 24, opacity: 0, duration: 0.5 }, '-=0.3');
 
         /* ──────────────────────────────────
-           HERO 3D ICON — rotates on scroll
-           (like the BMW car rotation)
+           HERO 3D ICON — continuous scroll-driven
+           rotation (like BMW car). Scrub = always
+           moves with scroll, forward AND backward.
            ────────────────────────────────── */
         gsap.to('.hero-3d-icon', {
-            rotateY: 30,
-            rotateX: -20,
-            scale: 0.7,
+            rotateY: 45,
+            rotateX: -30,
+            rotateZ: 8,
+            y: -60,
+            scale: 0.55,
             ease: 'none',
             scrollTrigger: {
                 trigger: '.hero',
                 start: 'top top',
-                end: 'bottom top',
-                scrub: 1.5
+                end: '+=1400',
+                scrub: 1
             }
         });
 
-        /* Hero glow parallax */
+        /* Hero glow parallax — scrub */
         gsap.to('.hero-glow', {
-            y: 200,
-            scale: 1.5,
+            y: 250,
+            scale: 1.6,
             opacity: 0,
             ease: 'none',
             scrollTrigger: {
@@ -469,112 +468,116 @@
         });
 
         /* ──────────────────────────────────
-           PROBLEM / SOLUTION CARDS
+           PROBLEM / SOLUTION — replay on scroll
            ────────────────────────────────── */
         gsap.from('.problem-card', {
             x: -80, opacity: 0, rotateY: -15, duration: 0.9, ease: 'power3.out',
-            scrollTrigger: { trigger: '.problem-grid', start: 'top 80%' }
+            scrollTrigger: { trigger: '.problem-grid', start: 'top 80%', toggleActions: replay }
         });
         gsap.from('.solution-card', {
             x: 80, opacity: 0, rotateY: 15, duration: 0.9, ease: 'power3.out',
-            scrollTrigger: { trigger: '.problem-grid', start: 'top 80%' }
+            scrollTrigger: { trigger: '.problem-grid', start: 'top 80%', toggleActions: replay }
         });
 
         /* ──────────────────────────────────
-           SECTION HEADERS (all of them)
+           SECTION HEADERS — replay on scroll
            ────────────────────────────────── */
         gsap.utils.toArray('.section-tag').forEach(function (el) {
             gsap.from(el, {
                 y: 20, opacity: 0, duration: 0.5, ease: 'power2.out',
-                scrollTrigger: { trigger: el, start: 'top 88%' }
+                scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: replay }
             });
         });
         gsap.utils.toArray('.section-title').forEach(function (el) {
             gsap.from(el, {
                 y: 30, opacity: 0, duration: 0.6, ease: 'power2.out',
-                scrollTrigger: { trigger: el, start: 'top 88%' }
+                scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: replay }
             });
         });
         gsap.utils.toArray('.section-subtitle').forEach(function (el) {
             gsap.from(el, {
                 y: 20, opacity: 0, duration: 0.5, ease: 'power2.out',
-                scrollTrigger: { trigger: el, start: 'top 88%' }
+                scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: replay }
             });
         });
 
         /* ──────────────────────────────────
-           STATS — counter animation
+           STATS — replay + counter
            ────────────────────────────────── */
         gsap.utils.toArray('.stat-item').forEach(function (item, i) {
             gsap.from(item, {
                 y: 30, opacity: 0, duration: 0.6, delay: i * 0.1, ease: 'power2.out',
-                scrollTrigger: { trigger: '.stats-grid', start: 'top 85%' },
+                scrollTrigger: { trigger: '.stats-grid', start: 'top 85%', toggleActions: replay },
                 onStart: function () {
                     var h3 = item.querySelector('h3');
-                    if (h3 && !h3.dataset.counted) {
-                        h3.dataset.counted = '1';
-                        animateCounter(h3, parseInt(h3.dataset.target, 10), h3.dataset.suffix || '');
-                    }
+                    var target = parseInt(h3.dataset.target, 10);
+                    var suffix = h3.dataset.suffix || '';
+                    animateCounter(h3, target, suffix);
                 }
             });
         });
 
         /* ──────────────────────────────────
-           FEATURES — 3D icon entrance + text slide
+           FEATURES — 3D scrub on icons +
+           replay text animations
            ────────────────────────────────── */
         gsap.utils.toArray('.feature-row').forEach(function (row) {
             var isReverse = row.classList.contains('reverse');
             var visual = row.querySelector('.feature-visual');
             var content = row.querySelector('.feature-content');
+            var icon = row.querySelector('.feature-icon');
 
-            /* Icon: 3D rotate-in from its side */
-            gsap.from(visual, {
-                x: isReverse ? 80 : -80,
-                opacity: 0,
-                rotateY: isReverse ? 45 : -45,
-                scale: 0.6,
-                duration: 1,
-                ease: 'back.out(1.4)',
-                scrollTrigger: { trigger: row, start: 'top 80%' }
-            });
+            /* Icon entrance — scrub (moves with scroll both ways) */
+            gsap.fromTo(visual,
+                { x: isReverse ? 100 : -100, opacity: 0, rotateY: isReverse ? 60 : -60, scale: 0.5 },
+                { x: 0, opacity: 1, rotateY: 0, scale: 1, ease: 'none',
+                  scrollTrigger: { trigger: row, start: 'top 90%', end: 'top 45%', scrub: 1 }
+                }
+            );
 
-            /* Text: slide in from opposite side */
-            gsap.from(content, {
-                x: isReverse ? -60 : 60,
-                opacity: 0,
-                duration: 0.8,
-                delay: 0.15,
-                ease: 'power3.out',
-                scrollTrigger: { trigger: row, start: 'top 80%' }
+            /* Text entrance — scrub */
+            gsap.fromTo(content,
+                { x: isReverse ? -80 : 80, opacity: 0 },
+                { x: 0, opacity: 1, ease: 'none',
+                  scrollTrigger: { trigger: row, start: 'top 88%', end: 'top 50%', scrub: 1 }
+                }
+            );
+
+            /* Continuous 3D icon rotation while scrolling past (like BMW) */
+            gsap.to(icon, {
+                rotateY: isReverse ? -20 : 20,
+                rotateX: 12,
+                ease: 'none',
+                scrollTrigger: { trigger: row, start: 'top bottom', end: 'bottom top', scrub: 1 }
             });
         });
 
         /* ──────────────────────────────────
-           COMPARISON TABLE — staggered rows
+           COMPARISON TABLE — replay
            ────────────────────────────────── */
         gsap.from('.comparison-table thead', {
             y: 20, opacity: 0, duration: 0.5,
-            scrollTrigger: { trigger: '.comparison-wrap', start: 'top 80%' }
+            scrollTrigger: { trigger: '.comparison-wrap', start: 'top 80%', toggleActions: replay }
         });
         gsap.from('.comparison-table tbody tr', {
             y: 20, opacity: 0, duration: 0.4, stagger: 0.06,
-            scrollTrigger: { trigger: '.comparison-wrap', start: 'top 75%' }
+            scrollTrigger: { trigger: '.comparison-wrap', start: 'top 75%', toggleActions: replay }
         });
 
         /* ──────────────────────────────────
-           CTA BOX — scale up
+           CTA BOX — replay
            ────────────────────────────────── */
         gsap.from('.cta-box', {
             scale: 0.85, opacity: 0, duration: 0.8, ease: 'back.out(1.3)',
-            scrollTrigger: { trigger: '.cta-section', start: 'top 80%' }
+            scrollTrigger: { trigger: '.cta-section', start: 'top 80%', toggleActions: replay }
         });
 
         /* ──────────────────────────────────
-           FOOTER
+           FOOTER — replay
            ────────────────────────────────── */
         gsap.from('footer', {
             y: 20, opacity: 0, duration: 0.5,
-            scrollTrigger: { trigger: 'footer', start: 'top 95%' }
+            scrollTrigger: { trigger: 'footer', start: 'top 95%', toggleActions: replay }
         });
     }
 
