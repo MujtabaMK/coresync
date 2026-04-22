@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -69,6 +70,22 @@ class _LoginScreenState extends State<LoginScreen> {
           rethrow;
         }
       }
+      // Backfill displayName for users who signed up before it was set,
+      // so the home screen greeting shows the name instantly.
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null && (user.displayName == null || user.displayName!.isEmpty)) {
+        try {
+          final doc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+          final first = doc.data()?['firstName'] as String? ?? '';
+          final last = doc.data()?['lastName'] as String? ?? '';
+          final name = [first, last].where((s) => s.isNotEmpty).join(' ');
+          if (name.isNotEmpty) await user.updateDisplayName(name);
+        } catch (_) {}
+      }
+
       if (mounted) context.go('/home');
     } on FirebaseAuthException catch (e) {
       if (mounted) {

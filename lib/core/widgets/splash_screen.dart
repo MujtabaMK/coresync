@@ -23,17 +23,28 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initialize() async {
-    // PushNotificationService.init() is now called in main() to avoid the
-    // race condition where app.dart's initState calls saveTokenForUser()
-    // before FCM permissions have been requested.
-    await NotificationService.init();
-    await NotificationService.requestPermissions();
+    try {
+      // PushNotificationService.init() is now called in main() to avoid the
+      // race condition where app.dart's initState calls saveTokenForUser()
+      // before FCM permissions have been requested.
+      await NotificationService.init();
+      await NotificationService.requestPermissions();
+    } catch (_) {}
 
-    final appBox = await Hive.openBox('app_settings');
+    late final Box appBox;
+    try {
+      appBox = await Hive.openBox('app_settings');
+    } catch (_) {
+      // If Hive fails, navigate to login as a safe fallback
+      if (mounted) context.go('/login');
+      return;
+    }
 
     // Initialize food database (seeds from JSON on first launch).
-    if (mounted) setState(() => _status = 'Loading food database...');
-    await FoodDatabaseService.instance.initialize();
+    try {
+      if (mounted) setState(() => _status = 'Loading food database...');
+      await FoodDatabaseService.instance.initialize();
+    } catch (_) {}
 
     if (!mounted) return;
 
@@ -55,11 +66,15 @@ class _SplashScreenState extends State<SplashScreen> {
       defaultValue: false,
     );
     if (!hasLaunchedBefore) {
-      await FirebaseAuth.instance.signOut();
-      // Wait for auth to fully settle after sign-out before navigating.
-      await FirebaseAuth.instance.authStateChanges().first;
+      try {
+        await FirebaseAuth.instance.signOut();
+        // Wait for auth to fully settle after sign-out before navigating.
+        await FirebaseAuth.instance.authStateChanges().first;
+      } catch (_) {}
       await appBox.put('has_launched_before', true);
     }
+
+    if (!mounted) return;
 
     // Walkthrough is only for new users who are not logged in.
     final walkthroughShown =
@@ -74,6 +89,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFD5D8DE),
       body: SizedBox.expand(
         child: Stack(
           fit: StackFit.expand,

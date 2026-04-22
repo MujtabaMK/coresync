@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pedometer_2/pedometer_2.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../data/battery_optimization_service.dart';
@@ -31,8 +30,12 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
   bool _permissionDenied = false;
   bool _initializing = true;
   ActivityType _activityType = ActivityType.UNKNOWN;
-
+  ActivityType? _osActivityType; // from OS activity recognition
   Future<bool>? _batteryOptFuture;
+
+  // Step-rate tracking for instant activity inference
+  Timer? _stillDebounce; // fires after inactivity to set "Still"
+  final List<DateTime> _recentStepTimes = []; // timestamps of recent steps
 
   /// Returns BMI-based step goal, or null if user metrics aren't loaded yet.
   int? _computeStepGoal() {
@@ -60,7 +63,7 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _service.refreshOnResume();
+      _service.refreshOnResume(); // also refreshes health metrics
       // Refresh battery optimization status after returning from settings
       if (Platform.isAndroid) {
         setState(() {
@@ -71,29 +74,85 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _init() async {
-    // Load today's previously saved steps from Firestore as fallback
+    // 1. Show Firestore data IMMEDIATELY — highest priority source
     try {
       final saved = await _gymCubit.repository.getStepsForDate(DateTime.now());
-      if (mounted) setState(() => _steps = saved);
-      _service.setMinSteps(saved);
+      if (saved > 0) {
+        _service.setMinSteps(saved);
+        if (mounted) setState(() { _steps = saved; _initializing = false; });
+      }
     } catch (_) {}
 
+    // 2. Listen for live updates BEFORE initialize() so we catch every update
+    _stepSub = _service.stepsStream.listen((steps) {
+      if (!mounted) return;
+      final prevSteps = _steps;
+      if (_activityType != ActivityType.IN_VEHICLE) {
+        setState(() => _steps = steps);
+        _gymCubit.saveSteps(DateTime.now(), steps, goalSteps: _computeStepGoal());
+      }
+
+      // Record step timestamps for rate calculation
+      final now = DateTime.now();
+      final newStepCount = steps - prevSteps;
+      for (var i = 0; i < newStepCount.clamp(0, 10); i++) {
+        _recentStepTimes.add(now);
+      }
+      // Keep only last 5 seconds of data
+      _recentStepTimes.removeWhere(
+        (t) => now.difference(t).inSeconds > 5,
+      );
+
+      // Infer activity from step rate instantly
+      _inferActivity();
+
+      // Reset the "still" debounce — if no steps for 3s, mark as Still
+      _stillDebounce?.cancel();
+      _stillDebounce = Timer(const Duration(seconds: 3), () {
+        if (!mounted) return;
+        _recentStepTimes.clear();
+        _inferActivity();
+      });
+    });
+
+    // UI is ready — show whatever we have (even 0)
+    if (mounted && _initializing) {
+      setState(() => _initializing = false);
+    }
+
+    // 3. Initialize sensor + Health Connect — fire-and-forget so UI stays smooth
+    _initSensors();
+  }
+
+  /// Runs the heavy sensor/Health Connect init without blocking the UI.
+  Future<void> _initSensors() async {
     final ok = await _service.initialize();
     if (!ok) {
       if (mounted) setState(() { _permissionDenied = true; _initializing = false; });
       return;
     }
 
-    // Use current value from service
-    if (_service.currentSteps > 0) {
+    // Subscribe to activity recognition AFTER permissions are granted
+    _activitySub = FlutterActivityRecognition.instance.activityStream.listen(
+      (activity) {
+        if (mounted) {
+          _osActivityType = activity.type;
+          if (activity.type == ActivityType.ON_BICYCLE ||
+              activity.type == ActivityType.IN_VEHICLE) {
+            setState(() => _activityType = activity.type);
+          }
+        }
+      },
+      onError: (_) {},
+    );
+
+    // Use the best known value after all sources are checked
+    if (_service.currentSteps > _steps && mounted) {
       setState(() => _steps = _service.currentSteps);
     }
-
     if (mounted) setState(() => _initializing = false);
 
-    // Save today's step goal (metrics may not be loaded yet from loadAll,
-    // so _saveTodaysGoals() in GymCubit handles persistent storage;
-    // here we just save the current steps with goal if available).
+    // Save today's step goal
     final goal = _computeStepGoal();
     if (_steps > 0) {
       _gymCubit.saveSteps(DateTime.now(), _steps, goalSteps: goal);
@@ -104,23 +163,7 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
       _batteryService.requestIgnoreBatteryOptimizations();
     }
 
-    // Listen for step updates from the service
-    _stepSub = _service.stepsStream.listen((steps) {
-      if (mounted && _activityType != ActivityType.IN_VEHICLE) {
-        setState(() => _steps = steps);
-        _gymCubit.saveSteps(DateTime.now(), steps, goalSteps: _computeStepGoal());
-      }
-    });
-
-    _activitySub = FlutterActivityRecognition.instance.activityStream.listen(
-      (activity) {
-        if (mounted) setState(() => _activityType = activity.type);
-      },
-      onError: (_) {},
-    );
-
-    // Sync historical steps in background — only set goalSteps for today,
-    // not for historical dates (their goals should stay as originally saved).
+    // Sync historical steps in background
     _service.syncHistoricalSteps((date, steps) async {
       final normalized = DateTime(date.year, date.month, date.day);
       final now = DateTime.now();
@@ -130,9 +173,38 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
     });
   }
 
+  void _inferActivity() {
+    // OS overrides for non-step activities
+    final os = _osActivityType;
+    if (os == ActivityType.ON_BICYCLE || os == ActivityType.IN_VEHICLE) {
+      if (_activityType != os) setState(() => _activityType = os!);
+      return;
+    }
+
+    ActivityType inferred;
+    if (_recentStepTimes.isEmpty) {
+      inferred = ActivityType.STILL;
+    } else {
+      // Calculate steps/min from recent timestamps (last 5s window)
+      final window = _recentStepTimes.length;
+      final span = _recentStepTimes.last.difference(_recentStepTimes.first).inMilliseconds;
+      final stepsPerMin = span > 0 ? (window / span) * 60000 : window * 60.0;
+      if (stepsPerMin >= 140) {
+        inferred = ActivityType.RUNNING;
+      } else {
+        inferred = ActivityType.WALKING;
+      }
+    }
+
+    if (inferred != _activityType) {
+      setState(() => _activityType = inferred);
+    }
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _stillDebounce?.cancel();
     _stepSub?.cancel();
     _activitySub?.cancel();
     super.dispose();
@@ -162,15 +234,21 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
     final gymState = context.watch<GymCubit>().state;
     final weight = gymState.userWeight ?? 70.0;
     final heightCm = gymState.userHeight;
-    final calories = (_steps * 0.04 * weight / 70).round();
+    // Prefer HealthKit/Health Connect values; fall back to MET-based estimate
+    final calories = _service.cachedActiveEnergy?.round() ??
+        StepCounterService.calculateStepCalories(
+          steps: _steps,
+          weightKg: weight,
+          heightCm: heightCm,
+        ).round();
     final minutes = (_steps / 100).round();
 
     // Personalized step goal based on BMI (if height & weight available)
     final goal = _computeStepGoal() ?? 10000;
 
-    // Km walked: stride length ≈ height * 0.415, default 0.75m
+    // Km walked: prefer health data, fall back to stride estimate
     final strideLengthM = heightCm != null ? heightCm * 0.415 / 100 : 0.75;
-    final kmWalked = _steps * strideLengthM / 1000;
+    final kmWalked = _service.cachedDistanceKm ?? _steps * strideLengthM / 1000;
 
     final stepsProgress = (_steps / goal).clamp(0.0, 1.0);
     final minutesProgress = (minutes / 60).clamp(0.0, 1.0); // 60 min goal

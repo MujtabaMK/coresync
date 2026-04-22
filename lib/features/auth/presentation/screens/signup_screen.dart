@@ -78,12 +78,22 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       if (userCredential.user != null) {
+        final firstName = _firstNameController.text.trim();
+        final lastName = _lastNameController.text.trim();
         await authRepository.createUserDocument(
           userCredential.user!,
-          firstName: _firstNameController.text.trim(),
-          lastName: _lastNameController.text.trim(),
+          firstName: firstName,
+          lastName: lastName,
           phoneNumber: phone,
         );
+        // Cache displayName on the Firebase Auth user so it's instantly
+        // available on HomeScreen without waiting for a Firestore query.
+        final displayName = [firstName, lastName]
+            .where((s) => s.isNotEmpty)
+            .join(' ');
+        if (displayName.isNotEmpty) {
+          await userCredential.user!.updateDisplayName(displayName);
+        }
       }
 
       if (mounted) context.go('/home');

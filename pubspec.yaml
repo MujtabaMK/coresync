@@ -1,7 +1,7 @@
 name: coresync
 description: "A multi-module productivity app with TodoList, Password Manager, and Gym Tracker."
 publish_to: 'none'
-version: 1.0.7+7
+version: 1.0.9+9
 
 environment:
   sdk: ^3.10.4
@@ -89,6 +89,8 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/app_icon.png"
+  adaptive_icon_foreground: "assets/app_icon.png"
+  adaptive_icon_background: "#FFFFFF"
   remove_alpha_ios: true
   macos:
     generate: true
@@ -112,6 +114,9 @@ flutter_native_splash:
   android: true
   ios: true
   web: true
+  android_12:
+    background_image: "assets/splash_screen.jpg"
+    fullscreen: true
 
 flutter:
   uses-material-design: true

@@ -3,23 +3,47 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  Future<String> _fetchFirstName() async {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  /// Firestore firstName (higher priority than displayName).
+  /// Populated once by a one-time fetch; triggers userChanges() as backup.
+  String? _firestoreName;
+
+  @override
+  void initState() {
+    super.initState();
+    _backfillDisplayName();
+  }
+
+  /// One-time Firestore fetch. If displayName is missing on the Auth user,
+  /// backfill it so the userChanges() stream updates the greeting reactively.
+  Future<void> _backfillDisplayName() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return 'there';
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
-    final firstName = doc.data()?['firstName'] as String?;
-    if (firstName != null && firstName.isNotEmpty) return firstName;
-    final displayName = user.displayName;
-    if (displayName != null && displayName.isNotEmpty) {
-      return displayName.split(' ').first;
-    }
-    return 'there';
+    if (user == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final firstName = doc.data()?['firstName'] as String?;
+      if (firstName != null && firstName.isNotEmpty) {
+        if (mounted) setState(() => _firestoreName = firstName);
+
+        // Backfill displayName on the Auth user if missing, so future
+        // loads are instant and userChanges() stream picks it up.
+        if (user.displayName == null || user.displayName!.isEmpty) {
+          final last = doc.data()?['lastName'] as String? ?? '';
+          final full = [firstName, last].where((s) => s.isNotEmpty).join(' ');
+          if (full.isNotEmpty) await user.updateDisplayName(full);
+        }
+      }
+    } catch (_) {}
   }
 
   static const _features = [
@@ -103,10 +127,15 @@ class HomeScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            FutureBuilder<String>(
-              future: _fetchFirstName(),
+            StreamBuilder<User?>(
+              stream: FirebaseAuth.instance.userChanges(),
               builder: (context, snapshot) {
-                final name = snapshot.data ?? '';
+                // Prefer Firestore firstName, fall back to Auth displayName
+                final displayName = snapshot.data?.displayName;
+                final name = _firestoreName ??
+                    (displayName != null && displayName.isNotEmpty
+                        ? displayName.split(' ').first
+                        : '');
                 return Text(
                   name.isEmpty ? 'Welcome!' : 'Welcome, $name!',
                   style: theme.textTheme.headlineSmall?.copyWith(

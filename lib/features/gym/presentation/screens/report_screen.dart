@@ -1077,48 +1077,50 @@ class _CollapsibleDatesSectionState extends State<_CollapsibleDatesSection>
         ),
         SizeTransition(
           sizeFactor: _expandAnimation,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Card(
-              clipBehavior: Clip.antiAlias,
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: widget.dates.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final date = widget.dates[index];
-                  final tile = ListTile(
-                    dense: true,
-                    leading: Icon(widget.icon,
-                        color: widget.iconColor, size: 20),
-                    title: Text(widget.dateFormat.format(date)),
-                  );
-                  if (widget.onDelete != null) {
-                    return Dismissible(
-                      key: ValueKey(date),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        color: Colors.red,
-                        child: const Text(
-                          'Delete',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      confirmDismiss: (_) => widget.onDelete!(date),
-                      child: tile,
-                    );
-                  }
-                  return tile;
-                },
-              ),
-            ),
-          ),
+          child: _expanded || _controller.isAnimating
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: widget.dates.length,
+                      separatorBuilder: (_, _) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final date = widget.dates[index];
+                        final tile = ListTile(
+                          dense: true,
+                          leading: Icon(widget.icon,
+                              color: widget.iconColor, size: 20),
+                          title: Text(widget.dateFormat.format(date)),
+                        );
+                        if (widget.onDelete != null) {
+                          return Dismissible(
+                            key: ValueKey(date),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              color: Colors.red,
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            confirmDismiss: (_) => widget.onDelete!(date),
+                            child: tile,
+                          );
+                        }
+                        return tile;
+                      },
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
         ),
       ],
     );
@@ -1235,35 +1237,37 @@ class _CollapsibleDailySectionState extends State<_CollapsibleDailySection>
         ),
         SizeTransition(
           sizeFactor: _expandAnimation,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Card(
-              clipBehavior: Clip.antiAlias,
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: widget.entries.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final entry = widget.entries[index];
-                  final dayGoal = widget.goalHistory[entry.key] ?? widget.goalValue;
-                  final color = widget.colorForValue(entry.value, dayGoal);
-                  return ListTile(
-                    dense: true,
-                    leading: Icon(widget.icon, color: color, size: 20),
-                    title: Text(widget.dateFormat.format(entry.key)),
-                    trailing: Text(
-                      widget.formatValue(entry.value, dayGoal),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                      ),
+          child: _expanded || _controller.isAnimating
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: widget.entries.length,
+                      separatorBuilder: (_, _) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final entry = widget.entries[index];
+                        final dayGoal = widget.goalHistory[entry.key] ?? widget.goalValue;
+                        final color = widget.colorForValue(entry.value, dayGoal);
+                        return ListTile(
+                          dense: true,
+                          leading: Icon(widget.icon, color: color, size: 20),
+                          title: Text(widget.dateFormat.format(entry.key)),
+                          trailing: Text(
+                            widget.formatValue(entry.value, dayGoal),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: color,
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-            ),
-          ),
+                  ),
+                )
+              : const SizedBox.shrink(),
         ),
       ],
     );

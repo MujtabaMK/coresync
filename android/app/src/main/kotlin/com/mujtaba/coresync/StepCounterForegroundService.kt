@@ -226,7 +226,7 @@ class StepCounterForegroundService : Service(), SensorEventListener {
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("$steps steps today")
-            .setContentText("CoreSync is tracking your steps")
+            .setContentText("CoreSync Go is tracking your steps")
             .setSmallIcon(R.drawable.ic_step_notification)
             .setContentIntent(pendingIntent)
             .setOngoing(true)

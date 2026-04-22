@@ -53,17 +53,41 @@ class _GymHomeScreenState extends State<GymHomeScreen>
   }
 
   Future<void> _initSteps() async {
-    // Load saved steps from Firestore
+    // 1. Show Firestore data IMMEDIATELY — this is the highest priority source
     try {
       final saved = await _gymCubit.repository.getStepsForDate(DateTime.now());
-      _stepService.setMinSteps(saved);
+      if (saved > 0) {
+        _stepService.setMinSteps(saved);
+        if (mounted) {
+          setState(() {
+            _liveSteps = saved;
+            _stepsLoading = false;
+          });
+        }
+      }
     } catch (_) {}
 
-    // Initialize the sensor (no-op if already initialized)
+    // 2. Listen for live updates BEFORE initialize() so we catch every update
+    _stepSub = _stepService.stepsStream.listen((steps) {
+      if (mounted) {
+        setState(() {
+          _liveSteps = steps;
+          _stepsLoading = false;
+        });
+        final now = DateTime.now();
+        final todayKey = DateTime(now.year, now.month, now.day);
+        final current = _gymCubit.state.stepsHistory[todayKey] ?? 0;
+        if (steps > current) {
+          _gymCubit.saveSteps(now, steps, goalSteps: _computeStepGoal());
+        }
+      }
+    });
+
+    // 3. Initialize sensor + Health Connect (may update _liveSteps via stream)
     await _stepService.initialize();
 
-    // Use the best known value now that both Firestore + native service are read
-    if (mounted) {
+    // 4. Use the best known value after all sources are checked
+    if (mounted && _stepService.currentSteps > _liveSteps) {
       setState(() {
         _liveSteps = _stepService.currentSteps;
         _stepsLoading = false;
@@ -75,19 +99,6 @@ class _GymHomeScreenState extends State<GymHomeScreen>
       _gymCubit.saveSteps(DateTime.now(), _stepService.currentSteps,
           goalSteps: _computeStepGoal());
     }
-
-    // Listen for live updates and sync to GymState
-    _stepSub = _stepService.stepsStream.listen((steps) {
-      if (mounted) {
-        setState(() => _liveSteps = steps);
-        final now = DateTime.now();
-        final todayKey = DateTime(now.year, now.month, now.day);
-        final current = _gymCubit.state.stepsHistory[todayKey] ?? 0;
-        if (steps > current) {
-          _gymCubit.saveSteps(now, steps, goalSteps: _computeStepGoal());
-        }
-      }
-    });
   }
 
   @override
@@ -207,7 +218,12 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                                     : Colors.amber.shade700;
                         final weight = state.userWeight ?? 70.0;
                         final stepCalories =
-                            (_liveSteps * 0.04 * weight / 70).round();
+                            _stepService.cachedActiveEnergy?.round() ??
+                            StepCounterService.calculateStepCalories(
+                              steps: _liveSteps,
+                              weightKg: weight,
+                              heightCm: heightCm,
+                            ).round();
                         final workoutCalories =
                             state.todayWorkoutCalories.round();
                         final totalBurnt = stepCalories + workoutCalories;

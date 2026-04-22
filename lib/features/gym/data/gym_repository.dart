@@ -280,15 +280,9 @@ class GymRepository {
 
   Future<void> saveStepsForDate(DateTime date, int steps, {int? goalSteps}) async {
     final key = DateFormat('yyyy-MM-dd').format(date);
-    // Never downgrade: only write if new steps >= existing
-    final doc = await _stepsCol.doc(key).get();
-    final existing = (doc.data() as Map<String, dynamic>?)?['steps'] as int? ?? 0;
-    final fields = <String, dynamic>{};
-    if (steps > existing) fields['steps'] = steps;
+    final fields = <String, dynamic>{'steps': steps};
     if (goalSteps != null) fields['goalSteps'] = goalSteps;
-    if (fields.isNotEmpty) {
-      await _stepsCol.doc(key).set(fields, SetOptions(merge: true));
-    }
+    await _stepsCol.doc(key).set(fields, SetOptions(merge: true));
   }
 
   Future<Map<DateTime, int>> getStepsHistory() async {

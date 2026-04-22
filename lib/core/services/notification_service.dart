@@ -171,24 +171,28 @@ class NotificationService {
     String channelId = 'general',
     String channelName = 'General',
   }) async {
-    await _plugin.show(
-      id,
-      title,
-      body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelId,
-          channelName,
-          importance: Importance.high,
-          priority: Priority.high,
+    try {
+      await _plugin.show(
+        id,
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channelId,
+            channelName,
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
         ),
-        iOS: const DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-    );
+      );
+    } catch (e) {
+      debugPrint('Failed to show notification $id: $e');
+    }
   }
 
   static Future<void> scheduleDailyNotification({
@@ -302,11 +306,19 @@ class NotificationService {
   }
 
   static Future<void> cancel(int id) async {
-    await _plugin.cancel(id);
+    try {
+      await _plugin.cancel(id);
+    } catch (e) {
+      debugPrint('Failed to cancel notification $id: $e');
+    }
   }
 
   static Future<void> cancelAll() async {
-    await _plugin.cancelAll();
+    try {
+      await _plugin.cancelAll();
+    } catch (e) {
+      debugPrint('Failed to cancel all notifications: $e');
+    }
   }
 
   // ── Helpers ──

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/providers/theme_provider.dart';
 import '../../domain/user_model.dart';
@@ -235,6 +236,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
                     },
                     child: const Text('Delete Account'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.language),
+                    label: const Text('Visit Website'),
+                    onPressed: () {
+                      launchUrl(Uri.parse('https://coresyncgo.com/'),
+                          mode: LaunchMode.externalApplication);
+                    },
                   ),
                 ),
                 const SizedBox(height: 16),

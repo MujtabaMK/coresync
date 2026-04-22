@@ -72,21 +72,14 @@ class _TrackFoodScreenState extends State<TrackFoodScreen>
   }
 
   Future<void> _initSteps() async {
+    // 1. Show Firestore data IMMEDIATELY as the floor
     try {
       final saved =
           await _gymCubit.repository.getStepsForDate(DateTime.now());
-      _stepService.setMinSteps(saved);
+      if (saved > 0) _stepService.setMinSteps(saved);
     } catch (_) {}
 
-    await _stepService.initialize();
-
-    // Sync current steps to GymState so the UI picks them up immediately
-    if (_stepService.currentSteps > 0) {
-      _gymCubit.saveSteps(DateTime.now(), _stepService.currentSteps,
-          goalSteps: _computeStepGoal());
-    }
-
-    // Listen for live updates and sync to GymState
+    // 2. Listen for live updates BEFORE initialize()
     _stepSub = _stepService.stepsStream.listen((steps) {
       if (mounted) {
         final now = DateTime.now();
@@ -97,6 +90,15 @@ class _TrackFoodScreenState extends State<TrackFoodScreen>
         }
       }
     });
+
+    // 3. Initialize sensor + Health Connect
+    await _stepService.initialize();
+
+    // 4. Sync current steps to GymState
+    if (_stepService.currentSteps > 0) {
+      _gymCubit.saveSteps(DateTime.now(), _stepService.currentSteps,
+          goalSteps: _computeStepGoal());
+    }
   }
 
   @override
@@ -415,7 +417,13 @@ class _TrackerView extends StatelessWidget {
     final todayKey = DateTime(now.year, now.month, now.day);
     final todaySteps = state.stepsHistory[todayKey] ?? 0;
     final weight = state.userWeight ?? 70.0;
-    final stepCalories = (todaySteps * 0.04 * weight / 70).round();
+    final stepCalories =
+        StepCounterService.instance.cachedActiveEnergy?.round() ??
+        StepCounterService.calculateStepCalories(
+          steps: todaySteps,
+          weightKg: weight,
+          heightCm: state.userHeight,
+        ).round();
     final workoutCalories = state.todayWorkoutCalories;
     final burnt = stepCalories + workoutCalories;
     final target = profile.dailyCalorieTarget;
