@@ -81,14 +81,13 @@
         .nav-btn { padding: 9px 24px; border-radius: 10px; border: 1.5px solid var(--primary); background: transparent; color: var(--primary); font-weight: 600; font-size: .88rem; cursor: pointer; transition: all .25s; text-decoration: none; display: inline-block; }
         .nav-btn:hover { background: var(--primary); color: #fff; box-shadow: 0 4px 20px rgba(74,95,224,.25); }
 
-        /* ── FLOATING 3D ICON (visible across entire page) ── */
-        .floating-3d { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 50; pointer-events: none; perspective: 1200px; }
-        .hero-3d-icon { width: 180px; height: 180px; border-radius: 36px; box-shadow: 0 24px 80px rgba(74,95,224,.25), 0 0 0 1px rgba(255,255,255,.6); will-change: transform; transform-style: preserve-3d; backface-visibility: visible; }
-
         /* ── HERO ── */
-        .hero { text-align: center; padding: 140px 24px 80px; position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .hero { text-align: center; padding: 140px 24px 0; position: relative; }
         .hero-glow { position: absolute; top: -200px; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(74,95,224,.1) 0%, transparent 70%); pointer-events: none; }
-        .hero-spacer { height: 200px; }
+        .hero-text { max-width: 700px; margin: 0 auto; }
+        .hero-3d-stage { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
+        .hero-3d-wrap { perspective: 1200px; }
+        .hero-3d-icon { width: 180px; height: 180px; border-radius: 36px; box-shadow: 0 24px 80px rgba(74,95,224,.2), 0 0 0 1px rgba(255,255,255,.6); will-change: transform; transform-style: preserve-3d; backface-visibility: visible; }
         .hero-badge { display: inline-block; padding: 6px 18px; border-radius: 50px; background: rgba(74,95,224,.08); color: var(--primary); font-size: .85rem; font-weight: 600; margin-bottom: 20px; border: 1px solid rgba(74,95,224,.15); }
         .hero h1 { font-size: 3.6rem; font-weight: 800; letter-spacing: -.03em; background: linear-gradient(135deg, #1E2432 30%, #4A5FE0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 16px; line-height: 1.15; max-width: 700px; }
         .hero p { font-size: 1.15rem; color: var(--text2); max-width: 600px; margin: 0 auto 32px; }
@@ -217,21 +216,22 @@
         </div>
     </nav>
 
-    <!-- FLOATING 3D ICON — stays fixed, rotates across entire page -->
-    <div class="floating-3d">
-        <img src="app_icon.png" alt="CoreSync Go" class="hero-3d-icon">
-    </div>
-
-    <!-- HERO -->
+    <!-- HERO — 3D stage is pinned, icon rotates with scroll -->
     <section class="hero">
         <div class="hero-glow"></div>
-        <div class="hero-spacer"></div>
-        <div class="hero-badge">8 Apps in 1</div>
-        <h1>Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
-        <p>CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
-        <div class="hero-cta">
-            <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
-            <a href="#features" class="btn-secondary">See All Features</a>
+        <div class="hero-3d-stage">
+            <div class="hero-3d-wrap">
+                <img src="app_icon.png" alt="CoreSync Go" class="hero-3d-icon">
+            </div>
+        </div>
+        <div class="hero-text">
+            <div class="hero-badge">8 Apps in 1</div>
+            <h1>Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
+            <p>CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
+            <div class="hero-cta" style="margin-bottom:80px;">
+                <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
+                <a href="#features" class="btn-secondary">See All Features</a>
+            </div>
         </div>
     </section>
 
@@ -439,42 +439,25 @@
             .from('.hero-cta', { y: 24, opacity: 0, duration: 0.5 }, '-=0.3');
 
         /* ──────────────────────────────────
-           3D ICON — moves left/right across
-           the page as you scroll. Text content
-           moves the opposite direction.
+           HERO 3D ICON — pinned stage with
+           scroll-driven rotation like a 3D
+           object being examined from all angles.
            ────────────────────────────────── */
-        var icon = '.floating-3d';
         var iconTl = gsap.timeline({
             scrollTrigger: {
-                trigger: 'body',
+                trigger: '.hero-3d-stage',
                 start: 'top top',
-                end: 'bottom bottom',
-                scrub: 0.8
+                end: '+=1800',
+                scrub: 0.6,
+                pin: true,
+                pinSpacing: true
             }
         });
-        var vw = window.innerWidth;
-        var shift = Math.min(vw * 0.3, 300); /* how far left/right */
         iconTl
-            /* hero → problem section: move left, rotate */
-            .to(icon, { x: -shift, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 90, rotateX: 12, scale: 0.75, duration: 1, ease: 'none' }, '<')
-            /* problem → stats: move right */
-            .to(icon, { x: shift, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 180, rotateX: -10, duration: 1, ease: 'none' }, '<')
-            /* stats → features: move left */
-            .to(icon, { x: -shift, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 270, rotateX: 15, scale: 0.6, duration: 1, ease: 'none' }, '<')
-            /* features mid: move right */
-            .to(icon, { x: shift, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 360, rotateX: -12, duration: 1, ease: 'none' }, '<')
-            /* features end → compare: move left */
-            .to(icon, { x: -shift, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 450, rotateX: 10, scale: 0.5, duration: 1, ease: 'none' }, '<')
-            /* compare → CTA: move center, fade */
-            .to(icon, { x: 0, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 540, rotateX: 0, scale: 0.4, opacity: 0.15, duration: 1, ease: 'none' }, '<')
-            /* CTA → footer: fade out */
-            .to('.hero-3d-icon', { rotateY: 630, opacity: 0, scale: 0.3, duration: 0.5, ease: 'none' });
+            .to('.hero-3d-icon', { rotateY: 90, rotateX: 15, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 180, rotateX: -10, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 270, rotateX: 20, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 360, rotateX: 0, duration: 1, ease: 'none' });
 
         /* Hero glow parallax — scrub */
         gsap.to('.hero-glow', {
