@@ -4,579 +4,340 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Why CoreSync Go? — The All-in-One App That Replaces 8 Apps</title>
-    <meta name="description" content="Discover why CoreSync Go is the ultimate productivity and wellness app. Replace 8 separate apps with one powerful solution.">
-    <meta name="keywords" content="CoreSync Go, best productivity app, all-in-one app, task manager, password manager, fitness tracker, document scanner, habit tracker, QR scanner, calculator, translator">
+    <meta name="description" content="Discover why CoreSync Go is the ultimate productivity and wellness app. Replace 8 separate apps with one powerful solution. Task manager, password vault, fitness tracker, document scanner, and more.">
+    <meta name="keywords" content="CoreSync Go, best productivity app, all-in-one app, replace multiple apps, task manager app, password manager app, fitness tracker app, document scanner app, habit tracker, QR scanner, calculator, translator">
     <meta name="author" content="CoreSync Go">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://coresyncgo.com/marketing.html">
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://coresyncgo.com/marketing.html">
     <meta property="og:title" content="Why CoreSync Go? — The All-in-One App That Replaces 8 Apps">
-    <meta property="og:description" content="Stop juggling 8 different apps. CoreSync Go unifies everything into one beautiful app.">
+    <meta property="og:description" content="Stop juggling 8 different apps. CoreSync Go unifies tasks, passwords, fitness, scanning, habits, QR codes, calculator, and translator into one beautiful app.">
     <meta property="og:image" content="https://coresyncgo.com/app_icon.png">
     <meta property="og:site_name" content="CoreSync Go">
+
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Why CoreSync Go?">
-    <meta name="twitter:description" content="Stop juggling 8 different apps. CoreSync Go unifies everything into one beautiful app.">
+    <meta name="twitter:title" content="Why CoreSync Go? — The All-in-One App That Replaces 8 Apps">
+    <meta name="twitter:description" content="Stop juggling 8 different apps. CoreSync Go unifies tasks, passwords, fitness, scanning, habits, QR codes, calculator, and translator into one beautiful app.">
     <meta name="twitter:image" content="https://coresyncgo.com/app_icon.png">
+
     <link rel="icon" type="image/png" href="app_icon.png">
     <link rel="apple-touch-icon" href="app_icon.png">
+
+    <!-- Structured Data -->
     <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"WebPage","name":"Why CoreSync Go?","description":"Discover why CoreSync Go is the ultimate all-in-one productivity and wellness app.","url":"https://coresyncgo.com/marketing.html","isPartOf":{"@type":"WebSite","name":"CoreSync Go","url":"https://coresyncgo.com/"}}
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Why CoreSync Go?",
+      "description": "Discover why CoreSync Go is the ultimate all-in-one productivity and wellness app.",
+      "url": "https://coresyncgo.com/marketing.html",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "CoreSync Go",
+        "url": "https://coresyncgo.com/"
+      }
+    }
     </script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        html.lenis,html.lenis body{height:auto}
-        .lenis.lenis-smooth{scroll-behavior:auto!important}
-        :root{
-            --primary:#4A5FE0;--primary2:#7C5CE6;
-            --text:#1E2432;--text2:#6B7280;
-            --card-bg:rgba(255,255,255,.55);--card-border:rgba(255,255,255,.7);
-            --green:#10B981;--red:#EF4444;--orange:#F59E0B;--blue:#3B82F6;--violet:#8B5CF6;--pink:#EC4899;--cyan:#06B6D4;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4A5FE0;
+            --primary2: #7C5CE6;
+            --bg: linear-gradient(170deg, #F2F4F8 0%, #E8ECF5 50%, #F0F2F8 100%);
+            --text: #1E2432;
+            --text2: #6B7280;
+            --card-bg: rgba(255,255,255,.55);
+            --card-border: rgba(255,255,255,.7);
+            --green: #10B981;
+            --orange: #F59E0B;
+            --blue: #3B82F6;
+            --red: #EF4444;
+            --violet: #8B5CF6;
+            --pink: #EC4899;
+            --cyan: #06B6D4;
         }
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(170deg,#F2F4F8 0%,#E8ECF5 50%,#F0F2F8 100%);color:var(--text);line-height:1.7;overflow-x:hidden}
-        body::-webkit-scrollbar{display:none}
-        body{scrollbar-width:none}
+        html { scroll-behavior: smooth; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
 
-        /* ═══ LOADER ═══ */
-        #loader{position:fixed;inset:0;z-index:9999;background:linear-gradient(170deg,#F2F4F8,#E8ECF5);display:flex;align-items:center;justify-content:center}
-        .loader-inner{text-align:center}
-        .loader-logo{width:72px;height:72px;border-radius:18px;box-shadow:0 12px 48px rgba(74,95,224,.2);margin-bottom:28px;animation:pulse 1.5s ease-in-out infinite}
-        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-        .loader-bar{width:200px;height:3px;background:rgba(0,0,0,.06);border-radius:3px;margin:0 auto 14px;overflow:hidden}
-        .loader-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--primary2));border-radius:3px;transition:width .1s}
-        .loader-pct{font-size:.78rem;font-weight:600;color:var(--text2);letter-spacing:.1em}
+        /* NAV */
+        .top-nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.06); }
+        .nav-brand { font-size: 1.25rem; font-weight: 800; background: linear-gradient(135deg, #4A5FE0, #7C5CE6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-decoration: none; }
+        .nav-links { display: flex; align-items: center; gap: 24px; }
+        .nav-link { color: var(--text2); text-decoration: none; font-size: .9rem; font-weight: 500; transition: color .2s; }
+        .nav-link:hover { color: var(--primary); }
+        .nav-btn { padding: 9px 24px; border-radius: 10px; border: 1.5px solid var(--primary); background: transparent; color: var(--primary); font-weight: 600; font-size: .88rem; cursor: pointer; transition: all .25s; text-decoration: none; display: inline-block; }
+        .nav-btn:hover { background: var(--primary); color: #fff; box-shadow: 0 4px 20px rgba(74,95,224,.25); }
 
-        /* ═══ SCROLL PROGRESS ═══ */
-        .scroll-progress{position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,var(--primary),var(--primary2));z-index:1000}
+        /* HERO */
+        .hero { text-align: center; padding: 100px 24px 60px; position: relative; }
+        .hero::before { content: ''; position: absolute; top: -60%; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(74,95,224,.08) 0%, transparent 70%); pointer-events: none; }
+        .hero-badge { display: inline-block; padding: 6px 18px; border-radius: 50px; background: rgba(74,95,224,.08); color: var(--primary); font-size: .85rem; font-weight: 600; margin-bottom: 20px; border: 1px solid rgba(74,95,224,.15); }
+        .hero h1 { font-size: 3.2rem; font-weight: 800; letter-spacing: -.03em; background: linear-gradient(135deg, #1E2432 30%, #4A5FE0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 16px; line-height: 1.15; }
+        .hero p { font-size: 1.15rem; color: var(--text2); max-width: 600px; margin: 0 auto 32px; }
+        .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+        .btn-primary { padding: 14px 32px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; text-decoration: none; font-weight: 600; font-size: .95rem; transition: all .25s; box-shadow: 0 4px 20px rgba(74,95,224,.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(74,95,224,.4); }
+        .btn-secondary { padding: 14px 32px; border-radius: 14px; background: var(--card-bg); backdrop-filter: blur(12px); color: var(--text); text-decoration: none; font-weight: 600; font-size: .95rem; border: 1px solid var(--card-border); transition: all .25s; }
+        .btn-secondary:hover { background: rgba(255,255,255,.85); transform: translateY(-2px); }
 
-        /* ═══ 3D CANVAS ═══ */
-        #three-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
+        /* SECTIONS */
+        section { padding: 60px 24px; }
+        .section-tag { text-align: center; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--primary); margin-bottom: 8px; }
+        .section-title { text-align: center; font-size: 2.2rem; font-weight: 800; letter-spacing: -.02em; margin-bottom: 12px; }
+        .section-subtitle { text-align: center; color: var(--text2); max-width: 560px; margin: 0 auto 48px; font-size: 1rem; }
 
-        /* ═══ CONTENT ═══ */
-        .page-content{position:relative;z-index:2}
+        /* PROBLEM-SOLUTION */
+        .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 960px; margin: 0 auto; }
+        .problem-card, .solution-card { border-radius: 20px; padding: 32px; border: 1px solid var(--card-border); }
+        .problem-card { background: rgba(239,68,68,.04); border-color: rgba(239,68,68,.12); }
+        .solution-card { background: rgba(16,185,129,.04); border-color: rgba(16,185,129,.12); }
+        .problem-card h3 { color: var(--red); margin-bottom: 16px; font-size: 1.15rem; }
+        .solution-card h3 { color: var(--green); margin-bottom: 16px; font-size: 1.15rem; }
+        .ps-list { list-style: none; padding: 0; }
+        .ps-list li { padding: 8px 0; font-size: .95rem; color: var(--text2); display: flex; align-items: flex-start; gap: 10px; }
+        .ps-list li span { flex-shrink: 0; font-size: 1.1rem; }
 
-        /* ═══ NAV ═══ */
-        .top-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:rgba(255,255,255,.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.06)}
-        .nav-brand{font-size:1.25rem;font-weight:800;background:linear-gradient(135deg,#4A5FE0,#7C5CE6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
-        .nav-links{display:flex;align-items:center;gap:24px}
-        .nav-link{color:var(--text2);text-decoration:none;font-size:.9rem;font-weight:500;transition:color .2s}
-        .nav-link:hover{color:var(--primary)}
-        .nav-btn{padding:9px 24px;border-radius:10px;border:1.5px solid var(--primary);background:transparent;color:var(--primary);font-weight:600;font-size:.88rem;cursor:pointer;transition:all .25s;text-decoration:none;display:inline-block}
-        .nav-btn:hover{background:var(--primary);color:#fff;box-shadow:0 4px 20px rgba(74,95,224,.25)}
+        /* FEATURES DEEP DIVE */
+        .features-list { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .feature-row { display: flex; align-items: center; gap: 28px; background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; padding: 28px 32px; border: 1px solid var(--card-border); box-shadow: 0 2px 12px rgba(0,0,0,.04); transition: all .3s; }
+        .feature-row:hover { background: rgba(255,255,255,.8); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,.07); }
+        .feature-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .feature-icon svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2; }
+        .feature-content h3 { font-size: 1.1rem; margin-bottom: 4px; }
+        .feature-content p { color: var(--text2); font-size: .92rem; margin: 0; }
+        .icon-tasks { background: linear-gradient(135deg, #3B82F6, #60A5FA); }
+        .icon-passwords { background: linear-gradient(135deg, #EF4444, #F87171); }
+        .icon-gym { background: linear-gradient(135deg, #10B981, #34D399); }
+        .icon-habits { background: linear-gradient(135deg, #F97316, #FB923C); }
+        .icon-scanner { background: linear-gradient(135deg, #F59E0B, #FBBF24); }
+        .icon-qr { background: linear-gradient(135deg, #8B5CF6, #A78BFA); }
+        .icon-calc { background: linear-gradient(135deg, #EC4899, #F472B6); }
+        .icon-translator { background: linear-gradient(135deg, #06B6D4, #22D3EE); }
 
-        /* ═══ HERO ═══ */
-        .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:100px 24px 80px;position:relative;overflow:hidden}
-        .hero::before{content:'';position:absolute;top:-60%;left:50%;transform:translateX(-50%);width:900px;height:900px;background:radial-gradient(circle,rgba(74,95,224,.08) 0%,transparent 70%);pointer-events:none}
-        .hero-left{max-width:520px;text-align:left;position:relative;z-index:3}
-        .hero-badge{display:inline-block;padding:6px 18px;border-radius:50px;background:rgba(74,95,224,.08);color:var(--primary);font-size:.82rem;font-weight:600;margin-bottom:20px;border:1px solid rgba(74,95,224,.15)}
-        .hero h1{font-size:clamp(2.6rem,5.5vw,4.2rem);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin-bottom:20px}
-        .hero h1 .grad{background:linear-gradient(135deg,var(--primary),var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .hero p{font-size:1.1rem;color:var(--text2);margin-bottom:32px;line-height:1.7}
-        .hero-cta{display:flex;gap:14px;flex-wrap:wrap}
-        .btn-primary{padding:15px 34px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;text-decoration:none;font-weight:600;font-size:.95rem;transition:all .25s;box-shadow:0 4px 24px rgba(74,95,224,.3)}
-        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(74,95,224,.4)}
-        .btn-secondary{padding:15px 34px;border-radius:14px;background:var(--card-bg);backdrop-filter:blur(12px);color:var(--text);text-decoration:none;font-weight:600;font-size:.95rem;border:1px solid var(--card-border);transition:all .25s}
-        .btn-secondary:hover{background:rgba(255,255,255,.85);transform:translateY(-2px)}
-        /* 3D object takes the right side — space reserved */
-        .hero-3d-space{width:400px;height:400px;flex-shrink:0}
-        .hero-inner{display:flex;align-items:center;justify-content:center;gap:60px;max-width:1060px;margin:0 auto;flex-wrap:wrap}
+        /* STATS BAR */
+        .stats-bar { background: rgba(232,236,243,.8); backdrop-filter: blur(12px); border-top: 1px solid rgba(0,0,0,.04); border-bottom: 1px solid rgba(0,0,0,.04); }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; max-width: 960px; margin: 0 auto; text-align: center; }
+        .stat-item h3 { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--primary2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .stat-item p { color: var(--text2); font-size: .88rem; margin-top: 4px; }
 
-        .scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);color:var(--text2);font-size:.72rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:6px}
-        .scroll-line{width:1px;height:32px;background:linear-gradient(to bottom,var(--text2),transparent);animation:scrollP 2s ease-in-out infinite}
-        @keyframes scrollP{0%,100%{opacity:1;transform:scaleY(1)}50%{opacity:.3;transform:scaleY(.5)}}
+        /* COMPARISON TABLE */
+        .comparison-wrap { max-width: 800px; margin: 0 auto; overflow-x: auto; }
+        .comparison-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--card-bg); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid var(--card-border); overflow: hidden; }
+        .comparison-table th, .comparison-table td { padding: 14px 20px; text-align: center; font-size: .9rem; }
+        .comparison-table thead th { background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; font-weight: 700; font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; }
+        .comparison-table thead th:first-child { text-align: left; }
+        .comparison-table tbody td { border-bottom: 1px solid rgba(0,0,0,.04); }
+        .comparison-table tbody td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+        .comparison-table tbody tr:last-child td { border-bottom: none; }
+        .comparison-table tbody tr:hover { background: rgba(255,255,255,.4); }
+        .check { color: var(--green); font-size: 1.2rem; font-weight: 700; }
+        .cross { color: rgba(0,0,0,.15); font-size: 1.2rem; }
 
-        /* ═══ SECTIONS ═══ */
-        section{padding:80px 24px}
-        .section-tag{text-align:center;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--primary);margin-bottom:8px}
-        .section-title{text-align:center;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;letter-spacing:-.02em;margin-bottom:12px}
-        .section-subtitle{text-align:center;color:var(--text2);max-width:560px;margin:0 auto 48px;font-size:1rem}
 
-        /* ═══ PROBLEM/SOLUTION ═══ */
-        .problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:960px;margin:0 auto}
-        .problem-card,.solution-card{border-radius:20px;padding:32px;border:1px solid var(--card-border)}
-        .problem-card{background:rgba(239,68,68,.04);border-color:rgba(239,68,68,.12)}
-        .solution-card{background:rgba(16,185,129,.04);border-color:rgba(16,185,129,.12)}
-        .problem-card h3{color:var(--red);margin-bottom:16px;font-size:1.15rem}
-        .solution-card h3{color:var(--green);margin-bottom:16px;font-size:1.15rem}
-        .ps-list{list-style:none;padding:0}
-        .ps-list li{padding:8px 0;font-size:.95rem;color:var(--text2);display:flex;align-items:flex-start;gap:10px}
-        .ps-list li span{flex-shrink:0;font-size:1.1rem}
+        /* CTA */
+        .cta-section { text-align: center; padding: 80px 24px; }
+        .cta-box { max-width: 640px; margin: 0 auto; background: linear-gradient(135deg, var(--primary), var(--primary2)); border-radius: 28px; padding: 56px 40px; color: #fff; position: relative; overflow: hidden; }
+        .cta-box::before { content: ''; position: absolute; top: -50%; right: -30%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,.1) 0%, transparent 70%); pointer-events: none; }
+        .cta-box h2 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; }
+        .cta-box p { font-size: 1.05rem; opacity: .85; margin-bottom: 28px; }
+        .cta-btn { display: inline-flex; align-items: center; gap: 10px; padding: 16px 36px; border-radius: 14px; background: #fff; color: var(--primary); font-weight: 700; font-size: 1rem; text-decoration: none; transition: all .25s; }
+        .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.2); }
 
-        /* ═══ FEATURES ═══ */
-        .features-list{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
-        .feature-row{display:flex;align-items:center;gap:28px;background:var(--card-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;padding:28px 32px;border:1px solid var(--card-border);box-shadow:0 2px 12px rgba(0,0,0,.04);transition:all .3s;transform-style:preserve-3d;perspective:800px}
-        .feature-row:hover{background:rgba(255,255,255,.8);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.07)}
-        .feature-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-        .feature-icon svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2}
-        .feature-content h3{font-size:1.1rem;margin-bottom:4px}
-        .feature-content p{color:var(--text2);font-size:.92rem;margin:0}
-        .icon-tasks{background:linear-gradient(135deg,#3B82F6,#60A5FA)}
-        .icon-passwords{background:linear-gradient(135deg,#EF4444,#F87171)}
-        .icon-gym{background:linear-gradient(135deg,#10B981,#34D399)}
-        .icon-habits{background:linear-gradient(135deg,#F97316,#FB923C)}
-        .icon-scanner{background:linear-gradient(135deg,#F59E0B,#FBBF24)}
-        .icon-qr{background:linear-gradient(135deg,#8B5CF6,#A78BFA)}
-        .icon-calc{background:linear-gradient(135deg,#EC4899,#F472B6)}
-        .icon-translator{background:linear-gradient(135deg,#06B6D4,#22D3EE)}
+        /* FOOTER */
+        footer { padding: 40px 24px; text-align: center; border-top: 1px solid rgba(0,0,0,.06); }
+        .footer-links { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .footer-links a { color: var(--text2); text-decoration: none; font-size: .9rem; transition: color .2s; }
+        .footer-links a:hover { color: var(--primary); }
+        footer .copyright { color: rgba(107,114,128,.45); font-size: .8rem; }
 
-        /* ═══ STATS ═══ */
-        .stats-bar{background:rgba(232,236,243,.8);backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,.04);border-bottom:1px solid rgba(0,0,0,.04)}
-        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;max-width:960px;margin:0 auto;text-align:center}
-        .stat-item h3{font-size:2.6rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .stat-item p{color:var(--text2);font-size:.88rem;margin-top:4px}
+        /* ANIMATIONS */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate { opacity: 0; animation: fadeInUp .6s ease-out forwards; }
+        .delay-1 { animation-delay: .1s; }
+        .delay-2 { animation-delay: .2s; }
+        .delay-3 { animation-delay: .3s; }
 
-        /* ═══ COMPARISON ═══ */
-        .comparison-wrap{max-width:800px;margin:0 auto;overflow-x:auto}
-        .comparison-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card-bg);backdrop-filter:blur(20px);border-radius:16px;border:1px solid var(--card-border);overflow:hidden}
-        .comparison-table th,.comparison-table td{padding:14px 20px;text-align:center;font-size:.9rem}
-        .comparison-table thead th{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em}
-        .comparison-table thead th:first-child{text-align:left}
-        .comparison-table tbody td{border-bottom:1px solid rgba(0,0,0,.04)}
-        .comparison-table tbody td:first-child{text-align:left;font-weight:600;color:var(--text)}
-        .comparison-table tbody tr:last-child td{border-bottom:none}
-        .comparison-table tbody tr:hover{background:rgba(255,255,255,.4)}
-        .check{color:var(--green);font-size:1.2rem;font-weight:700}
-        .cross{color:rgba(0,0,0,.15);font-size:1.2rem}
-
-        /* ═══ CTA ═══ */
-        .cta-section{text-align:center;padding:80px 24px}
-        .cta-box{max-width:640px;margin:0 auto;background:linear-gradient(135deg,var(--primary),var(--primary2));border-radius:28px;padding:56px 40px;color:#fff;position:relative;overflow:hidden}
-        .cta-box::before{content:'';position:absolute;top:-50%;right:-30%;width:400px;height:400px;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);pointer-events:none}
-        .cta-box h2{font-size:2rem;font-weight:800;margin-bottom:12px}
-        .cta-box p{font-size:1.05rem;opacity:.85;margin-bottom:28px}
-        .cta-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;border-radius:14px;background:#fff;color:var(--primary);font-weight:700;font-size:1rem;text-decoration:none;transition:all .25s}
-        .cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.2)}
-
-        /* ═══ FOOTER ═══ */
-        footer{padding:40px 24px;text-align:center;border-top:1px solid rgba(0,0,0,.06)}
-        .footer-links{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
-        .footer-links a{color:var(--text2);text-decoration:none;font-size:.9rem;transition:color .2s}
-        .footer-links a:hover{color:var(--primary)}
-        footer .copyright{color:rgba(107,114,128,.45);font-size:.8rem}
-
-        /* ═══ RESPONSIVE ═══ */
-        @media(max-width:768px){
-            .hero-inner{flex-direction:column-reverse;gap:20px;text-align:center}
-            .hero-left{text-align:center;max-width:100%}
-            .hero-3d-space{width:250px;height:250px}
-            .hero-cta{justify-content:center}
-            .hero h1{font-size:clamp(2rem,8vw,3rem)}
-            .problem-grid{grid-template-columns:1fr}
-            .stats-grid{grid-template-columns:repeat(2,1fr);gap:16px}
-            .feature-row{flex-direction:column;text-align:center;gap:16px;padding:24px 20px}
-            .comparison-wrap{margin:0 -12px}
-            .comparison-table th,.comparison-table td{padding:10px 12px;font-size:.82rem}
-            .cta-box{padding:40px 24px}
-            .cta-box h2{font-size:1.6rem}
-            .top-nav{padding:12px 16px}
-            .nav-links{gap:14px}
-            .scroll-hint{display:none}
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            .problem-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+            .feature-row { flex-direction: column; text-align: center; gap: 16px; padding: 24px 20px; }
+            .comparison-wrap { margin: 0 -12px; }
+            .comparison-table th, .comparison-table td { padding: 10px 12px; font-size: .82rem; }
+            .cta-box { padding: 40px 24px; }
+            .cta-box h2 { font-size: 1.6rem; }
+            .top-nav { padding: 12px 16px; }
+            .nav-links { gap: 14px; }
+            .section-title { font-size: 1.7rem; }
         }
-        @media(max-width:480px){
-            .stats-grid{grid-template-columns:1fr 1fr}
-            .hero-cta{flex-direction:column;align-items:center}
-            .nav-link{display:none}
-            .hero-3d-space{width:200px;height:200px}
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .hero-cta { flex-direction: column; align-items: center; }
+            .nav-link { display: none; }
         }
     </style>
 </head>
 <body>
 
-<!-- Scroll progress -->
-<div class="scroll-progress" id="scroll-progress"></div>
+    <!-- NAV -->
+    <nav class="top-nav">
+        <a href="index.html" class="nav-brand">CoreSync Go</a>
+        <div class="nav-links">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#compare" class="nav-link">Compare</a>
+            <a href="index.html" class="nav-btn">Download App</a>
+        </div>
+    </nav>
 
-<!-- Loader -->
-<div id="loader">
-    <div class="loader-inner">
-        <img src="app_icon.png" alt="CoreSync Go" class="loader-logo">
-        <div class="loader-bar"><div class="loader-fill" id="loader-fill"></div></div>
-        <div class="loader-pct" id="loader-pct">0%</div>
-    </div>
-</div>
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-badge">8 Apps in 1</div>
+        <h1>Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
+        <p>CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
+        <div class="hero-cta">
+            <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
+            <a href="#features" class="btn-secondary">See All Features</a>
+        </div>
+    </section>
 
-<!-- 3D Canvas (Three.js) -->
-<canvas id="three-canvas"></canvas>
-
-<div class="page-content">
-
-<!-- Nav -->
-<nav class="top-nav" id="main-nav">
-    <a href="index.html" class="nav-brand">CoreSync Go</a>
-    <div class="nav-links">
-        <a href="#features" class="nav-link">Features</a>
-        <a href="#compare" class="nav-link">Compare</a>
-        <a href="index.html" class="nav-btn">Download App</a>
-    </div>
-</nav>
-
-<!-- ═══ HERO ═══ -->
-<section class="hero" id="hero">
-    <div class="hero-inner">
-        <div class="hero-left">
-            <div class="hero-badge" id="hero-badge">8 Apps in 1</div>
-            <h1 id="hero-title">Stop Juggling Apps.<br><span class="grad">Start Syncing.</span></h1>
-            <p id="hero-desc">CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
-            <div class="hero-cta" id="hero-cta">
-                <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
-                <a href="#features" class="btn-secondary">See All Features</a>
+    <!-- PROBLEM / SOLUTION -->
+    <section>
+        <p class="section-tag">The Problem &amp; Solution</p>
+        <h2 class="section-title">Before &amp; After CoreSync Go</h2>
+        <p class="section-subtitle">Most people use 8+ different apps daily. That means 8 logins, 8 interfaces, and zero integration.</p>
+        <div class="problem-grid">
+            <div class="problem-card">
+                <h3>Without CoreSync Go</h3>
+                <ul class="ps-list">
+                    <li><span>&#10060;</span> Switching between 8+ separate apps daily</li>
+                    <li><span>&#10060;</span> Paying for multiple subscriptions</li>
+                    <li><span>&#10060;</span> No connection between your tasks, health, and habits</li>
+                    <li><span>&#10060;</span> Scattered data across different platforms</li>
+                    <li><span>&#10060;</span> Storage bloat from multiple heavy apps</li>
+                </ul>
+            </div>
+            <div class="solution-card">
+                <h3>With CoreSync Go</h3>
+                <ul class="ps-list">
+                    <li><span>&#9989;</span> One unified app for everything</li>
+                    <li><span>&#9989;</span> Completely free to use</li>
+                    <li><span>&#9989;</span> Seamless workflow between modules</li>
+                    <li><span>&#9989;</span> All data in one place, synced to the cloud</li>
+                    <li><span>&#9989;</span> Lightweight — save phone storage</li>
+                </ul>
             </div>
         </div>
-        <!-- 3D object renders here -->
-        <div class="hero-3d-space"></div>
-    </div>
-    <div class="scroll-hint" id="scroll-hint">
-        <span>Scroll</span>
-        <div class="scroll-line"></div>
-    </div>
-</section>
+    </section>
 
-<!-- ═══ PROBLEM / SOLUTION ═══ -->
-<section id="ps-section">
-    <p class="section-tag">The Problem &amp; Solution</p>
-    <h2 class="section-title">Before &amp; After CoreSync Go</h2>
-    <p class="section-subtitle">Most people use 8+ different apps daily. That means 8 logins, 8 interfaces, and zero integration.</p>
-    <div class="problem-grid">
-        <div class="problem-card">
-            <h3>Without CoreSync Go</h3>
-            <ul class="ps-list">
-                <li><span>&#10060;</span> Switching between 8+ separate apps daily</li>
-                <li><span>&#10060;</span> Paying for multiple subscriptions</li>
-                <li><span>&#10060;</span> No connection between your tasks, health, and habits</li>
-                <li><span>&#10060;</span> Scattered data across different platforms</li>
-                <li><span>&#10060;</span> Storage bloat from multiple heavy apps</li>
-            </ul>
+    <!-- STATS -->
+    <section class="stats-bar">
+        <div class="stats-grid">
+            <div class="stat-item"><h3>8</h3><p>Powerful Modules</p></div>
+            <div class="stat-item"><h3>20+</h3><p>Languages Supported</p></div>
+            <div class="stat-item"><h3>100%</h3><p>Free to Use</p></div>
+            <div class="stat-item"><h3>2</h3><p>Platforms (iOS &amp; Android)</p></div>
         </div>
-        <div class="solution-card">
-            <h3>With CoreSync Go</h3>
-            <ul class="ps-list">
-                <li><span>&#9989;</span> One unified app for everything</li>
-                <li><span>&#9989;</span> Completely free to use</li>
-                <li><span>&#9989;</span> Seamless workflow between modules</li>
-                <li><span>&#9989;</span> All data in one place, synced to the cloud</li>
-                <li><span>&#9989;</span> Lightweight — save phone storage</li>
-            </ul>
+    </section>
+
+    <!-- FEATURES DEEP DIVE -->
+    <section id="features">
+        <p class="section-tag">Features</p>
+        <h2 class="section-title">Everything You Need, Nothing You Don't</h2>
+        <p class="section-subtitle">Each module is designed to work independently or together, giving you a complete productivity ecosystem.</p>
+        <div class="features-list">
+            <div class="feature-row">
+                <div class="feature-icon icon-tasks"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+                <div class="feature-content"><h3>Task Manager</h3><p>Create, organize, and share tasks with priorities, due dates, and reminders. Collaborate with others by sharing tasks and tracking progress with detailed reports.</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="feature-icon icon-passwords"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+                <div class="feature-content"><h3>Password Vault</h3><p>Store all your credentials with industry-standard encryption. Auto-generate strong passwords and keep your digital life secure with one master access point.</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="feature-icon icon-gym"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+                <div class="feature-content"><h3>Gym &amp; Fitness Suite</h3><p>Track steps, water intake, workouts, sleep, and food. Set meal &amp; medicine reminders, monitor BMI, and export detailed health reports as PDF.</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="feature-icon icon-habits"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div>
+                <div class="feature-content"><h3>Habit Tracker</h3><p>Build positive habits with daily check-ins, streak tracking, and smart reminders. Visualize your weekly progress and stay consistent.</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="feature-icon icon-scanner"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+                <div class="feature-content"><h3>Document Scanner</h3><p>Scan documents with your camera, extract text using OCR, create multi-page PDFs, and add digital signatures — all without leaving the app.</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="feature-icon icon-qr"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div>
+                <div class="feature-content"><h3>QR, Barcode &amp; NFC</h3><p>Scan QR codes, barcodes, and NFC tags instantly. Generate custom QR codes for sharing links, Wi-Fi details, contacts, and more.</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="feature-icon icon-calc"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/></svg></div>
+                <div class="feature-content"><h3>Calculator &amp; Converter</h3><p>Simple and scientific calculators for everyday math, plus a full unit converter covering length, weight, temperature, currency, and more.</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="feature-icon icon-translator"><svg viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/></svg></div>
+                <div class="feature-content"><h3>Voice Translator</h3><p>Real-time speech translation across 20+ languages. Conversation mode enables two-way communication — perfect for travel and meetings.</p></div>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- ═══ STATS ═══ -->
-<section class="stats-bar" id="stats-section">
-    <div class="stats-grid">
-        <div class="stat-item"><h3 class="counter" data-target="8">0</h3><p>Powerful Modules</p></div>
-        <div class="stat-item"><h3 class="counter" data-target="20" data-suffix="+">0</h3><p>Languages Supported</p></div>
-        <div class="stat-item"><h3 class="counter" data-target="100" data-suffix="%">0</h3><p>Free to Use</p></div>
-        <div class="stat-item"><h3 class="counter" data-target="2">0</h3><p>Platforms (iOS &amp; Android)</p></div>
-    </div>
-</section>
+    <!-- COMPARISON TABLE -->
+    <section id="compare">
+        <p class="section-tag">Compare</p>
+        <h2 class="section-title">CoreSync Go vs. Using Separate Apps</h2>
+        <p class="section-subtitle">See how one app can replace your entire toolkit.</p>
+        <div class="comparison-wrap">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>CoreSync Go</th>
+                        <th>Separate Apps</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Task Management</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+                    <tr><td>Password Vault</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+                    <tr><td>Fitness Tracking</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+                    <tr><td>Document Scanner</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+                    <tr><td>All-in-One Integration</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
+                    <tr><td>Cloud Sync Across Modules</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
+                    <tr><td>Single Login</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
+                    <tr><td>Free to Use</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
+                    <tr><td>Lightweight on Storage</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-<!-- ═══ FEATURES ═══ -->
-<section id="features">
-    <p class="section-tag">Features</p>
-    <h2 class="section-title">Everything You Need, Nothing You Don't</h2>
-    <p class="section-subtitle">Each module is designed to work independently or together, giving you a complete productivity ecosystem.</p>
-    <div class="features-list" id="features-list">
-        <div class="feature-row"><div class="feature-icon icon-tasks"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><div class="feature-content"><h3>Task Manager</h3><p>Create, organize, and share tasks with priorities, due dates, and reminders. Collaborate with others by sharing tasks and tracking progress.</p></div></div>
-        <div class="feature-row"><div class="feature-icon icon-passwords"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div class="feature-content"><h3>Password Vault</h3><p>Store all your credentials with industry-standard encryption. Auto-generate strong passwords and keep your digital life secure.</p></div></div>
-        <div class="feature-row"><div class="feature-icon icon-gym"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div><div class="feature-content"><h3>Gym &amp; Fitness Suite</h3><p>Track steps, water, workouts, sleep, and food. Set meal &amp; medicine reminders, monitor BMI, and export health reports.</p></div></div>
-        <div class="feature-row"><div class="feature-icon icon-habits"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div><div class="feature-content"><h3>Habit Tracker</h3><p>Build positive habits with daily check-ins, streak tracking, and smart reminders. Visualize your weekly progress.</p></div></div>
-        <div class="feature-row"><div class="feature-icon icon-scanner"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="feature-content"><h3>Document Scanner</h3><p>Scan documents with your camera, extract text using OCR, create multi-page PDFs, and add digital signatures.</p></div></div>
-        <div class="feature-row"><div class="feature-icon icon-qr"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div><div class="feature-content"><h3>QR, Barcode &amp; NFC</h3><p>Scan QR codes, barcodes, and NFC tags instantly. Generate custom QR codes for sharing links, Wi-Fi, contacts.</p></div></div>
-        <div class="feature-row"><div class="feature-icon icon-calc"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/></svg></div><div class="feature-content"><h3>Calculator &amp; Converter</h3><p>Simple and scientific calculators for everyday math, plus a full unit converter covering length, weight, temperature, currency.</p></div></div>
-        <div class="feature-row"><div class="feature-icon icon-translator"><svg viewBox="0 0 24 24"><path d="M5 8h6M4 6h4M8 6V5a2 2 0 012-2 2 2 0 012 2v1M4 12l3.7-6M11.5 12l-3.7-6M14 20l2-6 2 6M14.5 18h3"/></svg></div><div class="feature-content"><h3>Voice Translator</h3><p>Real-time speech translation across 20+ languages. Conversation mode enables two-way communication.</p></div></div>
-    </div>
-</section>
 
-<!-- ═══ COMPARISON ═══ -->
-<section id="compare">
-    <p class="section-tag">Compare</p>
-    <h2 class="section-title">CoreSync Go vs. Using Separate Apps</h2>
-    <p class="section-subtitle">See how one app can replace your entire toolkit.</p>
-    <div class="comparison-wrap">
-        <table class="comparison-table" id="compare-table">
-            <thead><tr><th>Feature</th><th>CoreSync Go</th><th>Separate Apps</th></tr></thead>
-            <tbody>
-                <tr><td>Task Management</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-                <tr><td>Password Vault</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-                <tr><td>Fitness Tracking</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-                <tr><td>Document Scanner</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-                <tr><td>All-in-One Integration</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
-                <tr><td>Cloud Sync Across Modules</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
-                <tr><td>Single Login</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
-                <tr><td>Free to Use</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
-                <tr><td>Lightweight on Storage</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
-            </tbody>
-        </table>
-    </div>
-</section>
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="cta-box">
+            <h2>Ready to Simplify Your Life?</h2>
+            <p>Join thousands who replaced their app clutter with CoreSync Go. Free on iOS and Android.</p>
+            <a href="index.html" class="cta-btn">
+                <span>Download Now</span>
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+    </section>
 
-<!-- ═══ CTA ═══ -->
-<section class="cta-section">
-    <div class="cta-box" id="cta-box">
-        <h2>Ready to Simplify Your Life?</h2>
-        <p>Join thousands who replaced their app clutter with CoreSync Go. Free on iOS and Android.</p>
-        <a href="index.html" class="cta-btn">
-            <span>Download Now</span>
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-    </div>
-</section>
-
-<!-- Footer -->
-<footer>
-    <nav class="footer-links">
-        <a href="index.html">Home</a>
-        <a href="privacy-policy.html">Privacy Policy</a>
-        <a href="delete-account.html">Delete Account</a>
-        <a href="mailto:info@coresyncgo.com">Contact</a>
-    </nav>
-    <p class="copyright">&copy; 2026 CoreSync Go. All rights reserved.</p>
-</footer>
-
-</div><!-- .page-content -->
-
-<!-- ═══ LIBRARIES ═══ -->
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-
-<script>
-gsap.registerPlugin(ScrollTrigger);
-
-/* ═══════════════════════════════════════════
-   LOADER
-   ═══════════════════════════════════════════ */
-const loaderFill = document.getElementById('loader-fill');
-const loaderPct = document.getElementById('loader-pct');
-const loader = document.getElementById('loader');
-let prog = 0;
-const loadIv = setInterval(() => {
-    prog += Math.random() * 8 + 2;
-    if (prog >= 100) {
-        prog = 100; clearInterval(loadIv);
-        loaderFill.style.width = '100%'; loaderPct.textContent = '100%';
-        setTimeout(() => {
-            gsap.to(loader, { opacity: 0, duration: .7, ease: 'power3.inOut', onComplete: () => { loader.style.display = 'none'; runAnimations(); }});
-        }, 400);
-        return;
-    }
-    const e = prog < 50 ? 4*Math.pow(prog/100,3)*100 : (1-Math.pow(-2*prog/100+2,3)/2)*100;
-    loaderFill.style.width = e + '%';
-    loaderPct.textContent = Math.round(e) + '%';
-}, 45);
-
-/* ═══════════════════════════════════════════
-   THREE.JS — 3D APP ICON
-   Like BMW car — rotates & moves on scroll
-   ═══════════════════════════════════════════ */
-let appMesh, scene, camera, renderer;
-const scrollState = { rotY: 0, rotX: 0, posY: 0, posX: 0, scale: 1 };
-
-(function init3D() {
-    const canvas = document.getElementById('three-canvas');
-    scene = new THREE.Scene();
-
-    camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
-    camera.position.z = 5;
-
-    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-
-    // Lighting
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambient);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    dirLight.position.set(3, 4, 5);
-    scene.add(dirLight);
-    const rimLight = new THREE.DirectionalLight(0x7C5CE6, 0.5);
-    rimLight.position.set(-3, -2, -3);
-    scene.add(rimLight);
-
-    // Create rounded box (app icon shape)
-    const geometry = new THREE.BoxGeometry(1.8, 1.8, 1.8, 4, 4, 4);
-    // Round the corners
-    const pos = geometry.attributes.position;
-    const v = new THREE.Vector3();
-    for (let i = 0; i < pos.count; i++) {
-        v.fromBufferAttribute(pos, i);
-        const len = v.length();
-        v.normalize().multiplyScalar(Math.min(len, 1.35));
-        pos.setXYZ(i, v.x, v.y, v.z);
-    }
-    geometry.computeVertexNormals();
-
-    // Load app icon texture
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load('app_icon.png');
-    texture.colorSpace = THREE.SRGBColorSpace;
-
-    // Materials: icon on front, gradient color on other sides
-    const iconMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.3, metalness: 0.1 });
-    const sideMat = new THREE.MeshStandardMaterial({ color: 0x4A5FE0, roughness: 0.2, metalness: 0.4 });
-    const topMat = new THREE.MeshStandardMaterial({ color: 0x7C5CE6, roughness: 0.2, metalness: 0.4 });
-
-    appMesh = new THREE.Mesh(geometry, [sideMat, sideMat, topMat, topMat, iconMat, sideMat]);
-    appMesh.position.set(1.5, 0, 0);
-    scene.add(appMesh);
-
-    // Responsive
-    addEventListener('resize', () => {
-        camera.aspect = innerWidth / innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(innerWidth, innerHeight);
-    });
-
-    // Animate
-    function animate() {
-        requestAnimationFrame(animate);
-        if (appMesh) {
-            // Gentle idle float
-            appMesh.rotation.y = scrollState.rotY + Math.sin(Date.now() * 0.001) * 0.08;
-            appMesh.rotation.x = scrollState.rotX + Math.cos(Date.now() * 0.0012) * 0.05;
-            appMesh.rotation.z = Math.sin(Date.now() * 0.0008) * 0.03;
-            appMesh.position.y = scrollState.posY + Math.sin(Date.now() * 0.001) * 0.08;
-            appMesh.position.x = scrollState.posX;
-            appMesh.scale.setScalar(scrollState.scale);
-        }
-        renderer.render(scene, camera);
-    }
-    animate();
-})();
-
-/* ═══════════════════════════════════════════
-   SMOOTH SCROLL (LENIS)
-   ═══════════════════════════════════════════ */
-const lenis = new Lenis({ duration: 1.3, easing: t => Math.min(1, 1.001 - Math.pow(2, -10*t)), smoothWheel: true });
-lenis.on('scroll', ScrollTrigger.update);
-gsap.ticker.add(t => lenis.raf(t * 1000));
-gsap.ticker.lagSmoothing(0);
-
-/* Scroll progress bar */
-gsap.to('#scroll-progress', { width: '100%', ease: 'none', scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: .2 }});
-
-/* ═══════════════════════════════════════════
-   3D OBJECT SCROLL ANIMATIONS
-   Like BMW — object rotates & repositions per section
-   ═══════════════════════════════════════════ */
-
-// Hero → Problem section: rotate Y 180°, move left
-gsap.to(scrollState, {
-    rotY: Math.PI,
-    posX: -1.5,
-    scale: 0.8,
-    ease: 'none',
-    scrollTrigger: { trigger: '#ps-section', start: 'top bottom', end: 'top top', scrub: true }
-});
-
-// Problem → Stats: rotate more, go center
-gsap.to(scrollState, {
-    rotY: Math.PI * 2,
-    posX: 0,
-    posY: -0.5,
-    scale: 0.6,
-    ease: 'none',
-    scrollTrigger: { trigger: '#stats-section', start: 'top bottom', end: 'top top', scrub: true }
-});
-
-// Stats → Features: spin and move right
-gsap.to(scrollState, {
-    rotY: Math.PI * 3,
-    rotX: 0.3,
-    posX: 2,
-    posY: 0,
-    scale: 0.7,
-    ease: 'none',
-    scrollTrigger: { trigger: '#features', start: 'top bottom', end: 'top top', scrub: true }
-});
-
-// Features → Compare: full rotation, center, big
-gsap.to(scrollState, {
-    rotY: Math.PI * 4,
-    rotX: 0,
-    posX: 0,
-    posY: 0,
-    scale: 0.5,
-    ease: 'none',
-    scrollTrigger: { trigger: '#compare', start: 'top bottom', end: 'top top', scrub: true }
-});
-
-// Compare → CTA: zoom in
-gsap.to(scrollState, {
-    rotY: Math.PI * 5,
-    scale: 1.2,
-    posY: 0.3,
-    ease: 'none',
-    scrollTrigger: { trigger: '.cta-section', start: 'top bottom', end: 'top center', scrub: true }
-});
-
-/* ═══════════════════════════════════════════
-   PAGE ANIMATIONS (after loader)
-   ═══════════════════════════════════════════ */
-function runAnimations() {
-    // ── NAV ──
-    gsap.from('#main-nav', { y: -60, opacity: 0, duration: .8, ease: 'power3.out' });
-
-    // ── HERO ──
-    gsap.from('#hero-badge', { y: 30, opacity: 0, duration: .7, ease: 'power3.out', delay: .1 });
-    gsap.from('#hero-title', { y: 60, opacity: 0, duration: 1, ease: 'power4.out', delay: .3 });
-    gsap.from('#hero-desc', { y: 40, opacity: 0, duration: .8, ease: 'power3.out', delay: .7 });
-    gsap.from('#hero-cta', { y: 30, opacity: 0, duration: .8, ease: 'power3.out', delay: .9 });
-    gsap.from('#scroll-hint', { opacity: 0, duration: .6, delay: 1.3 });
-
-    // Hero parallax
-    gsap.to('#hero-title', { y: -80, opacity: .2, scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }});
-    gsap.to('#hero-desc', { y: -50, opacity: 0, scrollTrigger: { trigger: '#hero', start: '20% top', end: 'bottom top', scrub: true }});
-    gsap.to('#hero-cta', { y: -30, opacity: 0, scrollTrigger: { trigger: '#hero', start: '30% top', end: 'bottom top', scrub: true }});
-    gsap.to('#scroll-hint', { opacity: 0, scrollTrigger: { trigger: '#hero', start: '10% top', end: '30% top', scrub: true }});
-
-    // ── PROBLEM/SOLUTION ──
-    gsap.from('#ps-section .section-tag, #ps-section .section-title, #ps-section .section-subtitle', { y: 40, opacity: 0, duration: .7, stagger: .1, scrollTrigger: { trigger: '#ps-section', start: 'top 80%' }});
-    gsap.from('.problem-card', { x: -80, opacity: 0, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: '.problem-grid', start: 'top 75%' }});
-    gsap.from('.solution-card', { x: 80, opacity: 0, duration: .9, ease: 'power3.out', delay: .15, scrollTrigger: { trigger: '.problem-grid', start: 'top 75%' }});
-    gsap.from('.problem-card .ps-list li', { x: -30, opacity: 0, duration: .4, stagger: .06, scrollTrigger: { trigger: '.problem-card', start: 'top 70%' }});
-    gsap.from('.solution-card .ps-list li', { x: 30, opacity: 0, duration: .4, stagger: .06, scrollTrigger: { trigger: '.solution-card', start: 'top 70%' }});
-
-    // ── STATS ──
-    gsap.from('.stat-item', { y: 50, opacity: 0, scale: .8, duration: .7, ease: 'back.out(1.5)', stagger: .12, scrollTrigger: { trigger: '#stats-section', start: 'top 80%' }});
-    // Counter
-    document.querySelectorAll('.counter').forEach(el => {
-        const target = +el.dataset.target, suffix = el.dataset.suffix || '';
-        ScrollTrigger.create({
-            trigger: el, start: 'top 85%', once: true,
-            onEnter: () => { gsap.to({v:0}, { v: target, duration: 1.8, ease: 'power2.out', onUpdate: function(){ el.textContent = Math.round(this.targets()[0].v) + suffix; }}); }
-        });
-    });
-
-    // ── FEATURES ──
-    gsap.from('#features .section-tag, #features .section-title, #features .section-subtitle', { y: 40, opacity: 0, duration: .7, stagger: .1, scrollTrigger: { trigger: '#features', start: 'top 80%' }});
-    document.querySelectorAll('.feature-row').forEach(row => {
-        gsap.from(row, { y: 50, opacity: 0, scale: .96, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: row, start: 'top 85%' }});
-        // 3D tilt on hover
-        row.addEventListener('mousemove', e => {
-            const r = row.getBoundingClientRect();
-            const x = (e.clientX - r.left) / r.width - .5;
-            const y = (e.clientY - r.top) / r.height - .5;
-            gsap.to(row, { rotateY: x * 6, rotateX: -y * 6, duration: .3, ease: 'power2.out' });
-        });
-        row.addEventListener('mouseleave', () => {
-            gsap.to(row, { rotateY: 0, rotateX: 0, duration: .5, ease: 'power2.out' });
-        });
-    });
-
-    // ── COMPARISON ──
-    gsap.from('#compare .section-tag, #compare .section-title, #compare .section-subtitle', { y: 40, opacity: 0, duration: .7, stagger: .1, scrollTrigger: { trigger: '#compare', start: 'top 80%' }});
-    gsap.from('#compare-table', { y: 50, opacity: 0, scale: .95, duration: .8, scrollTrigger: { trigger: '#compare-table', start: 'top 80%' }});
-    gsap.from('#compare-table tbody tr', { x: -40, opacity: 0, duration: .4, stagger: .05, scrollTrigger: { trigger: '#compare-table', start: 'top 75%' }});
-
-    // ── CTA ──
-    gsap.from('#cta-box', { y: 60, opacity: 0, scale: .88, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: '#cta-box', start: 'top 85%' }});
-
-    // ── FOOTER ──
-    gsap.from('footer', { y: 30, opacity: 0, duration: .6, scrollTrigger: { trigger: 'footer', start: 'top 95%' }});
-}
-</script>
+    <!-- FOOTER -->
+    <footer>
+        <nav class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="privacy-policy.html">Privacy Policy</a>
+            <a href="delete-account.html">Delete Account</a>
+            <a href="mailto:info@coresyncgo.com">Contact</a>
+        </nav>
+        <p class="copyright">&copy; 2026 CoreSync Go. All rights reserved.</p>
+    </footer>
 
 </body>
 </html>
