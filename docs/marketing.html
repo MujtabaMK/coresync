@@ -101,14 +101,17 @@
         .ps-list li { padding: 8px 0; font-size: .95rem; color: var(--text2); display: flex; align-items: flex-start; gap: 10px; }
         .ps-list li span { flex-shrink: 0; font-size: 1.1rem; }
 
-        /* FEATURES DEEP DIVE */
-        .features-list { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-        .feature-row { display: flex; align-items: center; gap: 28px; background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; padding: 28px 32px; border: 1px solid var(--card-border); box-shadow: 0 2px 12px rgba(0,0,0,.04); transition: all .3s; }
-        .feature-row:hover { background: rgba(255,255,255,.8); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,.07); }
-        .feature-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .feature-icon svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2; }
-        .feature-content h3 { font-size: 1.1rem; margin-bottom: 4px; }
-        .feature-content p { color: var(--text2); font-size: .92rem; margin: 0; }
+        /* FEATURES — ALTERNATING LAYOUT */
+        .features-list { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 64px; }
+        .feature-row { display: flex; align-items: center; gap: 48px; }
+        .feature-row.reverse { flex-direction: row-reverse; }
+        .feature-visual { flex: 0 0 200px; display: flex; align-items: center; justify-content: center; }
+        .feature-icon { width: 120px; height: 120px; border-radius: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 12px 40px rgba(0,0,0,.1); transition: transform .4s cubic-bezier(.16,1,.3,1); }
+        .feature-row:hover .feature-icon { transform: scale(1.08) rotate(3deg); }
+        .feature-icon svg { width: 52px; height: 52px; stroke: #fff; fill: none; stroke-width: 1.8; }
+        .feature-content { flex: 1; }
+        .feature-content h3 { font-size: 1.35rem; margin-bottom: 8px; font-weight: 700; }
+        .feature-content p { color: var(--text2); font-size: 1rem; margin: 0; line-height: 1.7; }
         .icon-tasks { background: linear-gradient(135deg, #3B82F6, #60A5FA); }
         .icon-passwords { background: linear-gradient(135deg, #EF4444, #F87171); }
         .icon-gym { background: linear-gradient(135deg, #10B981, #34D399); }
@@ -137,7 +140,6 @@
         .check { color: var(--green); font-size: 1.2rem; font-weight: 700; }
         .cross { color: rgba(0,0,0,.15); font-size: 1.2rem; }
 
-
         /* CTA */
         .cta-section { text-align: center; padding: 80px 24px; }
         .cta-box { max-width: 640px; margin: 0 auto; background: linear-gradient(135deg, var(--primary), var(--primary2)); border-radius: 28px; padding: 56px 40px; color: #fff; position: relative; overflow: hidden; }
@@ -154,12 +156,21 @@
         .footer-links a:hover { color: var(--primary); }
         footer .copyright { color: rgba(107,114,128,.45); font-size: .8rem; }
 
-        /* ANIMATIONS */
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate { opacity: 0; animation: fadeInUp .6s ease-out forwards; }
-        .delay-1 { animation-delay: .1s; }
-        .delay-2 { animation-delay: .2s; }
-        .delay-3 { animation-delay: .3s; }
+        /* HERO ENTRANCE ANIMATIONS */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        .hero-enter { opacity: 0; animation: fadeInUp .7s cubic-bezier(.16,1,.3,1) forwards; }
+        .hero-enter-1 { animation-delay: .1s; }
+        .hero-enter-2 { animation-delay: .25s; }
+        .hero-enter-3 { animation-delay: .4s; }
+        .hero-enter-4 { animation-delay: .55s; }
+
+        /* SCROLL REVEAL */
+        .reveal { opacity: 0; transform: translateY(40px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+        .reveal-left { opacity: 0; transform: translateX(-60px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+        .reveal-right { opacity: 0; transform: translateX(60px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+        .reveal.visible, .reveal-left.visible, .reveal-right.visible { opacity: 1; transform: translate(0, 0); }
+        .stagger-1 { transition-delay: .12s; }
+        .stagger-2 { transition-delay: .24s; }
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
@@ -167,7 +178,11 @@
             .hero p { font-size: 1rem; }
             .problem-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-            .feature-row { flex-direction: column; text-align: center; gap: 16px; padding: 24px 20px; }
+            .feature-row, .feature-row.reverse { flex-direction: column; text-align: center; gap: 24px; }
+            .feature-visual { flex: none; }
+            .feature-icon { width: 96px; height: 96px; border-radius: 24px; }
+            .feature-icon svg { width: 40px; height: 40px; }
+            .reveal-left, .reveal-right { transform: translateY(30px); }
             .comparison-wrap { margin: 0 -12px; }
             .comparison-table th, .comparison-table td { padding: 10px 12px; font-size: .82rem; }
             .cta-box { padding: 40px 24px; }
@@ -197,10 +212,10 @@
 
     <!-- HERO -->
     <section class="hero">
-        <div class="hero-badge">8 Apps in 1</div>
-        <h1>Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
-        <p>CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
-        <div class="hero-cta">
+        <div class="hero-badge hero-enter hero-enter-1">8 Apps in 1</div>
+        <h1 class="hero-enter hero-enter-2">Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
+        <p class="hero-enter hero-enter-3">CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
+        <div class="hero-cta hero-enter hero-enter-4">
             <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
             <a href="#features" class="btn-secondary">See All Features</a>
         </div>
@@ -208,11 +223,11 @@
 
     <!-- PROBLEM / SOLUTION -->
     <section>
-        <p class="section-tag">The Problem &amp; Solution</p>
-        <h2 class="section-title">Before &amp; After CoreSync Go</h2>
-        <p class="section-subtitle">Most people use 8+ different apps daily. That means 8 logins, 8 interfaces, and zero integration.</p>
+        <p class="section-tag reveal">The Problem &amp; Solution</p>
+        <h2 class="section-title reveal stagger-1">Before &amp; After CoreSync Go</h2>
+        <p class="section-subtitle reveal stagger-2">Most people use 8+ different apps daily. That means 8 logins, 8 interfaces, and zero integration.</p>
         <div class="problem-grid">
-            <div class="problem-card">
+            <div class="problem-card reveal-left">
                 <h3>Without CoreSync Go</h3>
                 <ul class="ps-list">
                     <li><span>&#10060;</span> Switching between 8+ separate apps daily</li>
@@ -222,7 +237,7 @@
                     <li><span>&#10060;</span> Storage bloat from multiple heavy apps</li>
                 </ul>
             </div>
-            <div class="solution-card">
+            <div class="solution-card reveal-right">
                 <h3>With CoreSync Go</h3>
                 <ul class="ps-list">
                     <li><span>&#9989;</span> One unified app for everything</li>
@@ -238,60 +253,68 @@
     <!-- STATS -->
     <section class="stats-bar">
         <div class="stats-grid">
-            <div class="stat-item"><h3>8</h3><p>Powerful Modules</p></div>
-            <div class="stat-item"><h3>20+</h3><p>Languages Supported</p></div>
-            <div class="stat-item"><h3>100%</h3><p>Free to Use</p></div>
-            <div class="stat-item"><h3>2</h3><p>Platforms (iOS &amp; Android)</p></div>
+            <div class="stat-item reveal"><h3 data-target="8">8</h3><p>Powerful Modules</p></div>
+            <div class="stat-item reveal stagger-1"><h3 data-target="20" data-suffix="+">20+</h3><p>Languages Supported</p></div>
+            <div class="stat-item reveal stagger-2"><h3 data-target="100" data-suffix="%">100%</h3><p>Free to Use</p></div>
+            <div class="stat-item reveal stagger-2"><h3 data-target="2">2</h3><p>Platforms (iOS &amp; Android)</p></div>
         </div>
     </section>
 
     <!-- FEATURES DEEP DIVE -->
     <section id="features">
-        <p class="section-tag">Features</p>
-        <h2 class="section-title">Everything You Need, Nothing You Don't</h2>
-        <p class="section-subtitle">Each module is designed to work independently or together, giving you a complete productivity ecosystem.</p>
+        <p class="section-tag reveal">Features</p>
+        <h2 class="section-title reveal stagger-1">Everything You Need, Nothing You Don't</h2>
+        <p class="section-subtitle reveal stagger-2">Each module is designed to work independently or together, giving you a complete productivity ecosystem.</p>
         <div class="features-list">
+            <!-- Icon LEFT, text RIGHT -->
             <div class="feature-row">
-                <div class="feature-icon icon-tasks"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
-                <div class="feature-content"><h3>Task Manager</h3><p>Create, organize, and share tasks with priorities, due dates, and reminders. Collaborate with others by sharing tasks and tracking progress with detailed reports.</p></div>
+                <div class="feature-visual reveal-left"><div class="feature-icon icon-tasks"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div></div>
+                <div class="feature-content reveal-right stagger-1"><h3>Task Manager</h3><p>Create, organize, and share tasks with priorities, due dates, and reminders. Collaborate with others by sharing tasks and tracking progress with detailed reports.</p></div>
             </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-passwords"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-                <div class="feature-content"><h3>Password Vault</h3><p>Store all your credentials with industry-standard encryption. Auto-generate strong passwords and keep your digital life secure with one master access point.</p></div>
+            <!-- Icon RIGHT, text LEFT -->
+            <div class="feature-row reverse">
+                <div class="feature-visual reveal-right"><div class="feature-icon icon-passwords"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div></div>
+                <div class="feature-content reveal-left stagger-1"><h3>Password Vault</h3><p>Store all your credentials with industry-standard encryption. Auto-generate strong passwords and keep your digital life secure with one master access point.</p></div>
             </div>
+            <!-- Icon LEFT, text RIGHT -->
             <div class="feature-row">
-                <div class="feature-icon icon-gym"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
-                <div class="feature-content"><h3>Gym &amp; Fitness Suite</h3><p>Track steps, water intake, workouts, sleep, and food. Set meal &amp; medicine reminders, monitor BMI, and export detailed health reports as PDF.</p></div>
+                <div class="feature-visual reveal-left"><div class="feature-icon icon-gym"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div></div>
+                <div class="feature-content reveal-right stagger-1"><h3>Gym &amp; Fitness Suite</h3><p>Track steps, water intake, workouts, sleep, and food. Set meal &amp; medicine reminders, monitor BMI, and export detailed health reports as PDF.</p></div>
             </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-habits"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div>
-                <div class="feature-content"><h3>Habit Tracker</h3><p>Build positive habits with daily check-ins, streak tracking, and smart reminders. Visualize your weekly progress and stay consistent.</p></div>
+            <!-- Icon RIGHT, text LEFT -->
+            <div class="feature-row reverse">
+                <div class="feature-visual reveal-right"><div class="feature-icon icon-habits"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div></div>
+                <div class="feature-content reveal-left stagger-1"><h3>Habit Tracker</h3><p>Build positive habits with daily check-ins, streak tracking, and smart reminders. Visualize your weekly progress and stay consistent.</p></div>
             </div>
+            <!-- Icon LEFT, text RIGHT -->
             <div class="feature-row">
-                <div class="feature-icon icon-scanner"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-                <div class="feature-content"><h3>Document Scanner</h3><p>Scan documents with your camera, extract text using OCR, create multi-page PDFs, and add digital signatures — all without leaving the app.</p></div>
+                <div class="feature-visual reveal-left"><div class="feature-icon icon-scanner"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div></div>
+                <div class="feature-content reveal-right stagger-1"><h3>Document Scanner</h3><p>Scan documents with your camera, extract text using OCR, create multi-page PDFs, and add digital signatures — all without leaving the app.</p></div>
             </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-qr"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div>
-                <div class="feature-content"><h3>QR, Barcode &amp; NFC</h3><p>Scan QR codes, barcodes, and NFC tags instantly. Generate custom QR codes for sharing links, Wi-Fi details, contacts, and more.</p></div>
+            <!-- Icon RIGHT, text LEFT -->
+            <div class="feature-row reverse">
+                <div class="feature-visual reveal-right"><div class="feature-icon icon-qr"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div></div>
+                <div class="feature-content reveal-left stagger-1"><h3>QR, Barcode &amp; NFC</h3><p>Scan QR codes, barcodes, and NFC tags instantly. Generate custom QR codes for sharing links, Wi-Fi details, contacts, and more.</p></div>
             </div>
+            <!-- Icon LEFT, text RIGHT -->
             <div class="feature-row">
-                <div class="feature-icon icon-calc"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/></svg></div>
-                <div class="feature-content"><h3>Calculator &amp; Converter</h3><p>Simple and scientific calculators for everyday math, plus a full unit converter covering length, weight, temperature, currency, and more.</p></div>
+                <div class="feature-visual reveal-left"><div class="feature-icon icon-calc"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/></svg></div></div>
+                <div class="feature-content reveal-right stagger-1"><h3>Calculator &amp; Converter</h3><p>Simple and scientific calculators for everyday math, plus a full unit converter covering length, weight, temperature, currency, and more.</p></div>
             </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-translator"><svg viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/></svg></div>
-                <div class="feature-content"><h3>Voice Translator</h3><p>Real-time speech translation across 20+ languages. Conversation mode enables two-way communication — perfect for travel and meetings.</p></div>
+            <!-- Icon RIGHT, text LEFT -->
+            <div class="feature-row reverse">
+                <div class="feature-visual reveal-right"><div class="feature-icon icon-translator"><svg viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/></svg></div></div>
+                <div class="feature-content reveal-left stagger-1"><h3>Voice Translator</h3><p>Real-time speech translation across 20+ languages. Conversation mode enables two-way communication — perfect for travel and meetings.</p></div>
             </div>
         </div>
     </section>
 
     <!-- COMPARISON TABLE -->
     <section id="compare">
-        <p class="section-tag">Compare</p>
-        <h2 class="section-title">CoreSync Go vs. Using Separate Apps</h2>
-        <p class="section-subtitle">See how one app can replace your entire toolkit.</p>
-        <div class="comparison-wrap">
+        <p class="section-tag reveal">Compare</p>
+        <h2 class="section-title reveal stagger-1">CoreSync Go vs. Using Separate Apps</h2>
+        <p class="section-subtitle reveal stagger-2">See how one app can replace your entire toolkit.</p>
+        <div class="comparison-wrap reveal">
             <table class="comparison-table">
                 <thead>
                     <tr>
@@ -315,10 +338,9 @@
         </div>
     </section>
 
-
     <!-- CTA -->
     <section class="cta-section">
-        <div class="cta-box">
+        <div class="cta-box reveal">
             <h2>Ready to Simplify Your Life?</h2>
             <p>Join thousands who replaced their app clutter with CoreSync Go. Free on iOS and Android.</p>
             <a href="index.html" class="cta-btn">
@@ -338,6 +360,69 @@
         </nav>
         <p class="copyright">&copy; 2026 CoreSync Go. All rights reserved.</p>
     </footer>
+
+    <script>
+    /* ── Scroll Reveal (IntersectionObserver — no external library) ── */
+    (function () {
+        var revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+
+        if (!('IntersectionObserver' in window)) {
+            // Fallback: show everything immediately
+            revealEls.forEach(function (el) { el.classList.add('visible'); });
+            return;
+        }
+
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+        revealEls.forEach(function (el) { observer.observe(el); });
+    })();
+
+    /* ── Counter animation for stat numbers ── */
+    (function () {
+        function animateValue(el, target, suffix) {
+            var start = 0;
+            var duration = 1200;
+            var startTime = null;
+            function step(ts) {
+                if (!startTime) startTime = ts;
+                var progress = Math.min((ts - startTime) / duration, 1);
+                // ease-out cubic
+                var eased = 1 - Math.pow(1 - progress, 3);
+                var current = Math.round(eased * target);
+                el.textContent = current + suffix;
+                if (progress < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        var statItems = document.querySelectorAll('.stat-item');
+        if (!('IntersectionObserver' in window)) return;
+
+        var statsObs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    var h3 = entry.target.querySelector('h3');
+                    if (h3 && !h3.dataset.counted) {
+                        h3.dataset.counted = '1';
+                        var target = parseInt(h3.dataset.target, 10);
+                        var suffix = h3.dataset.suffix || '';
+                        animateValue(h3, target, suffix);
+                    }
+                    statsObs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        statItems.forEach(function (el) { statsObs.observe(el); });
+    })();
+    </script>
 
 </body>
 </html>
