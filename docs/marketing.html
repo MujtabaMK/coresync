@@ -44,10 +44,11 @@
     </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html.lenis, html.lenis body { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
         :root {
             --primary: #4A5FE0;
             --primary2: #7C5CE6;
-            --bg: linear-gradient(170deg, #F2F4F8 0%, #E8ECF5 50%, #F0F2F8 100%);
             --text: #1E2432;
             --text2: #6B7280;
             --card-bg: rgba(255,255,255,.55);
@@ -60,21 +61,22 @@
             --pink: #EC4899;
             --cyan: #06B6D4;
         }
-        html { scroll-behavior: smooth; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; background: linear-gradient(170deg, #F2F4F8 0%, #E8ECF5 50%, #F0F2F8 100%); color: var(--text); line-height: 1.7; overflow-x: hidden; }
 
         /* HIDDEN SCROLLBAR */
         body::-webkit-scrollbar { display: none; }
         body { scrollbar-width: none; -ms-overflow-style: none; }
+
+        /* ══ SCROLL PROGRESS BAR ══ */
+        .scroll-progress { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: linear-gradient(90deg, var(--primary), var(--primary2)); z-index: 9998; }
 
         /* ══ LOADER ══ */
         #loader {
             position: fixed; inset: 0; z-index: 9999;
             background: linear-gradient(170deg, #F2F4F8, #E8ECF5);
             display: flex; align-items: center; justify-content: center;
-            transition: opacity .6s ease, visibility .6s ease;
+            will-change: opacity;
         }
-        #loader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
         .loader-content { text-align: center; }
         .loader-logo {
             width: 80px; height: 80px; border-radius: 20px;
@@ -87,7 +89,7 @@
             50% { transform: scale(1.05); opacity: .85; }
         }
         .loader-bar-bg {
-            width: 200px; height: 3px; border-radius: 3px;
+            width: 220px; height: 3px; border-radius: 3px;
             background: rgba(0,0,0,.08); margin: 0 auto 14px; overflow: hidden;
         }
         .loader-bar-fill {
@@ -97,20 +99,19 @@
         }
         .loader-percent {
             font-size: .82rem; font-weight: 600; color: var(--text2);
-            letter-spacing: .05em;
+            letter-spacing: .08em;
         }
 
-        /* ══ CANVAS BG ══ */
+        /* ══ PARTICLES ══ */
         #particles-canvas {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 0; pointer-events: none;
         }
 
-        /* ══ PAGE CONTENT ══ */
         .page-content { position: relative; z-index: 1; }
 
         /* NAV */
-        .top-nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.06); }
+        .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.06); transform: translateY(-100%); }
         .nav-brand { font-size: 1.25rem; font-weight: 800; background: linear-gradient(135deg, #4A5FE0, #7C5CE6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-decoration: none; }
         .nav-links { display: flex; align-items: center; gap: 24px; }
         .nav-link { color: var(--text2); text-decoration: none; font-size: .9rem; font-weight: 500; transition: color .2s; }
@@ -119,29 +120,31 @@
         .nav-btn:hover { background: var(--primary); color: #fff; box-shadow: 0 4px 20px rgba(74,95,224,.25); }
 
         /* HERO */
-        .hero { text-align: center; padding: 120px 24px 80px; position: relative; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .hero::before { content: ''; position: absolute; top: -60%; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(74,95,224,.08) 0%, transparent 70%); pointer-events: none; }
+        .hero { text-align: center; padding: 120px 24px 80px; position: relative; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: -60%; left: 50%; transform: translateX(-50%); width: 900px; height: 900px; background: radial-gradient(circle, rgba(74,95,224,.1) 0%, transparent 70%); pointer-events: none; }
         .hero-badge { display: inline-block; padding: 6px 18px; border-radius: 50px; background: rgba(74,95,224,.08); color: var(--primary); font-size: .85rem; font-weight: 600; margin-bottom: 24px; border: 1px solid rgba(74,95,224,.15); }
-        .hero h1 { font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 800; letter-spacing: -.04em; background: linear-gradient(135deg, #1E2432 30%, #4A5FE0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; line-height: 1.05; }
+        .hero h1 { font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 800; letter-spacing: -.04em; margin-bottom: 24px; line-height: 1.0; overflow: hidden; }
+        .hero h1 .word { display: inline-block; overflow: hidden; vertical-align: top; }
+        .hero h1 .word-inner { display: inline-block; }
         .hero p { font-size: 1.15rem; color: var(--text2); max-width: 600px; margin: 0 auto 40px; }
         .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
         .btn-primary { padding: 16px 36px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; text-decoration: none; font-weight: 600; font-size: 1rem; transition: all .25s; box-shadow: 0 4px 20px rgba(74,95,224,.3); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(74,95,224,.4); }
         .btn-secondary { padding: 16px 36px; border-radius: 14px; background: var(--card-bg); backdrop-filter: blur(12px); color: var(--text); text-decoration: none; font-weight: 600; font-size: 1rem; border: 1px solid var(--card-border); transition: all .25s; }
         .btn-secondary:hover { background: rgba(255,255,255,.85); transform: translateY(-2px); }
-        .scroll-hint { margin-top: 48px; color: var(--text2); font-size: .78rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; animation: scrollBounce 2s ease-in-out infinite; }
-        .scroll-hint svg { display: block; margin: 8px auto 0; opacity: .4; }
+        .scroll-hint { margin-top: 48px; color: var(--text2); font-size: .78rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
+        .scroll-hint svg { display: block; margin: 8px auto 0; opacity: .4; animation: scrollBounce 2s ease-in-out infinite; }
         @keyframes scrollBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
 
         /* SECTIONS */
-        section { padding: 80px 24px; }
+        section { padding: 100px 24px; }
         .section-tag { text-align: center; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--primary); margin-bottom: 8px; }
-        .section-title { text-align: center; font-size: 2.4rem; font-weight: 800; letter-spacing: -.02em; margin-bottom: 12px; }
+        .section-title { text-align: center; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -.02em; margin-bottom: 12px; }
         .section-subtitle { text-align: center; color: var(--text2); max-width: 560px; margin: 0 auto 48px; font-size: 1rem; }
 
         /* PROBLEM-SOLUTION */
         .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 960px; margin: 0 auto; }
-        .problem-card, .solution-card { border-radius: 20px; padding: 32px; border: 1px solid var(--card-border); }
+        .problem-card, .solution-card { border-radius: 20px; padding: 32px; border: 1px solid var(--card-border); will-change: transform; }
         .problem-card { background: rgba(239,68,68,.04); border-color: rgba(239,68,68,.12); }
         .solution-card { background: rgba(16,185,129,.04); border-color: rgba(16,185,129,.12); }
         .problem-card h3 { color: var(--red); margin-bottom: 16px; font-size: 1.15rem; }
@@ -152,8 +155,8 @@
 
         /* FEATURES DEEP DIVE */
         .features-list { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-        .feature-row { display: flex; align-items: center; gap: 28px; background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; padding: 28px 32px; border: 1px solid var(--card-border); box-shadow: 0 2px 12px rgba(0,0,0,.04); transition: all .3s; }
-        .feature-row:hover { background: rgba(255,255,255,.8); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,.07); }
+        .feature-row { display: flex; align-items: center; gap: 28px; background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; padding: 28px 32px; border: 1px solid var(--card-border); box-shadow: 0 2px 12px rgba(0,0,0,.04); transition: all .3s; will-change: transform; }
+        .feature-row:hover { background: rgba(255,255,255,.8); transform: translateY(-2px) scale(1.01); box-shadow: 0 12px 40px rgba(0,0,0,.07); }
         .feature-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .feature-icon svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2; }
         .feature-content h3 { font-size: 1.1rem; margin-bottom: 4px; }
@@ -170,10 +173,8 @@
         /* STATS BAR */
         .stats-bar { background: rgba(232,236,243,.8); backdrop-filter: blur(12px); border-top: 1px solid rgba(0,0,0,.04); border-bottom: 1px solid rgba(0,0,0,.04); }
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; max-width: 960px; margin: 0 auto; text-align: center; }
-        .stat-item h3 { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--primary2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .stat-item h3 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--primary2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .stat-item p { color: var(--text2); font-size: .88rem; margin-top: 4px; }
-        /* Animated counters */
-        .stat-item h3 { transition: transform .3s; }
 
         /* COMPARISON TABLE */
         .comparison-wrap { max-width: 800px; margin: 0 auto; overflow-x: auto; }
@@ -189,8 +190,8 @@
         .cross { color: rgba(0,0,0,.15); font-size: 1.2rem; }
 
         /* CTA */
-        .cta-section { text-align: center; padding: 80px 24px; }
-        .cta-box { max-width: 640px; margin: 0 auto; background: linear-gradient(135deg, var(--primary), var(--primary2)); border-radius: 28px; padding: 56px 40px; color: #fff; position: relative; overflow: hidden; }
+        .cta-section { text-align: center; padding: 100px 24px; }
+        .cta-box { max-width: 640px; margin: 0 auto; background: linear-gradient(135deg, var(--primary), var(--primary2)); border-radius: 28px; padding: 56px 40px; color: #fff; position: relative; overflow: hidden; will-change: transform; }
         .cta-box::before { content: ''; position: absolute; top: -50%; right: -30%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,.1) 0%, transparent 70%); pointer-events: none; }
         .cta-box h2 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; }
         .cta-box p { font-size: 1.05rem; opacity: .85; margin-bottom: 28px; }
@@ -204,68 +205,12 @@
         .footer-links a:hover { color: var(--primary); }
         footer .copyright { color: rgba(107,114,128,.45); font-size: .8rem; }
 
-        /* ══ SCROLL REVEAL ANIMATIONS ══ */
-        .reveal {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);
-        }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .reveal-left {
-            opacity: 0;
-            transform: translateX(-40px);
-            transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);
-        }
-        .reveal-left.visible {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        .reveal-right {
-            opacity: 0;
-            transform: translateX(40px);
-            transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);
-        }
-        .reveal-right.visible {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        .reveal-scale {
-            opacity: 0;
-            transform: scale(.92);
-            transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);
-        }
-        .reveal-scale.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        /* Staggered children */
-        .stagger-children .feature-row { opacity: 0; transform: translateY(30px); transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); }
-        .stagger-children.visible .feature-row { opacity: 1; transform: translateY(0); }
-        .stagger-children.visible .feature-row:nth-child(1) { transition-delay: .05s; }
-        .stagger-children.visible .feature-row:nth-child(2) { transition-delay: .1s; }
-        .stagger-children.visible .feature-row:nth-child(3) { transition-delay: .15s; }
-        .stagger-children.visible .feature-row:nth-child(4) { transition-delay: .2s; }
-        .stagger-children.visible .feature-row:nth-child(5) { transition-delay: .25s; }
-        .stagger-children.visible .feature-row:nth-child(6) { transition-delay: .3s; }
-        .stagger-children.visible .feature-row:nth-child(7) { transition-delay: .35s; }
-        .stagger-children.visible .feature-row:nth-child(8) { transition-delay: .4s; }
-
-        /* Hero entrance animations */
-        .hero-anim { opacity: 0; transform: translateY(30px); }
-        .hero-loaded .hero-anim { opacity: 1; transform: translateY(0); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
-        .hero-loaded .hero-anim:nth-child(1) { transition-delay: .1s; }
-        .hero-loaded .hero-anim:nth-child(2) { transition-delay: .2s; }
-        .hero-loaded .hero-anim:nth-child(3) { transition-delay: .35s; }
-        .hero-loaded .hero-anim:nth-child(4) { transition-delay: .5s; }
-        .hero-loaded .hero-anim:nth-child(5) { transition-delay: .65s; }
+        /* 3D TILT on feature cards */
+        .feature-row { transform-style: preserve-3d; perspective: 1000px; }
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
-            .hero h1 { font-size: clamp(2rem, 8vw, 3rem); }
+            .hero h1 { font-size: clamp(2.2rem, 8vw, 3.2rem); }
             .hero p { font-size: 1rem; }
             .hero { padding: 100px 24px 60px; min-height: auto; }
             .problem-grid { grid-template-columns: 1fr; }
@@ -277,7 +222,7 @@
             .cta-box h2 { font-size: 1.6rem; }
             .top-nav { padding: 12px 16px; }
             .nav-links { gap: 14px; }
-            .section-title { font-size: 1.7rem; }
+            section { padding: 70px 24px; }
             .scroll-hint { display: none; }
         }
         @media (max-width: 480px) {
@@ -288,6 +233,9 @@
     </style>
 </head>
 <body>
+
+    <!-- Scroll progress bar -->
+    <div class="scroll-progress" id="scroll-progress"></div>
 
     <!-- ══ LOADER ══ -->
     <div id="loader">
@@ -306,7 +254,7 @@
     <div class="page-content">
 
     <!-- NAV -->
-    <nav class="top-nav">
+    <nav class="top-nav" id="main-nav">
         <a href="index.html" class="nav-brand">CoreSync Go</a>
         <div class="nav-links">
             <a href="#features" class="nav-link">Features</a>
@@ -317,26 +265,26 @@
 
     <!-- HERO -->
     <section class="hero" id="hero-section">
-        <div class="hero-badge hero-anim">8 Apps in 1</div>
-        <h1 class="hero-anim">Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
-        <p class="hero-anim">CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
-        <div class="hero-cta hero-anim">
+        <div class="hero-badge" id="hero-badge">8 Apps in 1</div>
+        <h1 id="hero-title">Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
+        <p id="hero-desc">CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
+        <div class="hero-cta" id="hero-cta">
             <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
             <a href="#features" class="btn-secondary">See All Features</a>
         </div>
-        <div class="scroll-hint hero-anim">
+        <div class="scroll-hint" id="hero-scroll">
             Keep Scrolling
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
         </div>
     </section>
 
     <!-- PROBLEM / SOLUTION -->
-    <section>
-        <p class="section-tag reveal">The Problem &amp; Solution</p>
-        <h2 class="section-title reveal">Before &amp; After CoreSync Go</h2>
-        <p class="section-subtitle reveal">Most people use 8+ different apps daily. That means 8 logins, 8 interfaces, and zero integration.</p>
+    <section id="ps-section">
+        <p class="section-tag">The Problem &amp; Solution</p>
+        <h2 class="section-title">Before &amp; After CoreSync Go</h2>
+        <p class="section-subtitle">Most people use 8+ different apps daily. That means 8 logins, 8 interfaces, and zero integration.</p>
         <div class="problem-grid">
-            <div class="problem-card reveal-left">
+            <div class="problem-card">
                 <h3>Without CoreSync Go</h3>
                 <ul class="ps-list">
                     <li><span>&#10060;</span> Switching between 8+ separate apps daily</li>
@@ -346,7 +294,7 @@
                     <li><span>&#10060;</span> Storage bloat from multiple heavy apps</li>
                 </ul>
             </div>
-            <div class="solution-card reveal-right">
+            <div class="solution-card">
                 <h3>With CoreSync Go</h3>
                 <ul class="ps-list">
                     <li><span>&#9989;</span> One unified app for everything</li>
@@ -360,21 +308,21 @@
     </section>
 
     <!-- STATS -->
-    <section class="stats-bar">
-        <div class="stats-grid reveal">
-            <div class="stat-item"><h3 data-count="8">0</h3><p>Powerful Modules</p></div>
-            <div class="stat-item"><h3 data-count="20">0</h3><p>Languages Supported</p></div>
-            <div class="stat-item"><h3 data-count="100">0</h3><p>% Free to Use</p></div>
-            <div class="stat-item"><h3 data-count="2">0</h3><p>Platforms (iOS &amp; Android)</p></div>
+    <section class="stats-bar" id="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item"><h3 class="counter" data-target="8">0</h3><p>Powerful Modules</p></div>
+            <div class="stat-item"><h3 class="counter" data-target="20" data-suffix="+">0</h3><p>Languages Supported</p></div>
+            <div class="stat-item"><h3 class="counter" data-target="100" data-suffix="%">0</h3><p>Free to Use</p></div>
+            <div class="stat-item"><h3 class="counter" data-target="2">0</h3><p>Platforms (iOS &amp; Android)</p></div>
         </div>
     </section>
 
     <!-- FEATURES DEEP DIVE -->
     <section id="features">
-        <p class="section-tag reveal">Features</p>
-        <h2 class="section-title reveal">Everything You Need, Nothing You Don't</h2>
-        <p class="section-subtitle reveal">Each module is designed to work independently or together, giving you a complete productivity ecosystem.</p>
-        <div class="features-list stagger-children">
+        <p class="section-tag">Features</p>
+        <h2 class="section-title">Everything You Need, Nothing You Don't</h2>
+        <p class="section-subtitle">Each module is designed to work independently or together, giving you a complete productivity ecosystem.</p>
+        <div class="features-list" id="features-list">
             <div class="feature-row">
                 <div class="feature-icon icon-tasks"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
                 <div class="feature-content"><h3>Task Manager</h3><p>Create, organize, and share tasks with priorities, due dates, and reminders. Collaborate with others by sharing tasks and tracking progress with detailed reports.</p></div>
@@ -412,10 +360,10 @@
 
     <!-- COMPARISON TABLE -->
     <section id="compare">
-        <p class="section-tag reveal">Compare</p>
-        <h2 class="section-title reveal">CoreSync Go vs. Using Separate Apps</h2>
-        <p class="section-subtitle reveal">See how one app can replace your entire toolkit.</p>
-        <div class="comparison-wrap reveal-scale">
+        <p class="section-tag">Compare</p>
+        <h2 class="section-title">CoreSync Go vs. Using Separate Apps</h2>
+        <p class="section-subtitle">See how one app can replace your entire toolkit.</p>
+        <div class="comparison-wrap" id="comparison-wrap">
             <table class="comparison-table">
                 <thead>
                     <tr>
@@ -441,7 +389,7 @@
 
     <!-- CTA -->
     <section class="cta-section">
-        <div class="cta-box reveal-scale">
+        <div class="cta-box" id="cta-box">
             <h2>Ready to Simplify Your Life?</h2>
             <p>Join thousands who replaced their app clutter with CoreSync Go. Free on iOS and Android.</p>
             <a href="index.html" class="cta-btn">
@@ -452,7 +400,7 @@
     </section>
 
     <!-- FOOTER -->
-    <footer class="reveal">
+    <footer>
         <nav class="footer-links">
             <a href="index.html">Home</a>
             <a href="privacy-policy.html">Privacy Policy</a>
@@ -464,6 +412,11 @@
 
     </div><!-- .page-content -->
 
+<!-- GSAP + ScrollTrigger + Lenis -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
+
 <script>
 // ══ LOADER ══
 (function() {
@@ -471,79 +424,83 @@
     const pct = document.getElementById('loader-percent');
     const loader = document.getElementById('loader');
     let progress = 0;
-    const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3) / 2;
 
     const interval = setInterval(() => {
-        progress += Math.random() * 12 + 3;
+        progress += Math.random() * 10 + 2;
         if (progress >= 100) {
             progress = 100;
             clearInterval(interval);
             fill.style.width = '100%';
             pct.textContent = '100%';
             setTimeout(() => {
-                loader.classList.add('loaded');
-                document.getElementById('hero-section').classList.add('hero-loaded');
-            }, 300);
+                gsap.to(loader, {
+                    opacity: 0,
+                    duration: .6,
+                    ease: 'power2.inOut',
+                    onComplete: () => {
+                        loader.style.display = 'none';
+                        initAnimations();
+                    }
+                });
+            }, 400);
             return;
         }
-        const eased = ease(progress / 100) * 100;
+        const eased = progress < 50 ? 4*Math.pow(progress/100,3)*100 : (1-Math.pow(-2*progress/100+2,3)/2)*100;
         fill.style.width = eased + '%';
         pct.textContent = Math.round(eased) + '%';
-    }, 60);
+    }, 50);
 })();
 
 // ══ PARTICLES ══
 (function() {
     const canvas = document.getElementById('particles-canvas');
     const ctx = canvas.getContext('2d');
-    let w, h, particles = [];
-    const PARTICLE_COUNT = 35;
+    let w, h, particles = [], mouse = { x: -1000, y: -1000 };
+    const COUNT = 40;
 
-    function resize() {
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
-    }
+    function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
     resize();
     window.addEventListener('resize', resize);
+    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
 
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
+    for (let i = 0; i < COUNT; i++) {
         particles.push({
-            x: Math.random() * w,
-            y: Math.random() * h,
+            x: Math.random() * w, y: Math.random() * h,
             r: Math.random() * 2.5 + 1,
-            dx: (Math.random() - .5) * .3,
-            dy: (Math.random() - .5) * .3,
-            opacity: Math.random() * .15 + .04
+            dx: (Math.random() - .5) * .4, dy: (Math.random() - .5) * .4,
+            opacity: Math.random() * .18 + .05
         });
     }
 
     function draw() {
         ctx.clearRect(0, 0, w, h);
         particles.forEach(p => {
-            p.x += p.dx;
-            p.y += p.dy;
-            if (p.x < 0) p.x = w;
-            if (p.x > w) p.x = 0;
-            if (p.y < 0) p.y = h;
-            if (p.y > h) p.y = 0;
+            // Mouse repulsion
+            const mx = p.x - mouse.x, my = p.y - mouse.y;
+            const md = Math.sqrt(mx*mx + my*my);
+            if (md < 120) {
+                p.x += mx / md * 1.5;
+                p.y += my / md * 1.5;
+            }
+            p.x += p.dx; p.y += p.dy;
+            if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+            if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(74, 95, 224, ${p.opacity})`;
             ctx.fill();
         });
-
-        // Draw connections
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
                 const dy = particles[i].y - particles[j].y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 150) {
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 160) {
                     ctx.beginPath();
                     ctx.moveTo(particles[i].x, particles[i].y);
                     ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.strokeStyle = `rgba(74, 95, 224, ${.04 * (1 - dist / 150)})`;
-                    ctx.lineWidth = .5;
+                    ctx.strokeStyle = `rgba(74, 95, 224, ${.06 * (1 - dist/160)})`;
+                    ctx.lineWidth = .6;
                     ctx.stroke();
                 }
             }
@@ -553,45 +510,196 @@
     draw();
 })();
 
-// ══ SCROLL REVEAL ══
-(function() {
-    const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger-children');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
+// ══ SMOOTH SCROLL (LENIS) ══
+const lenis = new Lenis({
+    duration: 1.2,
+    easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    orientation: 'vertical',
+    smoothWheel: true,
+});
+function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+requestAnimationFrame(raf);
+// Sync Lenis with GSAP ScrollTrigger
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+gsap.ticker.lagSmoothing(0);
+
+// ══ SCROLL PROGRESS BAR ══
+gsap.to('#scroll-progress', {
+    width: '100%',
+    ease: 'none',
+    scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: .3 }
+});
+
+// ══ ALL GSAP ANIMATIONS ══
+function initAnimations() {
+    gsap.registerPlugin(ScrollTrigger);
+
+    // ── NAV slide down ──
+    gsap.to('#main-nav', { y: 0, duration: .8, ease: 'power3.out', delay: .2 });
+
+    // ── HERO: Split text word animation ──
+    const title = document.getElementById('hero-title');
+    const text = title.innerHTML;
+    // Split by <br> first, then words
+    const parts = text.split('<br>');
+    title.innerHTML = parts.map(line =>
+        line.trim().split(/\s+/).map(word =>
+            `<span class="word"><span class="word-inner">${word}</span></span>`
+        ).join(' ')
+    ).join('<br>');
+
+    gsap.from('#hero-title .word-inner', {
+        y: '110%',
+        rotationX: -20,
+        opacity: 0,
+        duration: 1,
+        ease: 'power4.out',
+        stagger: .08,
+        delay: .3,
+    });
+
+    // Hero badge
+    gsap.from('#hero-badge', { y: 30, opacity: 0, duration: .8, ease: 'power3.out', delay: .1 });
+
+    // Hero description
+    gsap.from('#hero-desc', { y: 40, opacity: 0, duration: .8, ease: 'power3.out', delay: .9 });
+
+    // Hero CTA buttons
+    gsap.from('#hero-cta', { y: 40, opacity: 0, duration: .8, ease: 'power3.out', delay: 1.1 });
+
+    // Scroll hint
+    gsap.from('#hero-scroll', { y: 20, opacity: 0, duration: .6, ease: 'power3.out', delay: 1.4 });
+
+    // ── HERO PARALLAX on scroll ──
+    gsap.to('#hero-title', {
+        y: -80, opacity: .3,
+        scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
+    });
+    gsap.to('#hero-desc', {
+        y: -50, opacity: 0,
+        scrollTrigger: { trigger: '.hero', start: '20% top', end: 'bottom top', scrub: true }
+    });
+    gsap.to('#hero-cta', {
+        y: -30, opacity: 0,
+        scrollTrigger: { trigger: '.hero', start: '30% top', end: 'bottom top', scrub: true }
+    });
+    gsap.to('#hero-scroll', {
+        opacity: 0,
+        scrollTrigger: { trigger: '.hero', start: '10% top', end: '30% top', scrub: true }
+    });
+
+    // ── PROBLEM/SOLUTION ──
+    const psSection = document.getElementById('ps-section');
+    gsap.from('#ps-section .section-tag', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: psSection, start: 'top 80%' }});
+    gsap.from('#ps-section .section-title', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .1, scrollTrigger: { trigger: psSection, start: 'top 80%' }});
+    gsap.from('#ps-section .section-subtitle', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .2, scrollTrigger: { trigger: psSection, start: 'top 80%' }});
+
+    // Problem card slides from left
+    gsap.from('.problem-card', {
+        x: -80, opacity: 0, duration: .9, ease: 'power3.out',
+        scrollTrigger: { trigger: '.problem-grid', start: 'top 75%' }
+    });
+    // Solution card slides from right
+    gsap.from('.solution-card', {
+        x: 80, opacity: 0, duration: .9, ease: 'power3.out', delay: .15,
+        scrollTrigger: { trigger: '.problem-grid', start: 'top 75%' }
+    });
+
+    // Problem/Solution list items stagger
+    gsap.from('.problem-card .ps-list li', {
+        x: -30, opacity: 0, duration: .5, ease: 'power2.out', stagger: .08,
+        scrollTrigger: { trigger: '.problem-card', start: 'top 70%' }
+    });
+    gsap.from('.solution-card .ps-list li', {
+        x: 30, opacity: 0, duration: .5, ease: 'power2.out', stagger: .08,
+        scrollTrigger: { trigger: '.solution-card', start: 'top 70%' }
+    });
+
+    // ── STATS COUNTER with scroll trigger ──
+    const counters = document.querySelectorAll('.counter');
+    counters.forEach(counter => {
+        const target = parseInt(counter.dataset.target);
+        const suffix = counter.dataset.suffix || '';
+        ScrollTrigger.create({
+            trigger: counter,
+            start: 'top 85%',
+            once: true,
+            onEnter: () => {
+                gsap.to({ val: 0 }, {
+                    val: target, duration: 1.5, ease: 'power2.out',
+                    onUpdate: function() { counter.textContent = Math.round(this.targets()[0].val) + suffix; }
+                });
             }
         });
-    }, { threshold: .15, rootMargin: '0px 0px -40px 0px' });
+    });
+    // Stats items scale in
+    gsap.from('.stat-item', {
+        y: 50, opacity: 0, scale: .85, duration: .7, ease: 'back.out(1.5)', stagger: .12,
+        scrollTrigger: { trigger: '#stats-section', start: 'top 80%' }
+    });
 
-    revealEls.forEach(el => observer.observe(el));
-})();
+    // ── FEATURES: stagger from below with slight rotation ──
+    gsap.from('#features .section-tag', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: '#features', start: 'top 80%' }});
+    gsap.from('#features .section-title', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .1, scrollTrigger: { trigger: '#features', start: 'top 80%' }});
+    gsap.from('#features .section-subtitle', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .2, scrollTrigger: { trigger: '#features', start: 'top 80%' }});
 
-// ══ COUNTER ANIMATION ══
-(function() {
-    const counters = document.querySelectorAll('[data-count]');
-    const counterObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && !entry.target.dataset.counted) {
-                entry.target.dataset.counted = 'true';
-                const target = parseInt(entry.target.dataset.count);
-                const suffix = entry.target.dataset.count === '20' ? '+' : '';
-                let current = 0;
-                const step = target / 40;
-                const timer = setInterval(() => {
-                    current += step;
-                    if (current >= target) {
-                        current = target;
-                        clearInterval(timer);
-                    }
-                    entry.target.textContent = Math.round(current) + suffix;
-                }, 30);
-            }
+    document.querySelectorAll('.feature-row').forEach((row, i) => {
+        gsap.from(row, {
+            y: 60,
+            opacity: 0,
+            rotateX: -5,
+            scale: .95,
+            duration: .8,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: row, start: 'top 85%' }
         });
-    }, { threshold: .5 });
+    });
 
-    counters.forEach(c => counterObserver.observe(c));
-})();
+    // 3D tilt hover on feature rows
+    document.querySelectorAll('.feature-row').forEach(row => {
+        row.addEventListener('mousemove', e => {
+            const rect = row.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - .5;
+            const y = (e.clientY - rect.top) / rect.height - .5;
+            gsap.to(row, { rotateY: x * 6, rotateX: -y * 6, duration: .4, ease: 'power2.out' });
+        });
+        row.addEventListener('mouseleave', () => {
+            gsap.to(row, { rotateY: 0, rotateX: 0, duration: .6, ease: 'power2.out' });
+        });
+    });
+
+    // ── COMPARISON TABLE ──
+    gsap.from('#compare .section-tag', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: '#compare', start: 'top 80%' }});
+    gsap.from('#compare .section-title', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .1, scrollTrigger: { trigger: '#compare', start: 'top 80%' }});
+    gsap.from('#compare .section-subtitle', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .2, scrollTrigger: { trigger: '#compare', start: 'top 80%' }});
+    gsap.from('#comparison-wrap', {
+        y: 60, opacity: 0, scale: .92, duration: .9, ease: 'power3.out',
+        scrollTrigger: { trigger: '#comparison-wrap', start: 'top 80%' }
+    });
+    // Table rows animate one by one
+    gsap.from('.comparison-table tbody tr', {
+        x: -40, opacity: 0, duration: .5, ease: 'power2.out', stagger: .06,
+        scrollTrigger: { trigger: '.comparison-table', start: 'top 75%' }
+    });
+
+    // ── CTA BOX ──
+    gsap.from('#cta-box', {
+        y: 80, opacity: 0, scale: .85, rotateX: -5, duration: 1, ease: 'power3.out',
+        scrollTrigger: { trigger: '#cta-box', start: 'top 85%' }
+    });
+    // CTA parallax float
+    gsap.to('#cta-box', {
+        y: -20,
+        scrollTrigger: { trigger: '.cta-section', start: 'top bottom', end: 'bottom top', scrub: 1 }
+    });
+
+    // ── FOOTER ──
+    gsap.from('footer', {
+        y: 30, opacity: 0, duration: .7, ease: 'power3.out',
+        scrollTrigger: { trigger: 'footer', start: 'top 95%' }
+    });
+}
 </script>
 
 </body>
