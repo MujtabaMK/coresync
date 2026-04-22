@@ -4,701 +4,476 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Why CoreSync Go? — The All-in-One App That Replaces 8 Apps</title>
-    <meta name="description" content="Discover why CoreSync Go is the ultimate productivity and wellness app. Replace 8 separate apps with one powerful solution. Task manager, password vault, fitness tracker, document scanner, and more.">
-    <meta name="keywords" content="CoreSync Go, best productivity app, all-in-one app, replace multiple apps, task manager app, password manager app, fitness tracker app, document scanner app, habit tracker, QR scanner, calculator, translator">
+    <meta name="description" content="Discover why CoreSync Go is the ultimate productivity and wellness app. Replace 8 separate apps with one powerful solution.">
+    <meta name="keywords" content="CoreSync Go, best productivity app, all-in-one app, task manager, password manager, fitness tracker, document scanner, habit tracker, QR scanner, calculator, translator">
     <meta name="author" content="CoreSync Go">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://coresyncgo.com/marketing.html">
-
-    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://coresyncgo.com/marketing.html">
     <meta property="og:title" content="Why CoreSync Go? — The All-in-One App That Replaces 8 Apps">
-    <meta property="og:description" content="Stop juggling 8 different apps. CoreSync Go unifies tasks, passwords, fitness, scanning, habits, QR codes, calculator, and translator into one beautiful app.">
+    <meta property="og:description" content="Stop juggling 8 different apps. CoreSync Go unifies everything into one beautiful app.">
     <meta property="og:image" content="https://coresyncgo.com/app_icon.png">
     <meta property="og:site_name" content="CoreSync Go">
-
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Why CoreSync Go? — The All-in-One App That Replaces 8 Apps">
-    <meta name="twitter:description" content="Stop juggling 8 different apps. CoreSync Go unifies tasks, passwords, fitness, scanning, habits, QR codes, calculator, and translator into one beautiful app.">
+    <meta name="twitter:description" content="Stop juggling 8 different apps. CoreSync Go unifies everything into one beautiful app.">
     <meta name="twitter:image" content="https://coresyncgo.com/app_icon.png">
-
     <link rel="icon" type="image/png" href="app_icon.png">
     <link rel="apple-touch-icon" href="app_icon.png">
-
-    <!-- Structured Data -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "Why CoreSync Go?",
-      "description": "Discover why CoreSync Go is the ultimate all-in-one productivity and wellness app.",
-      "url": "https://coresyncgo.com/marketing.html",
-      "isPartOf": {
-        "@type": "WebSite",
-        "name": "CoreSync Go",
-        "url": "https://coresyncgo.com/"
-      }
-    }
+    {"@context":"https://schema.org","@type":"WebPage","name":"Why CoreSync Go?","description":"Discover why CoreSync Go is the ultimate all-in-one productivity and wellness app.","url":"https://coresyncgo.com/marketing.html","isPartOf":{"@type":"WebSite","name":"CoreSync Go","url":"https://coresyncgo.com/"}}
     </script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html.lenis, html.lenis body { height: auto; }
-        .lenis.lenis-smooth { scroll-behavior: auto !important; }
-        :root {
-            --primary: #4A5FE0;
-            --primary2: #7C5CE6;
-            --text: #1E2432;
-            --text2: #6B7280;
-            --card-bg: rgba(255,255,255,.55);
-            --card-border: rgba(255,255,255,.7);
-            --green: #10B981;
-            --orange: #F59E0B;
-            --blue: #3B82F6;
-            --red: #EF4444;
-            --violet: #8B5CF6;
-            --pink: #EC4899;
-            --cyan: #06B6D4;
+        *{margin:0;padding:0;box-sizing:border-box}
+        html.lenis,html.lenis body{height:auto}
+        .lenis.lenis-smooth{scroll-behavior:auto!important}
+        :root{--primary:#4A5FE0;--primary2:#7C5CE6;--text:#1E2432;--text2:#6B7280;--green:#10B981;--red:#EF4444}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a0f;color:#fff;line-height:1.6;overflow-x:hidden}
+        body::-webkit-scrollbar{display:none}
+        body{scrollbar-width:none}
+
+        /* ═══ LOADER ═══ */
+        #loader{position:fixed;inset:0;z-index:9999;background:#0a0a0f;display:flex;align-items:center;justify-content:center;will-change:opacity}
+        .loader-inner{text-align:center}
+        .loader-logo{width:72px;height:72px;border-radius:18px;box-shadow:0 0 60px rgba(74,95,224,.3);margin-bottom:28px}
+        .loader-bar{width:200px;height:2px;background:rgba(255,255,255,.08);border-radius:2px;margin:0 auto 16px;overflow:hidden}
+        .loader-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--primary2));border-radius:2px;transition:width .1s}
+        .loader-pct{font-size:.75rem;font-weight:500;color:rgba(255,255,255,.4);letter-spacing:.15em;font-variant-numeric:tabular-nums}
+
+        /* ═══ SCROLL PROGRESS ═══ */
+        .scroll-progress{position:fixed;top:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--primary),var(--primary2));z-index:1000}
+
+        /* ═══ CANVAS ═══ */
+        #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+        /* ═══ NAV ═══ */
+        .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 40px;display:flex;align-items:center;justify-content:space-between;mix-blend-mode:difference}
+        .nav-brand{font-size:1.1rem;font-weight:700;color:#fff;text-decoration:none;letter-spacing:-.02em}
+        .nav-links{display:flex;gap:32px;align-items:center}
+        .nav-link{color:rgba(255,255,255,.6);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .3s}
+        .nav-link:hover{color:#fff}
+        .nav-cta{padding:8px 22px;border:1px solid rgba(255,255,255,.2);border-radius:100px;color:#fff;text-decoration:none;font-size:.82rem;font-weight:600;transition:all .3s}
+        .nav-cta:hover{background:#fff;color:#0a0a0f}
+
+        /* ═══ SECTIONS ═══ */
+        .section{position:relative;z-index:1}
+
+        /* ─── HERO ─── */
+        .hero{height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden}
+        .hero-content{position:relative;z-index:2}
+        .hero-badge{display:inline-block;padding:6px 20px;border-radius:100px;border:1px solid rgba(255,255,255,.1);font-size:.78rem;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase;margin-bottom:32px}
+        .hero h1{font-size:clamp(3rem,8vw,7rem);font-weight:800;letter-spacing:-.05em;line-height:.95;margin-bottom:28px}
+        .hero h1 .line{display:block;overflow:hidden}
+        .hero h1 .line-inner{display:block}
+        .hero-sub{font-size:clamp(1rem,1.5vw,1.2rem);color:rgba(255,255,255,.45);max-width:500px;margin:0 auto 40px;line-height:1.7}
+        .hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+        .btn-glow{padding:16px 40px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;text-decoration:none;font-weight:600;font-size:.95rem;box-shadow:0 0 40px rgba(74,95,224,.4);transition:all .3s}
+        .btn-glow:hover{transform:translateY(-2px);box-shadow:0 0 60px rgba(74,95,224,.6)}
+        .btn-ghost{padding:16px 40px;border-radius:14px;border:1px solid rgba(255,255,255,.15);color:#fff;text-decoration:none;font-weight:600;font-size:.95rem;transition:all .3s}
+        .btn-ghost:hover{border-color:rgba(255,255,255,.4);transform:translateY(-2px)}
+        .scroll-indicator{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,.3);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase}
+        .scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);animation:scrollPulse 2s ease-in-out infinite}
+        @keyframes scrollPulse{0%,100%{opacity:1;transform:scaleY(1)}50%{opacity:.3;transform:scaleY(.6)}}
+
+        /* ─── BIG TEXT (scroll-driven statement) ─── */
+        .big-text-section{min-height:200vh;position:relative;display:flex;align-items:center;justify-content:center}
+        .big-text-pin{height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 40px}
+        .big-text{font-size:clamp(2rem,5vw,4.5rem);font-weight:800;letter-spacing:-.04em;line-height:1.15;max-width:900px}
+        .big-text .word{display:inline-block;margin-right:.3em;opacity:.15;transition:opacity .1s}
+        .big-text .word.active{opacity:1}
+
+        /* ─── FEATURES HORIZONTAL SCROLL ─── */
+        .features-section{overflow:hidden}
+        .features-pin{height:100vh;display:flex;align-items:center;overflow:hidden}
+        .features-track{display:flex;gap:32px;padding:0 80px;will-change:transform}
+        .feature-card-lg{flex:0 0 380px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:40px 32px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:all .4s}
+        .feature-card-lg:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);transform:translateY(-8px)}
+        .fc-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:24px}
+        .fc-icon svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2}
+        .feature-card-lg h3{font-size:1.3rem;font-weight:700;margin-bottom:10px;letter-spacing:-.02em}
+        .feature-card-lg p{color:rgba(255,255,255,.45);font-size:.92rem;line-height:1.7}
+        .icon-tasks{background:linear-gradient(135deg,#3B82F6,#60A5FA)}
+        .icon-passwords{background:linear-gradient(135deg,#EF4444,#F87171)}
+        .icon-gym{background:linear-gradient(135deg,#10B981,#34D399)}
+        .icon-habits{background:linear-gradient(135deg,#F97316,#FB923C)}
+        .icon-scanner{background:linear-gradient(135deg,#F59E0B,#FBBF24)}
+        .icon-qr{background:linear-gradient(135deg,#8B5CF6,#A78BFA)}
+        .icon-calc{background:linear-gradient(135deg,#EC4899,#F472B6)}
+        .icon-translator{background:linear-gradient(135deg,#06B6D4,#22D3EE)}
+
+        /* ─── STATS ─── */
+        .stats-section{padding:160px 40px;text-align:center}
+        .stats-label{font-size:.78rem;font-weight:600;color:var(--primary);letter-spacing:.15em;text-transform:uppercase;margin-bottom:16px}
+        .stats-heading{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-.02em;margin-bottom:64px;color:rgba(255,255,255,.7)}
+        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;max-width:900px;margin:0 auto}
+        .stat-block{text-align:center}
+        .stat-num{font-size:clamp(2.5rem,5vw,4rem);font-weight:800;letter-spacing:-.04em;background:linear-gradient(135deg,var(--primary),var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .stat-label{font-size:.85rem;color:rgba(255,255,255,.35);margin-top:6px}
+
+        /* ─── COMPARISON ─── */
+        .compare-section{padding:160px 40px;max-width:860px;margin:0 auto}
+        .compare-label{font-size:.78rem;font-weight:600;color:var(--primary);letter-spacing:.15em;text-transform:uppercase;margin-bottom:16px;text-align:center}
+        .compare-title{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-.02em;margin-bottom:64px;text-align:center;color:rgba(255,255,255,.8)}
+        .compare-table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:16px;border:1px solid rgba(255,255,255,.06)}
+        .compare-table th,.compare-table td{padding:16px 24px;text-align:center;font-size:.9rem;border-bottom:1px solid rgba(255,255,255,.04)}
+        .compare-table thead th{background:rgba(255,255,255,.04);color:rgba(255,255,255,.6);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+        .compare-table thead th:first-child{text-align:left}
+        .compare-table tbody td:first-child{text-align:left;font-weight:600;color:rgba(255,255,255,.7)}
+        .compare-table tbody tr:last-child td{border-bottom:none}
+        .compare-table tbody tr{transition:background .3s}
+        .compare-table tbody tr:hover{background:rgba(255,255,255,.03)}
+        .cmark{color:#10B981;font-size:1.2rem}
+        .xmark{color:rgba(255,255,255,.1);font-size:1.2rem}
+
+        /* ─── CTA ─── */
+        .cta-section{padding:160px 40px 100px;text-align:center}
+        .cta-title{font-size:clamp(2rem,5vw,4rem);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin-bottom:20px}
+        .cta-sub{font-size:1.05rem;color:rgba(255,255,255,.4);margin-bottom:40px}
+        .cta-btn{display:inline-flex;align-items:center;gap:12px;padding:18px 44px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;text-decoration:none;font-weight:700;font-size:1.05rem;box-shadow:0 0 60px rgba(74,95,224,.35);transition:all .3s}
+        .cta-btn:hover{transform:translateY(-3px);box-shadow:0 0 80px rgba(74,95,224,.5)}
+        .cta-btn svg{width:20px;height:20px}
+
+        /* ─── FOOTER ─── */
+        footer{padding:40px;text-align:center;border-top:1px solid rgba(255,255,255,.04)}
+        .footer-links{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+        .footer-links a{color:rgba(255,255,255,.3);text-decoration:none;font-size:.85rem;transition:color .3s}
+        .footer-links a:hover{color:rgba(255,255,255,.7)}
+        footer .copy{color:rgba(255,255,255,.12);font-size:.78rem}
+
+        /* ═══ RESPONSIVE ═══ */
+        @media(max-width:768px){
+            .nav{padding:16px 20px}.nav-links{gap:16px}
+            .nav-link{display:none}
+            .hero h1{font-size:clamp(2.4rem,10vw,4rem)}
+            .features-track{padding:0 24px;gap:16px}
+            .feature-card-lg{flex:0 0 300px;padding:28px 24px}
+            .stats-row{grid-template-columns:1fr 1fr;gap:24px}
+            .stats-section,.compare-section,.cta-section{padding:100px 24px}
+            .compare-table th,.compare-table td{padding:12px 14px;font-size:.82rem}
+            .scroll-indicator{display:none}
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; background: linear-gradient(170deg, #F2F4F8 0%, #E8ECF5 50%, #F0F2F8 100%); color: var(--text); line-height: 1.7; overflow-x: hidden; }
-
-        /* HIDDEN SCROLLBAR */
-        body::-webkit-scrollbar { display: none; }
-        body { scrollbar-width: none; -ms-overflow-style: none; }
-
-        /* ══ SCROLL PROGRESS BAR ══ */
-        .scroll-progress { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: linear-gradient(90deg, var(--primary), var(--primary2)); z-index: 9998; }
-
-        /* ══ LOADER ══ */
-        #loader {
-            position: fixed; inset: 0; z-index: 9999;
-            background: linear-gradient(170deg, #F2F4F8, #E8ECF5);
-            display: flex; align-items: center; justify-content: center;
-            will-change: opacity;
-        }
-        .loader-content { text-align: center; }
-        .loader-logo {
-            width: 80px; height: 80px; border-radius: 20px;
-            box-shadow: 0 12px 48px rgba(74,95,224,.2);
-            margin-bottom: 32px;
-            animation: loaderPulse 1.5s ease-in-out infinite;
-        }
-        @keyframes loaderPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: .85; }
-        }
-        .loader-bar-bg {
-            width: 220px; height: 3px; border-radius: 3px;
-            background: rgba(0,0,0,.08); margin: 0 auto 14px; overflow: hidden;
-        }
-        .loader-bar-fill {
-            height: 100%; width: 0%; border-radius: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--primary2));
-            transition: width .15s ease;
-        }
-        .loader-percent {
-            font-size: .82rem; font-weight: 600; color: var(--text2);
-            letter-spacing: .08em;
-        }
-
-        /* ══ PARTICLES ══ */
-        #particles-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0; pointer-events: none;
-        }
-
-        .page-content { position: relative; z-index: 1; }
-
-        /* NAV */
-        .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.06); transform: translateY(-100%); }
-        .nav-brand { font-size: 1.25rem; font-weight: 800; background: linear-gradient(135deg, #4A5FE0, #7C5CE6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-decoration: none; }
-        .nav-links { display: flex; align-items: center; gap: 24px; }
-        .nav-link { color: var(--text2); text-decoration: none; font-size: .9rem; font-weight: 500; transition: color .2s; }
-        .nav-link:hover { color: var(--primary); }
-        .nav-btn { padding: 9px 24px; border-radius: 10px; border: 1.5px solid var(--primary); background: transparent; color: var(--primary); font-weight: 600; font-size: .88rem; cursor: pointer; transition: all .25s; text-decoration: none; display: inline-block; }
-        .nav-btn:hover { background: var(--primary); color: #fff; box-shadow: 0 4px 20px rgba(74,95,224,.25); }
-
-        /* HERO */
-        .hero { text-align: center; padding: 120px 24px 80px; position: relative; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
-        .hero::before { content: ''; position: absolute; top: -60%; left: 50%; transform: translateX(-50%); width: 900px; height: 900px; background: radial-gradient(circle, rgba(74,95,224,.1) 0%, transparent 70%); pointer-events: none; }
-        .hero-badge { display: inline-block; padding: 6px 18px; border-radius: 50px; background: rgba(74,95,224,.08); color: var(--primary); font-size: .85rem; font-weight: 600; margin-bottom: 24px; border: 1px solid rgba(74,95,224,.15); }
-        .hero h1 { font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 800; letter-spacing: -.04em; margin-bottom: 24px; line-height: 1.0; overflow: hidden; }
-        .hero h1 .word { display: inline-block; overflow: hidden; vertical-align: top; }
-        .hero h1 .word-inner { display: inline-block; }
-        .hero p { font-size: 1.15rem; color: var(--text2); max-width: 600px; margin: 0 auto 40px; }
-        .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-        .btn-primary { padding: 16px 36px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; text-decoration: none; font-weight: 600; font-size: 1rem; transition: all .25s; box-shadow: 0 4px 20px rgba(74,95,224,.3); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(74,95,224,.4); }
-        .btn-secondary { padding: 16px 36px; border-radius: 14px; background: var(--card-bg); backdrop-filter: blur(12px); color: var(--text); text-decoration: none; font-weight: 600; font-size: 1rem; border: 1px solid var(--card-border); transition: all .25s; }
-        .btn-secondary:hover { background: rgba(255,255,255,.85); transform: translateY(-2px); }
-        .scroll-hint { margin-top: 48px; color: var(--text2); font-size: .78rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
-        .scroll-hint svg { display: block; margin: 8px auto 0; opacity: .4; animation: scrollBounce 2s ease-in-out infinite; }
-        @keyframes scrollBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
-
-        /* SECTIONS */
-        section { padding: 100px 24px; }
-        .section-tag { text-align: center; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--primary); margin-bottom: 8px; }
-        .section-title { text-align: center; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -.02em; margin-bottom: 12px; }
-        .section-subtitle { text-align: center; color: var(--text2); max-width: 560px; margin: 0 auto 48px; font-size: 1rem; }
-
-        /* PROBLEM-SOLUTION */
-        .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 960px; margin: 0 auto; }
-        .problem-card, .solution-card { border-radius: 20px; padding: 32px; border: 1px solid var(--card-border); will-change: transform; }
-        .problem-card { background: rgba(239,68,68,.04); border-color: rgba(239,68,68,.12); }
-        .solution-card { background: rgba(16,185,129,.04); border-color: rgba(16,185,129,.12); }
-        .problem-card h3 { color: var(--red); margin-bottom: 16px; font-size: 1.15rem; }
-        .solution-card h3 { color: var(--green); margin-bottom: 16px; font-size: 1.15rem; }
-        .ps-list { list-style: none; padding: 0; }
-        .ps-list li { padding: 8px 0; font-size: .95rem; color: var(--text2); display: flex; align-items: flex-start; gap: 10px; }
-        .ps-list li span { flex-shrink: 0; font-size: 1.1rem; }
-
-        /* FEATURES DEEP DIVE */
-        .features-list { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-        .feature-row { display: flex; align-items: center; gap: 28px; background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; padding: 28px 32px; border: 1px solid var(--card-border); box-shadow: 0 2px 12px rgba(0,0,0,.04); transition: all .3s; will-change: transform; }
-        .feature-row:hover { background: rgba(255,255,255,.8); transform: translateY(-2px) scale(1.01); box-shadow: 0 12px 40px rgba(0,0,0,.07); }
-        .feature-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .feature-icon svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2; }
-        .feature-content h3 { font-size: 1.1rem; margin-bottom: 4px; }
-        .feature-content p { color: var(--text2); font-size: .92rem; margin: 0; }
-        .icon-tasks { background: linear-gradient(135deg, #3B82F6, #60A5FA); }
-        .icon-passwords { background: linear-gradient(135deg, #EF4444, #F87171); }
-        .icon-gym { background: linear-gradient(135deg, #10B981, #34D399); }
-        .icon-habits { background: linear-gradient(135deg, #F97316, #FB923C); }
-        .icon-scanner { background: linear-gradient(135deg, #F59E0B, #FBBF24); }
-        .icon-qr { background: linear-gradient(135deg, #8B5CF6, #A78BFA); }
-        .icon-calc { background: linear-gradient(135deg, #EC4899, #F472B6); }
-        .icon-translator { background: linear-gradient(135deg, #06B6D4, #22D3EE); }
-
-        /* STATS BAR */
-        .stats-bar { background: rgba(232,236,243,.8); backdrop-filter: blur(12px); border-top: 1px solid rgba(0,0,0,.04); border-bottom: 1px solid rgba(0,0,0,.04); }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; max-width: 960px; margin: 0 auto; text-align: center; }
-        .stat-item h3 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--primary2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .stat-item p { color: var(--text2); font-size: .88rem; margin-top: 4px; }
-
-        /* COMPARISON TABLE */
-        .comparison-wrap { max-width: 800px; margin: 0 auto; overflow-x: auto; }
-        .comparison-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--card-bg); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid var(--card-border); overflow: hidden; }
-        .comparison-table th, .comparison-table td { padding: 14px 20px; text-align: center; font-size: .9rem; }
-        .comparison-table thead th { background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; font-weight: 700; font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; }
-        .comparison-table thead th:first-child { text-align: left; }
-        .comparison-table tbody td { border-bottom: 1px solid rgba(0,0,0,.04); }
-        .comparison-table tbody td:first-child { text-align: left; font-weight: 600; color: var(--text); }
-        .comparison-table tbody tr:last-child td { border-bottom: none; }
-        .comparison-table tbody tr:hover { background: rgba(255,255,255,.4); }
-        .check { color: var(--green); font-size: 1.2rem; font-weight: 700; }
-        .cross { color: rgba(0,0,0,.15); font-size: 1.2rem; }
-
-        /* CTA */
-        .cta-section { text-align: center; padding: 100px 24px; }
-        .cta-box { max-width: 640px; margin: 0 auto; background: linear-gradient(135deg, var(--primary), var(--primary2)); border-radius: 28px; padding: 56px 40px; color: #fff; position: relative; overflow: hidden; will-change: transform; }
-        .cta-box::before { content: ''; position: absolute; top: -50%; right: -30%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,.1) 0%, transparent 70%); pointer-events: none; }
-        .cta-box h2 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; }
-        .cta-box p { font-size: 1.05rem; opacity: .85; margin-bottom: 28px; }
-        .cta-btn { display: inline-flex; align-items: center; gap: 10px; padding: 16px 36px; border-radius: 14px; background: #fff; color: var(--primary); font-weight: 700; font-size: 1rem; text-decoration: none; transition: all .25s; }
-        .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.2); }
-
-        /* FOOTER */
-        footer { padding: 40px 24px; text-align: center; border-top: 1px solid rgba(0,0,0,.06); }
-        .footer-links { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
-        .footer-links a { color: var(--text2); text-decoration: none; font-size: .9rem; transition: color .2s; }
-        .footer-links a:hover { color: var(--primary); }
-        footer .copyright { color: rgba(107,114,128,.45); font-size: .8rem; }
-
-        /* 3D TILT on feature cards */
-        .feature-row { transform-style: preserve-3d; perspective: 1000px; }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .hero h1 { font-size: clamp(2.2rem, 8vw, 3.2rem); }
-            .hero p { font-size: 1rem; }
-            .hero { padding: 100px 24px 60px; min-height: auto; }
-            .problem-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-            .feature-row { flex-direction: column; text-align: center; gap: 16px; padding: 24px 20px; }
-            .comparison-wrap { margin: 0 -12px; }
-            .comparison-table th, .comparison-table td { padding: 10px 12px; font-size: .82rem; }
-            .cta-box { padding: 40px 24px; }
-            .cta-box h2 { font-size: 1.6rem; }
-            .top-nav { padding: 12px 16px; }
-            .nav-links { gap: 14px; }
-            section { padding: 70px 24px; }
-            .scroll-hint { display: none; }
-        }
-        @media (max-width: 480px) {
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .hero-cta { flex-direction: column; align-items: center; }
-            .nav-link { display: none; }
+        @media(max-width:480px){
+            .hero-btns{flex-direction:column;align-items:center}
+            .stats-row{grid-template-columns:1fr 1fr}
+            .feature-card-lg{flex:0 0 280px}
         }
     </style>
 </head>
 <body>
 
-    <!-- Scroll progress bar -->
-    <div class="scroll-progress" id="scroll-progress"></div>
+<!-- Scroll progress -->
+<div class="scroll-progress" id="scroll-progress"></div>
 
-    <!-- ══ LOADER ══ -->
-    <div id="loader">
-        <div class="loader-content">
-            <img src="app_icon.png" alt="CoreSync Go" class="loader-logo">
-            <div class="loader-bar-bg">
-                <div class="loader-bar-fill" id="loader-fill"></div>
-            </div>
-            <div class="loader-percent" id="loader-percent">0%</div>
+<!-- Loader -->
+<div id="loader">
+    <div class="loader-inner">
+        <img src="app_icon.png" alt="CoreSync Go" class="loader-logo">
+        <div class="loader-bar"><div class="loader-fill" id="loader-fill"></div></div>
+        <div class="loader-pct" id="loader-pct">0%</div>
+    </div>
+</div>
+
+<!-- Background canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Nav -->
+<nav class="nav" id="main-nav">
+    <a href="index.html" class="nav-brand">CoreSync Go</a>
+    <div class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#compare" class="nav-link">Compare</a>
+        <a href="index.html" class="nav-cta">Download</a>
+    </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero section" id="hero">
+    <div class="hero-content">
+        <div class="hero-badge" id="hero-badge">8 Apps in 1</div>
+        <h1 id="hero-title">
+            <span class="line"><span class="line-inner">Stop Juggling.</span></span>
+            <span class="line"><span class="line-inner">Start Syncing.</span></span>
+        </h1>
+        <p class="hero-sub" id="hero-sub">CoreSync Go replaces your task manager, password vault, fitness tracker, scanner, and more — all in one app.</p>
+        <div class="hero-btns" id="hero-btns">
+            <a href="index.html" class="btn-glow">Get It Free</a>
+            <a href="#features" class="btn-ghost">Explore</a>
         </div>
     </div>
+    <div class="scroll-indicator" id="scroll-ind">
+        <span>Scroll</span>
+        <div class="scroll-line"></div>
+    </div>
+</section>
 
-    <!-- ══ PARTICLES ══ -->
-    <canvas id="particles-canvas"></canvas>
-
-    <div class="page-content">
-
-    <!-- NAV -->
-    <nav class="top-nav" id="main-nav">
-        <a href="index.html" class="nav-brand">CoreSync Go</a>
-        <div class="nav-links">
-            <a href="#features" class="nav-link">Features</a>
-            <a href="#compare" class="nav-link">Compare</a>
-            <a href="index.html" class="nav-btn">Download App</a>
+<!-- ═══ BIG TEXT — scroll-driven word reveal ═══ -->
+<section class="big-text-section section" id="big-text-section">
+    <div class="big-text-pin">
+        <div class="big-text" id="big-text">
+            One app to manage your tasks, secure your passwords, track your fitness, scan documents, build habits, read QR codes, calculate anything, and translate any language.
         </div>
+    </div>
+</section>
+
+<!-- ═══ FEATURES — horizontal scroll ═══ -->
+<section class="features-section section" id="features">
+    <div class="features-pin" id="features-pin">
+        <div class="features-track" id="features-track">
+            <div class="feature-card-lg">
+                <div class="fc-icon icon-tasks"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+                <h3>Task Manager</h3>
+                <p>Create, organize, and share tasks with priorities, due dates, and reminders. Collaborate and track progress with reports.</p>
+            </div>
+            <div class="feature-card-lg">
+                <div class="fc-icon icon-passwords"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+                <h3>Password Vault</h3>
+                <p>Industry-standard encryption. Auto-generate strong passwords and keep your digital life secure with one master access.</p>
+            </div>
+            <div class="feature-card-lg">
+                <div class="fc-icon icon-gym"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+                <h3>Gym & Fitness</h3>
+                <p>Track steps, water, workouts, sleep, and food. Set reminders, monitor BMI, and export health reports as PDF.</p>
+            </div>
+            <div class="feature-card-lg">
+                <div class="fc-icon icon-habits"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div>
+                <h3>Habit Tracker</h3>
+                <p>Build positive habits with daily check-ins, streak tracking, and smart reminders. Visualize weekly progress.</p>
+            </div>
+            <div class="feature-card-lg">
+                <div class="fc-icon icon-scanner"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+                <h3>Document Scanner</h3>
+                <p>Scan with camera, OCR text extraction, multi-page PDFs, digital signatures — all without leaving the app.</p>
+            </div>
+            <div class="feature-card-lg">
+                <div class="fc-icon icon-qr"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div>
+                <h3>QR, Barcode & NFC</h3>
+                <p>Scan QR codes, barcodes, NFC tags instantly. Generate custom QR codes for links, Wi-Fi, contacts, and more.</p>
+            </div>
+            <div class="feature-card-lg">
+                <div class="fc-icon icon-calc"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/></svg></div>
+                <h3>Calculator</h3>
+                <p>Simple and scientific calculators plus full unit converter for length, weight, temperature, currency, and more.</p>
+            </div>
+            <div class="feature-card-lg">
+                <div class="fc-icon icon-translator"><svg viewBox="0 0 24 24"><path d="M5 8h6M4 6h4M8 6V5a2 2 0 012-2 2 2 0 012 2v1M4 12l3.7-6M11.5 12l-3.7-6M14 20l2-6 2 6M14.5 18h3"/></svg></div>
+                <h3>Voice Translator</h3>
+                <p>Real-time speech translation across 20+ languages. Conversation mode for two-way communication.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ STATS ═══ -->
+<section class="stats-section section" id="stats">
+    <div class="stats-label">By the Numbers</div>
+    <div class="stats-heading">Everything you need, nothing you don't.</div>
+    <div class="stats-row">
+        <div class="stat-block"><div class="stat-num counter" data-target="8">0</div><div class="stat-label">Modules</div></div>
+        <div class="stat-block"><div class="stat-num counter" data-target="20" data-suffix="+">0</div><div class="stat-label">Languages</div></div>
+        <div class="stat-block"><div class="stat-num counter" data-target="100" data-suffix="%">0</div><div class="stat-label">Free</div></div>
+        <div class="stat-block"><div class="stat-num counter" data-target="2">0</div><div class="stat-label">Platforms</div></div>
+    </div>
+</section>
+
+<!-- ═══ COMPARISON ═══ -->
+<section class="compare-section section" id="compare">
+    <div class="compare-label">Compare</div>
+    <div class="compare-title">CoreSync Go vs. Separate Apps</div>
+    <table class="compare-table" id="compare-table">
+        <thead><tr><th>Feature</th><th>CoreSync Go</th><th>Others</th></tr></thead>
+        <tbody>
+            <tr><td>Task Management</td><td class="cmark">&#10003;</td><td class="cmark">&#10003;</td></tr>
+            <tr><td>Password Vault</td><td class="cmark">&#10003;</td><td class="cmark">&#10003;</td></tr>
+            <tr><td>Fitness Tracking</td><td class="cmark">&#10003;</td><td class="cmark">&#10003;</td></tr>
+            <tr><td>Document Scanner</td><td class="cmark">&#10003;</td><td class="cmark">&#10003;</td></tr>
+            <tr><td>All-in-One Integration</td><td class="cmark">&#10003;</td><td class="xmark">&#10007;</td></tr>
+            <tr><td>Cloud Sync Across All</td><td class="cmark">&#10003;</td><td class="xmark">&#10007;</td></tr>
+            <tr><td>Single Login</td><td class="cmark">&#10003;</td><td class="xmark">&#10007;</td></tr>
+            <tr><td>Completely Free</td><td class="cmark">&#10003;</td><td class="xmark">&#10007;</td></tr>
+            <tr><td>Lightweight</td><td class="cmark">&#10003;</td><td class="xmark">&#10007;</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta-section section" id="cta">
+    <h2 class="cta-title" id="cta-title">Ready to Simplify<br>Your Life?</h2>
+    <p class="cta-sub">Free on iOS and Android. No subscriptions. No ads.</p>
+    <a href="index.html" class="cta-btn">
+        Download Now
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+</section>
+
+<!-- Footer -->
+<footer>
+    <nav class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="privacy-policy.html">Privacy</a>
+        <a href="delete-account.html">Delete Account</a>
+        <a href="mailto:info@coresyncgo.com">Contact</a>
     </nav>
+    <p class="copy">&copy; 2026 CoreSync Go</p>
+</footer>
 
-    <!-- HERO -->
-    <section class="hero" id="hero-section">
-        <div class="hero-badge" id="hero-badge">8 Apps in 1</div>
-        <h1 id="hero-title">Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
-        <p id="hero-desc">CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
-        <div class="hero-cta" id="hero-cta">
-            <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
-            <a href="#features" class="btn-secondary">See All Features</a>
-        </div>
-        <div class="scroll-hint" id="hero-scroll">
-            Keep Scrolling
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-        </div>
-    </section>
-
-    <!-- PROBLEM / SOLUTION -->
-    <section id="ps-section">
-        <p class="section-tag">The Problem &amp; Solution</p>
-        <h2 class="section-title">Before &amp; After CoreSync Go</h2>
-        <p class="section-subtitle">Most people use 8+ different apps daily. That means 8 logins, 8 interfaces, and zero integration.</p>
-        <div class="problem-grid">
-            <div class="problem-card">
-                <h3>Without CoreSync Go</h3>
-                <ul class="ps-list">
-                    <li><span>&#10060;</span> Switching between 8+ separate apps daily</li>
-                    <li><span>&#10060;</span> Paying for multiple subscriptions</li>
-                    <li><span>&#10060;</span> No connection between your tasks, health, and habits</li>
-                    <li><span>&#10060;</span> Scattered data across different platforms</li>
-                    <li><span>&#10060;</span> Storage bloat from multiple heavy apps</li>
-                </ul>
-            </div>
-            <div class="solution-card">
-                <h3>With CoreSync Go</h3>
-                <ul class="ps-list">
-                    <li><span>&#9989;</span> One unified app for everything</li>
-                    <li><span>&#9989;</span> Completely free to use</li>
-                    <li><span>&#9989;</span> Seamless workflow between modules</li>
-                    <li><span>&#9989;</span> All data in one place, synced to the cloud</li>
-                    <li><span>&#9989;</span> Lightweight — save phone storage</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- STATS -->
-    <section class="stats-bar" id="stats-section">
-        <div class="stats-grid">
-            <div class="stat-item"><h3 class="counter" data-target="8">0</h3><p>Powerful Modules</p></div>
-            <div class="stat-item"><h3 class="counter" data-target="20" data-suffix="+">0</h3><p>Languages Supported</p></div>
-            <div class="stat-item"><h3 class="counter" data-target="100" data-suffix="%">0</h3><p>Free to Use</p></div>
-            <div class="stat-item"><h3 class="counter" data-target="2">0</h3><p>Platforms (iOS &amp; Android)</p></div>
-        </div>
-    </section>
-
-    <!-- FEATURES DEEP DIVE -->
-    <section id="features">
-        <p class="section-tag">Features</p>
-        <h2 class="section-title">Everything You Need, Nothing You Don't</h2>
-        <p class="section-subtitle">Each module is designed to work independently or together, giving you a complete productivity ecosystem.</p>
-        <div class="features-list" id="features-list">
-            <div class="feature-row">
-                <div class="feature-icon icon-tasks"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
-                <div class="feature-content"><h3>Task Manager</h3><p>Create, organize, and share tasks with priorities, due dates, and reminders. Collaborate with others by sharing tasks and tracking progress with detailed reports.</p></div>
-            </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-passwords"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-                <div class="feature-content"><h3>Password Vault</h3><p>Store all your credentials with industry-standard encryption. Auto-generate strong passwords and keep your digital life secure with one master access point.</p></div>
-            </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-gym"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
-                <div class="feature-content"><h3>Gym &amp; Fitness Suite</h3><p>Track steps, water intake, workouts, sleep, and food. Set meal &amp; medicine reminders, monitor BMI, and export detailed health reports as PDF.</p></div>
-            </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-habits"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div>
-                <div class="feature-content"><h3>Habit Tracker</h3><p>Build positive habits with daily check-ins, streak tracking, and smart reminders. Visualize your weekly progress and stay consistent.</p></div>
-            </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-scanner"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-                <div class="feature-content"><h3>Document Scanner</h3><p>Scan documents with your camera, extract text using OCR, create multi-page PDFs, and add digital signatures — all without leaving the app.</p></div>
-            </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-qr"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div>
-                <div class="feature-content"><h3>QR, Barcode &amp; NFC</h3><p>Scan QR codes, barcodes, and NFC tags instantly. Generate custom QR codes for sharing links, Wi-Fi details, contacts, and more.</p></div>
-            </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-calc"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/></svg></div>
-                <div class="feature-content"><h3>Calculator &amp; Converter</h3><p>Simple and scientific calculators for everyday math, plus a full unit converter covering length, weight, temperature, currency, and more.</p></div>
-            </div>
-            <div class="feature-row">
-                <div class="feature-icon icon-translator"><svg viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/></svg></div>
-                <div class="feature-content"><h3>Voice Translator</h3><p>Real-time speech translation across 20+ languages. Conversation mode enables two-way communication — perfect for travel and meetings.</p></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- COMPARISON TABLE -->
-    <section id="compare">
-        <p class="section-tag">Compare</p>
-        <h2 class="section-title">CoreSync Go vs. Using Separate Apps</h2>
-        <p class="section-subtitle">See how one app can replace your entire toolkit.</p>
-        <div class="comparison-wrap" id="comparison-wrap">
-            <table class="comparison-table">
-                <thead>
-                    <tr>
-                        <th>Feature</th>
-                        <th>CoreSync Go</th>
-                        <th>Separate Apps</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>Task Management</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-                    <tr><td>Password Vault</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-                    <tr><td>Fitness Tracking</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-                    <tr><td>Document Scanner</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
-                    <tr><td>All-in-One Integration</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
-                    <tr><td>Cloud Sync Across Modules</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
-                    <tr><td>Single Login</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
-                    <tr><td>Free to Use</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
-                    <tr><td>Lightweight on Storage</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="cta-section">
-        <div class="cta-box" id="cta-box">
-            <h2>Ready to Simplify Your Life?</h2>
-            <p>Join thousands who replaced their app clutter with CoreSync Go. Free on iOS and Android.</p>
-            <a href="index.html" class="cta-btn">
-                <span>Download Now</span>
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-        </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer>
-        <nav class="footer-links">
-            <a href="index.html">Home</a>
-            <a href="privacy-policy.html">Privacy Policy</a>
-            <a href="delete-account.html">Delete Account</a>
-            <a href="mailto:info@coresyncgo.com">Contact</a>
-        </nav>
-        <p class="copyright">&copy; 2026 CoreSync Go. All rights reserved.</p>
-    </footer>
-
-    </div><!-- .page-content -->
-
-<!-- GSAP + ScrollTrigger + Lenis -->
+<!-- ═══ LIBRARIES ═══ -->
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
 
 <script>
-// ══ LOADER ══
-(function() {
-    const fill = document.getElementById('loader-fill');
-    const pct = document.getElementById('loader-percent');
-    const loader = document.getElementById('loader');
-    let progress = 0;
+gsap.registerPlugin(ScrollTrigger);
 
-    const interval = setInterval(() => {
-        progress += Math.random() * 10 + 2;
-        if (progress >= 100) {
-            progress = 100;
-            clearInterval(interval);
-            fill.style.width = '100%';
-            pct.textContent = '100%';
-            setTimeout(() => {
-                gsap.to(loader, {
-                    opacity: 0,
-                    duration: .6,
-                    ease: 'power2.inOut',
-                    onComplete: () => {
-                        loader.style.display = 'none';
-                        initAnimations();
-                    }
-                });
-            }, 400);
-            return;
-        }
-        const eased = progress < 50 ? 4*Math.pow(progress/100,3)*100 : (1-Math.pow(-2*progress/100+2,3)/2)*100;
-        fill.style.width = eased + '%';
-        pct.textContent = Math.round(eased) + '%';
-    }, 50);
-})();
-
-// ══ PARTICLES ══
-(function() {
-    const canvas = document.getElementById('particles-canvas');
-    const ctx = canvas.getContext('2d');
-    let w, h, particles = [], mouse = { x: -1000, y: -1000 };
-    const COUNT = 40;
-
-    function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
-    resize();
-    window.addEventListener('resize', resize);
-    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-
-    for (let i = 0; i < COUNT; i++) {
-        particles.push({
-            x: Math.random() * w, y: Math.random() * h,
-            r: Math.random() * 2.5 + 1,
-            dx: (Math.random() - .5) * .4, dy: (Math.random() - .5) * .4,
-            opacity: Math.random() * .18 + .05
-        });
+/* ═══ LOADER ═══ */
+const loaderFill = document.getElementById('loader-fill');
+const loaderPct = document.getElementById('loader-pct');
+const loader = document.getElementById('loader');
+let prog = 0;
+const loadInterval = setInterval(() => {
+    prog += Math.random() * 8 + 2;
+    if (prog >= 100) {
+        prog = 100; clearInterval(loadInterval);
+        loaderFill.style.width = '100%'; loaderPct.textContent = '100%';
+        setTimeout(() => {
+            gsap.to(loader, { opacity: 0, duration: .8, ease: 'power3.inOut', onComplete: () => { loader.style.display = 'none'; startExperience(); }});
+        }, 500);
+        return;
     }
+    const e = prog < 50 ? 4*Math.pow(prog/100,3)*100 : (1-Math.pow(-2*prog/100+2,3)/2)*100;
+    loaderFill.style.width = e + '%';
+    loaderPct.textContent = Math.round(e) + '%';
+}, 40);
 
-    function draw() {
-        ctx.clearRect(0, 0, w, h);
-        particles.forEach(p => {
-            // Mouse repulsion
-            const mx = p.x - mouse.x, my = p.y - mouse.y;
-            const md = Math.sqrt(mx*mx + my*my);
-            if (md < 120) {
-                p.x += mx / md * 1.5;
-                p.y += my / md * 1.5;
-            }
-            p.x += p.dx; p.y += p.dy;
-            if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
-            if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(74, 95, 224, ${p.opacity})`;
-            ctx.fill();
-        });
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const dx = particles[i].x - particles[j].x;
-                const dy = particles[i].y - particles[j].y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 160) {
-                    ctx.beginPath();
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.strokeStyle = `rgba(74, 95, 224, ${.06 * (1 - dist/160)})`;
-                    ctx.lineWidth = .6;
-                    ctx.stroke();
-                }
-            }
+/* ═══ BACKGROUND CANVAS ═══ */
+(function(){
+    const c = document.getElementById('bg-canvas'), ctx = c.getContext('2d');
+    let w, h, pts = [], mouse = {x: -999, y: -999};
+    function resize(){ w = c.width = innerWidth; h = c.height = innerHeight; }
+    resize(); addEventListener('resize', resize);
+    addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    for(let i = 0; i < 50; i++) pts.push({x:Math.random()*2000,y:Math.random()*2000,r:Math.random()*2+.5,vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5,o:Math.random()*.2+.03});
+    (function draw(){
+        ctx.clearRect(0,0,w,h);
+        for(const p of pts){
+            const dx=p.x-mouse.x, dy=p.y-mouse.y, d=Math.hypot(dx,dy);
+            if(d<140){p.x+=dx/d*2;p.y+=dy/d*2;}
+            p.x+=p.vx; p.y+=p.vy;
+            if(p.x<-10)p.x=w+10; if(p.x>w+10)p.x=-10;
+            if(p.y<-10)p.y=h+10; if(p.y>h+10)p.y=-10;
+            ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.28);
+            ctx.fillStyle=`rgba(74,95,224,${p.o})`; ctx.fill();
+        }
+        for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+            const d=Math.hypot(pts[i].x-pts[j].x, pts[i].y-pts[j].y);
+            if(d<180){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+                ctx.strokeStyle=`rgba(74,95,224,${.07*(1-d/180)})`;ctx.lineWidth=.5;ctx.stroke();}
         }
         requestAnimationFrame(draw);
-    }
-    draw();
+    })();
 })();
 
-// ══ SMOOTH SCROLL (LENIS) ══
-const lenis = new Lenis({
-    duration: 1.2,
-    easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    orientation: 'vertical',
-    smoothWheel: true,
-});
-function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-requestAnimationFrame(raf);
-// Sync Lenis with GSAP ScrollTrigger
+/* ═══ SMOOTH SCROLL ═══ */
+const lenis = new Lenis({ duration: 1.4, easing: t => Math.min(1, 1.001 - Math.pow(2, -10*t)), smoothWheel: true });
 lenis.on('scroll', ScrollTrigger.update);
-gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+gsap.ticker.add(t => lenis.raf(t * 1000));
 gsap.ticker.lagSmoothing(0);
 
-// ══ SCROLL PROGRESS BAR ══
-gsap.to('#scroll-progress', {
-    width: '100%',
-    ease: 'none',
-    scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: .3 }
-});
+/* ═══ SCROLL PROGRESS ═══ */
+gsap.to('#scroll-progress', { width: '100%', ease: 'none', scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: .2 }});
 
-// ══ ALL GSAP ANIMATIONS ══
-function initAnimations() {
-    gsap.registerPlugin(ScrollTrigger);
+/* ═══ MAIN EXPERIENCE ═══ */
+function startExperience() {
 
-    // ── NAV slide down ──
-    gsap.to('#main-nav', { y: 0, duration: .8, ease: 'power3.out', delay: .2 });
+    // ── NAV ──
+    gsap.from('#main-nav', { y: -60, opacity: 0, duration: 1, ease: 'power3.out' });
 
-    // ── HERO: Split text word animation ──
-    const title = document.getElementById('hero-title');
-    const text = title.innerHTML;
-    // Split by <br> first, then words
-    const parts = text.split('<br>');
-    title.innerHTML = parts.map(line =>
-        line.trim().split(/\s+/).map(word =>
-            `<span class="word"><span class="word-inner">${word}</span></span>`
-        ).join(' ')
-    ).join('<br>');
+    // ── HERO ENTRANCE ──
+    gsap.from('#hero-badge', { y: 30, opacity: 0, duration: .8, ease: 'power3.out', delay: .2 });
+    gsap.from('.line-inner', { y: '120%', duration: 1.2, ease: 'power4.out', stagger: .15, delay: .4 });
+    gsap.from('#hero-sub', { y: 40, opacity: 0, duration: 1, ease: 'power3.out', delay: 1 });
+    gsap.from('#hero-btns', { y: 40, opacity: 0, duration: .8, ease: 'power3.out', delay: 1.3 });
+    gsap.from('#scroll-ind', { opacity: 0, duration: .6, delay: 1.8 });
 
-    gsap.from('#hero-title .word-inner', {
-        y: '110%',
-        rotationX: -20,
-        opacity: 0,
-        duration: 1,
-        ease: 'power4.out',
-        stagger: .08,
-        delay: .3,
+    // ── HERO PARALLAX ──
+    const heroTl = gsap.timeline({ scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }});
+    heroTl.to('.hero-content', { y: -150, scale: .9, opacity: 0, ease: 'none' }, 0);
+    heroTl.to('#scroll-ind', { opacity: 0, y: -40 }, 0);
+
+    // ── BIG TEXT: word-by-word reveal on scroll ──
+    const bigTextEl = document.getElementById('big-text');
+    const rawText = bigTextEl.textContent.trim();
+    bigTextEl.innerHTML = rawText.split(/\s+/).map(w => `<span class="word">${w}</span>`).join(' ');
+    const words = bigTextEl.querySelectorAll('.word');
+
+    ScrollTrigger.create({
+        trigger: '#big-text-section',
+        start: 'top top',
+        end: 'bottom bottom',
+        pin: '.big-text-pin',
+        scrub: true,
+        onUpdate: self => {
+            const p = self.progress;
+            words.forEach((w, i) => {
+                const wordProgress = i / words.length;
+                w.classList.toggle('active', p > wordProgress);
+            });
+        }
     });
 
-    // Hero badge
-    gsap.from('#hero-badge', { y: 30, opacity: 0, duration: .8, ease: 'power3.out', delay: .1 });
+    // ── FEATURES HORIZONTAL SCROLL ──
+    const track = document.getElementById('features-track');
+    const trackWidth = track.scrollWidth - window.innerWidth;
 
-    // Hero description
-    gsap.from('#hero-desc', { y: 40, opacity: 0, duration: .8, ease: 'power3.out', delay: .9 });
-
-    // Hero CTA buttons
-    gsap.from('#hero-cta', { y: 40, opacity: 0, duration: .8, ease: 'power3.out', delay: 1.1 });
-
-    // Scroll hint
-    gsap.from('#hero-scroll', { y: 20, opacity: 0, duration: .6, ease: 'power3.out', delay: 1.4 });
-
-    // ── HERO PARALLAX on scroll ──
-    gsap.to('#hero-title', {
-        y: -80, opacity: .3,
-        scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
-    });
-    gsap.to('#hero-desc', {
-        y: -50, opacity: 0,
-        scrollTrigger: { trigger: '.hero', start: '20% top', end: 'bottom top', scrub: true }
-    });
-    gsap.to('#hero-cta', {
-        y: -30, opacity: 0,
-        scrollTrigger: { trigger: '.hero', start: '30% top', end: 'bottom top', scrub: true }
-    });
-    gsap.to('#hero-scroll', {
-        opacity: 0,
-        scrollTrigger: { trigger: '.hero', start: '10% top', end: '30% top', scrub: true }
+    gsap.to(track, {
+        x: -trackWidth,
+        ease: 'none',
+        scrollTrigger: {
+            trigger: '.features-section',
+            start: 'top top',
+            end: () => '+=' + trackWidth,
+            pin: '#features-pin',
+            scrub: 1,
+            invalidateOnRefresh: true,
+        }
     });
 
-    // ── PROBLEM/SOLUTION ──
-    const psSection = document.getElementById('ps-section');
-    gsap.from('#ps-section .section-tag', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: psSection, start: 'top 80%' }});
-    gsap.from('#ps-section .section-title', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .1, scrollTrigger: { trigger: psSection, start: 'top 80%' }});
-    gsap.from('#ps-section .section-subtitle', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .2, scrollTrigger: { trigger: psSection, start: 'top 80%' }});
-
-    // Problem card slides from left
-    gsap.from('.problem-card', {
-        x: -80, opacity: 0, duration: .9, ease: 'power3.out',
-        scrollTrigger: { trigger: '.problem-grid', start: 'top 75%' }
-    });
-    // Solution card slides from right
-    gsap.from('.solution-card', {
-        x: 80, opacity: 0, duration: .9, ease: 'power3.out', delay: .15,
-        scrollTrigger: { trigger: '.problem-grid', start: 'top 75%' }
+    // Feature cards entrance
+    gsap.from('.feature-card-lg', {
+        y: 80, opacity: 0, scale: .9, duration: .8, ease: 'power3.out', stagger: .1,
+        scrollTrigger: { trigger: '.features-section', start: 'top 80%' }
     });
 
-    // Problem/Solution list items stagger
-    gsap.from('.problem-card .ps-list li', {
-        x: -30, opacity: 0, duration: .5, ease: 'power2.out', stagger: .08,
-        scrollTrigger: { trigger: '.problem-card', start: 'top 70%' }
-    });
-    gsap.from('.solution-card .ps-list li', {
-        x: 30, opacity: 0, duration: .5, ease: 'power2.out', stagger: .08,
-        scrollTrigger: { trigger: '.solution-card', start: 'top 70%' }
-    });
+    // ── STATS ──
+    gsap.from('.stats-label', { y: 30, opacity: 0, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: '#stats', start: 'top 75%' }});
+    gsap.from('.stats-heading', { y: 30, opacity: 0, duration: .7, ease: 'power3.out', delay: .1, scrollTrigger: { trigger: '#stats', start: 'top 75%' }});
+    gsap.from('.stat-block', { y: 60, opacity: 0, scale: .8, duration: .8, ease: 'back.out(1.7)', stagger: .15, scrollTrigger: { trigger: '.stats-row', start: 'top 80%' }});
 
-    // ── STATS COUNTER with scroll trigger ──
-    const counters = document.querySelectorAll('.counter');
-    counters.forEach(counter => {
-        const target = parseInt(counter.dataset.target);
-        const suffix = counter.dataset.suffix || '';
+    // Counter animation
+    document.querySelectorAll('.counter').forEach(el => {
+        const target = +el.dataset.target, suffix = el.dataset.suffix || '';
         ScrollTrigger.create({
-            trigger: counter,
-            start: 'top 85%',
-            once: true,
-            onEnter: () => {
-                gsap.to({ val: 0 }, {
-                    val: target, duration: 1.5, ease: 'power2.out',
-                    onUpdate: function() { counter.textContent = Math.round(this.targets()[0].val) + suffix; }
-                });
-            }
-        });
-    });
-    // Stats items scale in
-    gsap.from('.stat-item', {
-        y: 50, opacity: 0, scale: .85, duration: .7, ease: 'back.out(1.5)', stagger: .12,
-        scrollTrigger: { trigger: '#stats-section', start: 'top 80%' }
-    });
-
-    // ── FEATURES: stagger from below with slight rotation ──
-    gsap.from('#features .section-tag', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: '#features', start: 'top 80%' }});
-    gsap.from('#features .section-title', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .1, scrollTrigger: { trigger: '#features', start: 'top 80%' }});
-    gsap.from('#features .section-subtitle', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .2, scrollTrigger: { trigger: '#features', start: 'top 80%' }});
-
-    document.querySelectorAll('.feature-row').forEach((row, i) => {
-        gsap.from(row, {
-            y: 60,
-            opacity: 0,
-            rotateX: -5,
-            scale: .95,
-            duration: .8,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: row, start: 'top 85%' }
+            trigger: el, start: 'top 85%', once: true,
+            onEnter: () => { gsap.to({v:0}, { v: target, duration: 2, ease: 'power2.out', onUpdate: function(){ el.textContent = Math.round(this.targets()[0].v) + suffix; }}); }
         });
     });
 
-    // 3D tilt hover on feature rows
-    document.querySelectorAll('.feature-row').forEach(row => {
-        row.addEventListener('mousemove', e => {
-            const rect = row.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width - .5;
-            const y = (e.clientY - rect.top) / rect.height - .5;
-            gsap.to(row, { rotateY: x * 6, rotateX: -y * 6, duration: .4, ease: 'power2.out' });
-        });
-        row.addEventListener('mouseleave', () => {
-            gsap.to(row, { rotateY: 0, rotateX: 0, duration: .6, ease: 'power2.out' });
-        });
-    });
+    // ── COMPARISON ──
+    gsap.from('.compare-label', { y: 30, opacity: 0, duration: .7, scrollTrigger: { trigger: '#compare', start: 'top 75%' }});
+    gsap.from('.compare-title', { y: 30, opacity: 0, duration: .7, delay: .1, scrollTrigger: { trigger: '#compare', start: 'top 75%' }});
+    gsap.from('#compare-table', { y: 60, opacity: 0, scale: .95, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: '#compare-table', start: 'top 80%' }});
+    gsap.from('#compare-table tbody tr', { x: -50, opacity: 0, duration: .5, ease: 'power2.out', stagger: .07, scrollTrigger: { trigger: '#compare-table', start: 'top 75%' }});
 
-    // ── COMPARISON TABLE ──
-    gsap.from('#compare .section-tag', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: '#compare', start: 'top 80%' }});
-    gsap.from('#compare .section-title', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .1, scrollTrigger: { trigger: '#compare', start: 'top 80%' }});
-    gsap.from('#compare .section-subtitle', { y: 40, opacity: 0, duration: .7, ease: 'power3.out', delay: .2, scrollTrigger: { trigger: '#compare', start: 'top 80%' }});
-    gsap.from('#comparison-wrap', {
-        y: 60, opacity: 0, scale: .92, duration: .9, ease: 'power3.out',
-        scrollTrigger: { trigger: '#comparison-wrap', start: 'top 80%' }
+    // ── CTA ──
+    gsap.from('#cta-title', {
+        y: 80, opacity: 0, scale: .85, duration: 1.2, ease: 'power3.out',
+        scrollTrigger: { trigger: '#cta', start: 'top 80%' }
     });
-    // Table rows animate one by one
-    gsap.from('.comparison-table tbody tr', {
-        x: -40, opacity: 0, duration: .5, ease: 'power2.out', stagger: .06,
-        scrollTrigger: { trigger: '.comparison-table', start: 'top 75%' }
-    });
-
-    // ── CTA BOX ──
-    gsap.from('#cta-box', {
-        y: 80, opacity: 0, scale: .85, rotateX: -5, duration: 1, ease: 'power3.out',
-        scrollTrigger: { trigger: '#cta-box', start: 'top 85%' }
-    });
-    // CTA parallax float
-    gsap.to('#cta-box', {
-        y: -20,
-        scrollTrigger: { trigger: '.cta-section', start: 'top bottom', end: 'bottom top', scrub: 1 }
-    });
+    gsap.from('.cta-sub', { y: 40, opacity: 0, duration: .8, delay: .2, scrollTrigger: { trigger: '#cta', start: 'top 80%' }});
+    gsap.from('.cta-btn', { y: 40, opacity: 0, scale: .9, duration: .8, delay: .4, scrollTrigger: { trigger: '#cta', start: 'top 80%' }});
 
     // ── FOOTER ──
-    gsap.from('footer', {
-        y: 30, opacity: 0, duration: .7, ease: 'power3.out',
-        scrollTrigger: { trigger: 'footer', start: 'top 95%' }
-    });
+    gsap.from('footer', { y: 30, opacity: 0, duration: .6, scrollTrigger: { trigger: 'footer', start: 'top 95%' }});
 }
 </script>
 
