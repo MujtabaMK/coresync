@@ -439,11 +439,11 @@
             .from('.hero-cta', { y: 24, opacity: 0, duration: 0.5 }, '-=0.3');
 
         /* ──────────────────────────────────
-           3D ICON — full page scroll-driven
-           rotation. Fixed in center, rotates
-           continuously across the entire page
-           like a 3D object being examined.
+           3D ICON — moves left/right across
+           the page as you scroll. Text content
+           moves the opposite direction.
            ────────────────────────────────── */
+        var icon = '.floating-3d';
         var iconTl = gsap.timeline({
             scrollTrigger: {
                 trigger: 'body',
@@ -452,12 +452,29 @@
                 scrub: 0.8
             }
         });
+        var vw = window.innerWidth;
+        var shift = Math.min(vw * 0.3, 300); /* how far left/right */
         iconTl
-            .to('.hero-3d-icon', { rotateY: 120, rotateX: 15, scale: 0.7, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 240, rotateX: -15, scale: 0.5, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 360, rotateX: 10, scale: 0.45, opacity: 0.3, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 540, rotateX: -10, scale: 0.4, opacity: 0.15, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 720, rotateX: 0, scale: 0.35, opacity: 0, duration: 1, ease: 'none' });
+            /* hero → problem section: move left, rotate */
+            .to(icon, { x: -shift, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 90, rotateX: 12, scale: 0.75, duration: 1, ease: 'none' }, '<')
+            /* problem → stats: move right */
+            .to(icon, { x: shift, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 180, rotateX: -10, duration: 1, ease: 'none' }, '<')
+            /* stats → features: move left */
+            .to(icon, { x: -shift, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 270, rotateX: 15, scale: 0.6, duration: 1, ease: 'none' }, '<')
+            /* features mid: move right */
+            .to(icon, { x: shift, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 360, rotateX: -12, duration: 1, ease: 'none' }, '<')
+            /* features end → compare: move left */
+            .to(icon, { x: -shift, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 450, rotateX: 10, scale: 0.5, duration: 1, ease: 'none' }, '<')
+            /* compare → CTA: move center, fade */
+            .to(icon, { x: 0, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 540, rotateX: 0, scale: 0.4, opacity: 0.15, duration: 1, ease: 'none' }, '<')
+            /* CTA → footer: fade out */
+            .to('.hero-3d-icon', { rotateY: 630, opacity: 0, scale: 0.3, duration: 0.5, ease: 'none' });
 
         /* Hero glow parallax — scrub */
         gsap.to('.hero-glow', {
