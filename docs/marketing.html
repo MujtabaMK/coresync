@@ -87,7 +87,15 @@
         .hero-text { max-width: 700px; margin: 0 auto; }
         .hero-3d-stage { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
         .hero-3d-wrap { perspective: 1200px; }
-        .hero-3d-icon { width: 180px; height: 180px; border-radius: 36px; box-shadow: 0 24px 80px rgba(74,95,224,.2), 0 0 0 1px rgba(255,255,255,.6); will-change: transform; transform-style: preserve-3d; backface-visibility: visible; }
+        .hero-3d-cube { width: 180px; height: 180px; position: relative; transform-style: preserve-3d; will-change: transform; }
+        .hero-3d-cube .cube-face { position: absolute; width: 180px; height: 180px; border-radius: 28px; box-shadow: 0 0 30px rgba(74,95,224,.15); overflow: hidden; backface-visibility: visible; }
+        .hero-3d-cube .cube-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .cube-front  { transform: translateZ(90px); }
+        .cube-back   { transform: rotateY(180deg) translateZ(90px); }
+        .cube-left   { transform: rotateY(-90deg) translateZ(90px); }
+        .cube-right  { transform: rotateY(90deg) translateZ(90px); }
+        .cube-top    { transform: rotateX(90deg) translateZ(90px); }
+        .cube-bottom { transform: rotateX(-90deg) translateZ(90px); }
         .hero-badge { display: inline-block; padding: 6px 18px; border-radius: 50px; background: rgba(74,95,224,.08); color: var(--primary); font-size: .85rem; font-weight: 600; margin-bottom: 20px; border: 1px solid rgba(74,95,224,.15); }
         .hero h1 { font-size: 3.6rem; font-weight: 800; letter-spacing: -.03em; background: linear-gradient(135deg, #1E2432 30%, #4A5FE0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 16px; line-height: 1.15; max-width: 700px; }
         .hero p { font-size: 1.15rem; color: var(--text2); max-width: 600px; margin: 0 auto 32px; }
@@ -221,7 +229,14 @@
         <div class="hero-glow"></div>
         <div class="hero-3d-stage">
             <div class="hero-3d-wrap">
-                <img src="app_icon.png" alt="CoreSync Go" class="hero-3d-icon">
+                <div class="hero-3d-cube">
+                    <div class="cube-face cube-front"><img src="app_icon.png" alt="CoreSync Go"></div>
+                    <div class="cube-face cube-back"><img src="app_icon.png" alt="CoreSync Go"></div>
+                    <div class="cube-face cube-left"><img src="app_icon.png" alt="CoreSync Go"></div>
+                    <div class="cube-face cube-right"><img src="app_icon.png" alt="CoreSync Go"></div>
+                    <div class="cube-face cube-top"><img src="app_icon.png" alt="CoreSync Go"></div>
+                    <div class="cube-face cube-bottom"><img src="app_icon.png" alt="CoreSync Go"></div>
+                </div>
             </div>
         </div>
         <div class="hero-text">
@@ -432,32 +447,40 @@
            ────────────────────────────────── */
         var heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
         heroTl
-            .from('.hero-3d-icon', { scale: 0.2, opacity: 0, rotateY: -120, duration: 1.2, ease: 'back.out(1.4)' })
+            .from('.hero-3d-cube', { scale: 0.2, opacity: 0, rotateY: -120, duration: 1.2, ease: 'back.out(1.4)' })
             .from('.hero-badge', { y: 24, opacity: 0, duration: 0.5 }, '-=0.6')
             .from('.hero h1', { y: 40, opacity: 0, duration: 0.7 }, '-=0.4')
             .from('.hero p', { y: 24, opacity: 0, duration: 0.5 }, '-=0.4')
             .from('.hero-cta', { y: 24, opacity: 0, duration: 0.5 }, '-=0.3');
 
         /* ──────────────────────────────────
-           HERO 3D ICON — pinned stage with
-           scroll-driven rotation like a 3D
-           object being examined from all angles.
+           3D CUBE — pinned, rotates with scroll
+           showing all 6 faces like a real 3D
+           object. App icon on every face.
            ────────────────────────────────── */
         var iconTl = gsap.timeline({
             scrollTrigger: {
                 trigger: '.hero-3d-stage',
                 start: 'top top',
-                end: '+=1800',
+                end: '+=2400',
                 scrub: 0.6,
                 pin: true,
                 pinSpacing: true
             }
         });
         iconTl
-            .to('.hero-3d-icon', { rotateY: 90, rotateX: 15, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 180, rotateX: -10, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 270, rotateX: 20, duration: 1, ease: 'none' })
-            .to('.hero-3d-icon', { rotateY: 360, rotateX: 0, duration: 1, ease: 'none' });
+            /* Show front → rotate to right face */
+            .to('.hero-3d-cube', { rotateY: 90, rotateX: 10, duration: 1, ease: 'none' })
+            /* Right face → rotate to back */
+            .to('.hero-3d-cube', { rotateY: 180, rotateX: -5, duration: 1, ease: 'none' })
+            /* Back → tilt to show top face */
+            .to('.hero-3d-cube', { rotateY: 220, rotateX: -60, duration: 1, ease: 'none' })
+            /* Top → swing to show left face */
+            .to('.hero-3d-cube', { rotateY: 270, rotateX: 0, duration: 1, ease: 'none' })
+            /* Left → tilt to show bottom */
+            .to('.hero-3d-cube', { rotateY: 320, rotateX: 60, duration: 1, ease: 'none' })
+            /* Bottom → back to front (full loop) */
+            .to('.hero-3d-cube', { rotateY: 360, rotateX: 0, duration: 1, ease: 'none' });
 
         /* Hero glow parallax — scrub */
         gsap.to('.hero-glow', {
