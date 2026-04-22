@@ -16,10 +16,29 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   String _status = '';
 
+  bool _navigated = false;
+
   @override
   void initState() {
     super.initState();
     _initialize();
+    // Safety net: if _initialize() hangs for any reason (permissions dialog,
+    // database lock, network timeout), force-navigate after 6 seconds so the
+    // user never sees an infinite blank screen.
+    Future.delayed(const Duration(seconds: 6), _fallbackNavigate);
+  }
+
+  void _fallbackNavigate() {
+    if (_navigated || !mounted) return;
+    _navigated = true;
+    final isLoggedIn = FirebaseAuth.instance.currentUser != null;
+    context.go(isLoggedIn ? '/home' : '/login');
+  }
+
+  void _navigate(String route) {
+    if (_navigated || !mounted) return;
+    _navigated = true;
+    context.go(route);
   }
 
   Future<void> _initialize() async {
@@ -27,26 +46,26 @@ class _SplashScreenState extends State<SplashScreen> {
       // PushNotificationService.init() is now called in main() to avoid the
       // race condition where app.dart's initState calls saveTokenForUser()
       // before FCM permissions have been requested.
-      await NotificationService.init();
-      await NotificationService.requestPermissions();
+      await NotificationService.init().timeout(const Duration(seconds: 3));
+      await NotificationService.requestPermissions().timeout(const Duration(seconds: 3));
     } catch (_) {}
 
     late final Box appBox;
     try {
-      appBox = await Hive.openBox('app_settings');
+      appBox = await Hive.openBox('app_settings').timeout(const Duration(seconds: 3));
     } catch (_) {
       // If Hive fails, navigate to login as a safe fallback
-      if (mounted) context.go('/login');
+      _navigate('/login');
       return;
     }
 
     // Initialize food database (seeds from JSON on first launch).
     try {
       if (mounted) setState(() => _status = 'Loading food database...');
-      await FoodDatabaseService.instance.initialize();
+      await FoodDatabaseService.instance.initialize().timeout(const Duration(seconds: 5));
     } catch (_) {}
 
-    if (!mounted) return;
+    if (!mounted || _navigated) return;
 
     // If user is already logged in, skip walkthrough and go to home.
     // This handles both normal launches and reinstalls where Firebase
@@ -55,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (isLoggedIn) {
       await appBox.put('walkthrough_shown', true);
       await appBox.put('has_launched_before', true);
-      context.go('/home');
+      _navigate('/home');
       return;
     }
 
@@ -69,20 +88,21 @@ class _SplashScreenState extends State<SplashScreen> {
       try {
         await FirebaseAuth.instance.signOut();
         // Wait for auth to fully settle after sign-out before navigating.
-        await FirebaseAuth.instance.authStateChanges().first;
+        await FirebaseAuth.instance.authStateChanges().first
+            .timeout(const Duration(seconds: 3));
       } catch (_) {}
       await appBox.put('has_launched_before', true);
     }
 
-    if (!mounted) return;
+    if (!mounted || _navigated) return;
 
     // Walkthrough is only for new users who are not logged in.
     final walkthroughShown =
         appBox.get('walkthrough_shown', defaultValue: false);
     if (!walkthroughShown) {
-      context.go('/walkthrough');
+      _navigate('/walkthrough');
     } else {
-      context.go('/login');
+      _navigate('/login');
     }
   }
 

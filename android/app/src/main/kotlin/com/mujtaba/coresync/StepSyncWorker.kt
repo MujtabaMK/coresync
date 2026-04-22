@@ -65,6 +65,9 @@ class StepSyncWorker(
 
     override fun doWork(): Result {
         try {
+            if (FirebaseApp.getApps(applicationContext).isEmpty()) {
+                FirebaseApp.initializeApp(applicationContext)
+            }
             if (FirebaseApp.getApps(applicationContext).isEmpty()) return Result.retry()
             val user = FirebaseAuth.getInstance().currentUser ?: return Result.retry()
 

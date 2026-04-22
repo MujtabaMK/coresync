@@ -58,6 +58,13 @@ class StepCounterForegroundService : Service(), SensorEventListener {
 
     override fun onCreate() {
         super.onCreate()
+
+        // This service runs in a separate process (:step_counter), so Firebase
+        // must be initialized independently from the main Flutter process.
+        if (FirebaseApp.getApps(this).isEmpty()) {
+            FirebaseApp.initializeApp(this)
+        }
+
         createNotificationChannel()
 
         val notification = buildNotification(getSteps(this))

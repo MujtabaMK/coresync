@@ -34,7 +34,13 @@ Future<void> main() async {
   // Initialize FCM early — must happen before the app widget calls
   // saveTokenForUser() in its initState, so the permission dialog has
   // already been shown and the APNs/FCM token is available.
-  await PushNotificationService.init();
+  // Timeout prevents app from hanging if FCM/Google Play Services is slow.
+  try {
+    await PushNotificationService.init()
+        .timeout(const Duration(seconds: 5));
+  } catch (e) {
+    debugPrint('FCM init skipped: $e');
+  }
 
   Hive.registerAdapter(PasswordEntryModelAdapter());
   Hive.registerAdapter(MembershipModelAdapter());
