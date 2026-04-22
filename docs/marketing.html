@@ -82,10 +82,12 @@
         .nav-btn:hover { background: var(--primary); color: #fff; box-shadow: 0 4px 20px rgba(74,95,224,.25); }
 
         /* ── HERO ── */
-        .hero { text-align: center; padding: 140px 24px 80px; position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .hero { text-align: center; padding: 140px 24px 0; position: relative; }
         .hero-glow { position: absolute; top: -200px; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(74,95,224,.1) 0%, transparent 70%); pointer-events: none; }
-        .hero-3d-wrap { perspective: 1000px; margin-bottom: 32px; }
-        .hero-3d-icon { width: 140px; height: 140px; border-radius: 32px; box-shadow: 0 24px 80px rgba(74,95,224,.2), 0 0 0 1px rgba(255,255,255,.6); will-change: transform; transform-style: preserve-3d; }
+        .hero-text { max-width: 700px; margin: 0 auto; }
+        .hero-3d-stage { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
+        .hero-3d-wrap { perspective: 1200px; }
+        .hero-3d-icon { width: 180px; height: 180px; border-radius: 36px; box-shadow: 0 24px 80px rgba(74,95,224,.2), 0 0 0 1px rgba(255,255,255,.6); will-change: transform; transform-style: preserve-3d; backface-visibility: visible; }
         .hero-badge { display: inline-block; padding: 6px 18px; border-radius: 50px; background: rgba(74,95,224,.08); color: var(--primary); font-size: .85rem; font-weight: 600; margin-bottom: 20px; border: 1px solid rgba(74,95,224,.15); }
         .hero h1 { font-size: 3.6rem; font-weight: 800; letter-spacing: -.03em; background: linear-gradient(135deg, #1E2432 30%, #4A5FE0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 16px; line-height: 1.15; max-width: 700px; }
         .hero p { font-size: 1.15rem; color: var(--text2); max-width: 600px; margin: 0 auto 32px; }
@@ -214,18 +216,22 @@
         </div>
     </nav>
 
-    <!-- HERO -->
+    <!-- HERO — 3D stage is pinned, icon rotates with scroll -->
     <section class="hero">
         <div class="hero-glow"></div>
-        <div class="hero-3d-wrap">
-            <img src="app_icon.png" alt="CoreSync Go" class="hero-3d-icon">
+        <div class="hero-3d-stage">
+            <div class="hero-3d-wrap">
+                <img src="app_icon.png" alt="CoreSync Go" class="hero-3d-icon">
+            </div>
         </div>
-        <div class="hero-badge">8 Apps in 1</div>
-        <h1>Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
-        <p>CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
-        <div class="hero-cta">
-            <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
-            <a href="#features" class="btn-secondary">See All Features</a>
+        <div class="hero-text">
+            <div class="hero-badge">8 Apps in 1</div>
+            <h1>Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
+            <p>CoreSync Go replaces your task manager, password vault, fitness tracker, document scanner, habit tracker, QR scanner, calculator, and translator — all in one beautifully designed app.</p>
+            <div class="hero-cta" style="margin-bottom:80px;">
+                <a href="index.html" class="btn-primary">Get CoreSync Go — Free</a>
+                <a href="#features" class="btn-secondary">See All Features</a>
+            </div>
         </div>
     </section>
 
@@ -433,25 +439,25 @@
             .from('.hero-cta', { y: 24, opacity: 0, duration: 0.5 }, '-=0.3');
 
         /* ──────────────────────────────────
-           HERO 3D ICON — continuous scroll-driven
-           rotation (like BMW car). Scrub = always
-           moves with scroll, forward AND backward.
+           HERO 3D ICON — pinned stage with
+           scroll-driven rotation like a 3D
+           object being examined from all angles.
            ────────────────────────────────── */
-        /* Full 3D rotation tied to scroll — moves with scroll like a 3D object */
-        gsap.to('.hero-3d-icon', {
-            rotateY: 360,
-            rotateX: -25,
-            y: -80,
-            scale: 0.4,
-            ease: 'none',
+        var iconTl = gsap.timeline({
             scrollTrigger: {
-                trigger: '.hero',
+                trigger: '.hero-3d-stage',
                 start: 'top top',
-                end: '+=2000',
-                scrub: 0.8,
-                pin: false
+                end: '+=1800',
+                scrub: 0.6,
+                pin: true,
+                pinSpacing: true
             }
         });
+        iconTl
+            .to('.hero-3d-icon', { rotateY: 90, rotateX: 15, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 180, rotateX: -10, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 270, rotateX: 20, duration: 1, ease: 'none' })
+            .to('.hero-3d-icon', { rotateY: 360, rotateX: 0, duration: 1, ease: 'none' });
 
         /* Hero glow parallax — scrub */
         gsap.to('.hero-glow', {
