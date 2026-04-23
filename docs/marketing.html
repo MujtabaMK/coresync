@@ -88,12 +88,7 @@
         .hero-3d-stage { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
         .floating-cube-wrap { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none; }
         .floating-cube-wrap .hero-3d-wrap { perspective: 1200px; }
-        .floating-text { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none; opacity: 0; max-width: 320px; }
-        .floating-text h3 { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #1E2432 30%, #4A5FE0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px; line-height: 1.2; }
-        .floating-text p { font-size: .95rem; color: var(--text2); line-height: 1.5; }
-        .ft-item { position: absolute; top: 0; left: 0; width: 100%; opacity: 0; }
-        .ft-item.ft-right { text-align: left; }
-        .ft-item.ft-left { text-align: right; }
+        #pageContent { will-change: transform; }
         .hero-3d-wrap { perspective: 1200px; }
         .hero-3d-cube { width: 180px; height: 180px; position: relative; transform-style: preserve-3d; will-change: transform; }
         .hero-3d-cube .cube-face { position: absolute; width: 180px; height: 180px; overflow: hidden; backface-visibility: visible; background: #e8ecf3; }
@@ -191,9 +186,6 @@
             .hero { padding: 120px 24px 60px; min-height: auto; }
             .hero h1 { font-size: 2.2rem; }
             .hero p { font-size: 1rem; }
-            .floating-text { max-width: 200px; }
-            .floating-text h3 { font-size: 1.1rem; }
-            .floating-text p { font-size: .8rem; }
             .hero-3d-cube { width: 120px; height: 120px; }
             .hero-3d-cube .cube-face { width: 120px; height: 120px; }
             .cube-front  { transform: translateZ(60px); }
@@ -256,26 +248,6 @@
         </div>
     </div>
 
-    <!-- FLOATING TEXT — moves opposite to cube -->
-    <div class="floating-text" id="floatingText">
-        <div class="ft-item ft-left" id="ft1">
-            <h3>Before &amp; After</h3>
-            <p>See the difference CoreSync Go makes in your daily workflow.</p>
-        </div>
-        <div class="ft-item ft-right" id="ft2">
-            <h3>8 Powerful Modules</h3>
-            <p>Everything you need, nothing you don't. 100% free.</p>
-        </div>
-        <div class="ft-item ft-left" id="ft3">
-            <h3>Built for You</h3>
-            <p>Each feature designed to work independently or together.</p>
-        </div>
-        <div class="ft-item ft-right" id="ft4">
-            <h3>One App. Done.</h3>
-            <p>Replace 8 apps and simplify your life today.</p>
-        </div>
-    </div>
-
     <!-- HERO -->
     <section class="hero">
         <div class="hero-glow"></div>
@@ -291,6 +263,7 @@
         </div>
     </section>
 
+    <div id="pageContent">
     <!-- PROBLEM / SOLUTION -->
     <section>
         <p class="section-tag">The Problem &amp; Solution</p>
@@ -420,6 +393,8 @@
         </div>
     </section>
 
+    </div><!-- /pageContent -->
+
     <!-- FOOTER -->
     <footer>
         <nav class="footer-links">
@@ -516,7 +491,7 @@
 
         /* ──────────────────────────────────
            PHASE 2: AFTER HERO — cube moves
-           left/right, text moves opposite
+           left/right, page content moves opposite
            ────────────────────────────────── */
         var pageCubeTl = gsap.timeline({
             scrollTrigger: {
@@ -528,38 +503,28 @@
             }
         });
         pageCubeTl
-            /* Scale down + show floating text */
+            /* Scale down cube */
             .to('.hero-3d-cube', { scale: 0.75, duration: 0.3, ease: 'none' })
-            .to('#floatingText', { opacity: 1, duration: 0.3, ease: 'none' }, '<')
 
-            /* ── Move 1: cube RIGHT, text LEFT ── */
-            .to('#ft1', { opacity: 1, duration: 0.15, ease: 'none' })
+            /* ── Move 1: cube RIGHT, content LEFT ── */
             .to('#floatingCube', { x: 300, duration: 1, ease: 'power1.inOut' })
-            .to('#floatingText', { x: -300, duration: 1, ease: 'power1.inOut' }, '<')
+            .to('#pageContent', { x: -120, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 450, rotateX: 10, duration: 1, ease: 'none' }, '<')
-            .to('#ft1', { opacity: 0, duration: 0.15, ease: 'none' })
 
-            /* ── Move 2: cube LEFT, text RIGHT ── */
-            .to('#ft2', { opacity: 1, duration: 0.15, ease: 'none' })
+            /* ── Move 2: cube LEFT, content RIGHT ── */
             .to('#floatingCube', { x: -300, duration: 1, ease: 'power1.inOut' })
-            .to('#floatingText', { x: 300, duration: 1, ease: 'power1.inOut' }, '<')
+            .to('#pageContent', { x: 120, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 540, rotateX: -5, duration: 1, ease: 'none' }, '<')
-            .to('#ft2', { opacity: 0, duration: 0.15, ease: 'none' })
 
-            /* ── Move 3: cube RIGHT, text LEFT ── */
-            .to('#ft3', { opacity: 1, duration: 0.15, ease: 'none' })
+            /* ── Move 3: cube RIGHT, content LEFT ── */
             .to('#floatingCube', { x: 300, duration: 1, ease: 'power1.inOut' })
-            .to('#floatingText', { x: -300, duration: 1, ease: 'power1.inOut' }, '<')
+            .to('#pageContent', { x: -120, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 630, rotateX: -60, duration: 1, ease: 'none' }, '<')
-            .to('#ft3', { opacity: 0, duration: 0.15, ease: 'none' })
 
-            /* ── Move 4: cube LEFT, text RIGHT ── */
-            .to('#ft4', { opacity: 1, duration: 0.15, ease: 'none' })
+            /* ── Move 4: cube LEFT, content RIGHT ── */
             .to('#floatingCube', { x: -300, duration: 1, ease: 'power1.inOut' })
-            .to('#floatingText', { x: 300, duration: 1, ease: 'power1.inOut' }, '<')
-            .to('.hero-3d-cube', { rotateY: 720, rotateX: 0, duration: 1, ease: 'none' }, '<')
-            .to('#ft4', { opacity: 0, duration: 0.15, ease: 'none' })
-            .to('#floatingText', { opacity: 0, duration: 0.2, ease: 'none' });
+            .to('#pageContent', { x: 120, duration: 1, ease: 'power1.inOut' }, '<')
+            .to('.hero-3d-cube', { rotateY: 720, rotateX: 0, duration: 1, ease: 'none' }, '<');
 
         /* Hero glow parallax — scrub */
         gsap.to('.hero-glow', {
