@@ -381,21 +381,26 @@
         @keyframes logoDance{0%{transform:translateY(0)}25%{transform:translateY(-8px) rotate(2deg)}50%{transform:translateY(0)}75%{transform:translateY(-6px) rotate(-2deg)}100%{transform:translateY(0)}}
         @keyframes cardSlideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
 
-        /* Hero animations — triggered after loader */
+        /* All animations triggered after loader via .anim-ready */
         .anim-ready .hero-icon{animation:heroScaleIn .7s cubic-bezier(.34,1.56,.64,1) .1s both,logoGlow 3s ease-in-out 1s infinite,logoDance 4s ease-in-out 1.5s infinite}
         .anim-ready .hero h1{animation:heroSlideUp .6s ease-out .3s both}
         .anim-ready .hero .tagline{animation:heroSlideUp .6s ease-out .5s both}
         .anim-ready .hero .store-buttons{animation:heroSlideUp .6s ease-out .65s both}
-
-        /* Scroll-reveal: hidden by default, animate when visible */
-        .anim-ready .reveal{opacity:0;transform:translateY(40px);transition:opacity .6s ease-out,transform .6s ease-out}
-        .anim-ready .reveal.visible{opacity:1;transform:translateY(0)}
-        .anim-ready .reveal.delay-1{transition-delay:.08s}
-        .anim-ready .reveal.delay-2{transition-delay:.16s}
-        .anim-ready .reveal.delay-3{transition-delay:.24s}
-        .anim-ready .reveal.delay-4{transition-delay:.32s}
-        .anim-ready .reveal.delay-5{transition-delay:.4s}
-        .anim-ready .reveal.delay-6{transition-delay:.48s}
+        .anim-ready .section-title{animation:cardSlideUp .6s ease-out .8s both}
+        .anim-ready .section-subtitle{animation:cardSlideUp .5s ease-out .9s both}
+        .anim-ready .feature-card:nth-child(1){animation:cardSlideUp .5s ease-out 1s both}
+        .anim-ready .feature-card:nth-child(2){animation:cardSlideUp .5s ease-out 1.1s both}
+        .anim-ready .feature-card:nth-child(3){animation:cardSlideUp .5s ease-out 1.2s both}
+        .anim-ready .feature-card:nth-child(4){animation:cardSlideUp .5s ease-out 1.3s both}
+        .anim-ready .feature-card:nth-child(5){animation:cardSlideUp .5s ease-out 1.4s both}
+        .anim-ready .feature-card:nth-child(6){animation:cardSlideUp .5s ease-out 1.5s both}
+        .anim-ready .feature-card:nth-child(7){animation:cardSlideUp .5s ease-out 1.6s both}
+        .anim-ready .feature-card:nth-child(8){animation:cardSlideUp .5s ease-out 1.7s both}
+        .anim-ready .highlight-item:nth-child(1){animation:cardSlideUp .5s ease-out 1.8s both}
+        .anim-ready .highlight-item:nth-child(2){animation:cardSlideUp .5s ease-out 1.9s both}
+        .anim-ready .highlight-item:nth-child(3){animation:cardSlideUp .5s ease-out 2s both}
+        .anim-ready .highlight-item:nth-child(4){animation:cardSlideUp .5s ease-out 2.1s both}
+        .anim-ready footer{animation:cardSlideUp .5s ease-out 2.2s both}
 
         /* RESPONSIVE */
         @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}.micro-grid{grid-template-columns:1fr}}
@@ -452,23 +457,23 @@
         </div>
     </section>
     <section id="features">
-        <h2 class="section-title reveal">Everything You Need</h2><p class="section-subtitle reveal delay-1">Eight powerful modules working together so you can focus on what matters.</p>
+        <h2 class="section-title">Everything You Need</h2><p class="section-subtitle">Eight powerful modules working together so you can focus on what matters.</p>
         <div class="features-grid">
-            <div class="feature-card reveal"><div class="feature-icon icon-tasks"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><h3>Task Manager</h3><p>Create, organize, and share tasks. Set reminders, priorities, and never miss a deadline.</p></div>
-            <div class="feature-card reveal delay-1"><div class="feature-icon icon-passwords"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><h3>Password Manager</h3><p>Store credentials with encryption. Auto-generate strong passwords and keep accounts secure.</p></div>
-            <div class="feature-card reveal delay-2"><div class="feature-icon icon-gym"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div><h3>Gym &amp; Fitness</h3><p>Track steps, water, workouts, sleep, and food. Set reminders and monitor your progress.</p></div>
-            <div class="feature-card reveal delay-3"><div class="feature-icon icon-habits"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div><h3>Habit Tracker</h3><p>Build positive habits with daily tracking, streaks, reminders, and weekly progress insights.</p></div>
-            <div class="feature-card reveal delay-4"><div class="feature-icon icon-scanner"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><h3>Document Scanner</h3><p>Scan documents, extract text with OCR, create PDFs, and add digital signatures.</p></div>
-            <div class="feature-card reveal delay-5"><div class="feature-icon icon-qr"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div><h3>QR &amp; Barcode Scanner</h3><p>Scan QR codes and barcodes instantly. Generate your own codes for sharing.</p></div>
-            <div class="feature-card reveal delay-6"><div class="feature-icon icon-calc"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/></svg></div><h3>Calculator</h3><p>Simple and scientific calculators plus a full unit converter for everyday use.</p></div>
-            <div class="feature-card reveal delay-6"><div class="feature-icon icon-translator"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/><path d="M2 16h4"/><path d="M18 16h4"/><path d="M10 16l2-2 2 2"/></svg></div><h3>Voice Translator</h3><p>Translate speech in real time across 20+ languages. Conversation mode for two-way communication.</p></div>
+            <div class="feature-card"><div class="feature-icon icon-tasks"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><h3>Task Manager</h3><p>Create, organize, and share tasks. Set reminders, priorities, and never miss a deadline.</p></div>
+            <div class="feature-card"><div class="feature-icon icon-passwords"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><h3>Password Manager</h3><p>Store credentials with encryption. Auto-generate strong passwords and keep accounts secure.</p></div>
+            <div class="feature-card"><div class="feature-icon icon-gym"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div><h3>Gym &amp; Fitness</h3><p>Track steps, water, workouts, sleep, and food. Set reminders and monitor your progress.</p></div>
+            <div class="feature-card"><div class="feature-icon icon-habits"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div><h3>Habit Tracker</h3><p>Build positive habits with daily tracking, streaks, reminders, and weekly progress insights.</p></div>
+            <div class="feature-card"><div class="feature-icon icon-scanner"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><h3>Document Scanner</h3><p>Scan documents, extract text with OCR, create PDFs, and add digital signatures.</p></div>
+            <div class="feature-card"><div class="feature-icon icon-qr"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="4" height="4"/></svg></div><h3>QR &amp; Barcode Scanner</h3><p>Scan QR codes and barcodes instantly. Generate your own codes for sharing.</p></div>
+            <div class="feature-card"><div class="feature-icon icon-calc"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/></svg></div><h3>Calculator</h3><p>Simple and scientific calculators plus a full unit converter for everyday use.</p></div>
+            <div class="feature-card"><div class="feature-icon icon-translator"><svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M5 8l6 0"/><path d="M4 6l4 0"/><path d="M8 6v-1a2 2 0 012-2h0a2 2 0 012 2v1"/><path d="M4 12l3.7-6"/><path d="M11.5 12l-3.7-6"/><path d="M14 20l2-6 2 6"/><path d="M14.5 18h3"/><path d="M2 16h4"/><path d="M18 16h4"/><path d="M10 16l2-2 2 2"/></svg></div><h3>Voice Translator</h3><p>Translate speech in real time across 20+ languages. Conversation mode for two-way communication.</p></div>
         </div>
     </section>
     <section class="highlights"><div class="highlights-grid">
-        <div class="highlight-item reveal"><div class="highlight-icon">&#9729;</div><h4>Cloud Sync</h4><p>Your data, everywhere. Seamlessly synced in real time.</p></div>
-        <div class="highlight-item reveal delay-1"><div class="highlight-icon">&#128274;</div><h4>Encrypted &amp; Secure</h4><p>Industry-standard encryption for passwords and data.</p></div>
-        <div class="highlight-item reveal delay-2"><div class="highlight-icon">&#127912;</div><h4>Material 3 Design</h4><p>Modern interface following Material You guidelines.</p></div>
-        <div class="highlight-item reveal delay-3"><div class="highlight-icon">&#127761;</div><h4>Dark Mode</h4><p>Easy on the eyes with light and dark themes.</p></div>
+        <div class="highlight-item"><div class="highlight-icon">&#9729;</div><h4>Cloud Sync</h4><p>Your data, everywhere. Seamlessly synced in real time.</p></div>
+        <div class="highlight-item"><div class="highlight-icon">&#128274;</div><h4>Encrypted &amp; Secure</h4><p>Industry-standard encryption for passwords and data.</p></div>
+        <div class="highlight-item"><div class="highlight-icon">&#127912;</div><h4>Material 3 Design</h4><p>Modern interface following Material You guidelines.</p></div>
+        <div class="highlight-item"><div class="highlight-icon">&#127761;</div><h4>Dark Mode</h4><p>Easy on the eyes with light and dark themes.</p></div>
     </div></section>
     <footer class="reveal"><nav class="footer-links"><a href="marketing.html">Why CoreSync Go?</a><a href="privacy-policy.html">Privacy Policy</a><a href="delete-account.html">Delete Account</a><a href="mailto:info@coresyncgo.com">Contact</a></nav><p class="copyright">&copy; 2026 CoreSync Go. All rights reserved.</p></footer>
 </div>
@@ -1841,16 +1846,6 @@ async function ensureLibs(){
                 var landing=document.getElementById('landing-content');
                 if(landing&&landing.style.display!=='none'){
                     landing.classList.add('anim-ready');
-                    /* Reveal elements when they scroll into view */
-                    var observer=new IntersectionObserver(function(entries){
-                        entries.forEach(function(e){
-                            if(e.isIntersecting){
-                                e.target.classList.add('visible');
-                                observer.unobserve(e.target);
-                            }
-                        });
-                    },{threshold:0.15});
-                    landing.querySelectorAll('.reveal').forEach(function(el){observer.observe(el);});
                 }
             },300);
         }
