@@ -374,33 +374,10 @@
         .dash-main>*{animation:fadeIn .45s ease-out both}
         .dash-main>*:nth-child(1){animation-delay:0s}.dash-main>*:nth-child(2){animation-delay:.06s}.dash-main>*:nth-child(3){animation-delay:.12s}.dash-main>*:nth-child(4){animation-delay:.18s}.dash-main>*:nth-child(5){animation-delay:.24s}.dash-main>*:nth-child(6){animation-delay:.3s}.dash-main>*:nth-child(7){animation-delay:.36s}
 
-        /* LANDING PAGE ANIMATIONS */
-        @keyframes heroSlideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes heroScaleIn{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
-        @keyframes logoGlow{0%{box-shadow:0 8px 40px rgba(0,212,255,.25)}50%{box-shadow:0 8px 60px rgba(74,95,224,.5),0 0 80px rgba(0,212,255,.3)}100%{box-shadow:0 8px 40px rgba(0,212,255,.25)}}
-        @keyframes logoDance{0%{transform:translateY(0)}25%{transform:translateY(-8px) rotate(2deg)}50%{transform:translateY(0)}75%{transform:translateY(-6px) rotate(-2deg)}100%{transform:translateY(0)}}
-        @keyframes cardSlideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
-
-        /* All animations triggered after loader via .anim-ready */
-        .anim-ready .hero-icon{animation:heroScaleIn .7s cubic-bezier(.34,1.56,.64,1) .1s both,logoGlow 3s ease-in-out 1s infinite,logoDance 4s ease-in-out 1.5s infinite}
-        .anim-ready .hero h1{animation:heroSlideUp .6s ease-out .3s both}
-        .anim-ready .hero .tagline{animation:heroSlideUp .6s ease-out .5s both}
-        .anim-ready .hero .store-buttons{animation:heroSlideUp .6s ease-out .65s both}
-        .anim-ready .section-title{animation:cardSlideUp .6s ease-out .8s both}
-        .anim-ready .section-subtitle{animation:cardSlideUp .5s ease-out .9s both}
-        .anim-ready .feature-card:nth-child(1){animation:cardSlideUp .5s ease-out 1s both}
-        .anim-ready .feature-card:nth-child(2){animation:cardSlideUp .5s ease-out 1.1s both}
-        .anim-ready .feature-card:nth-child(3){animation:cardSlideUp .5s ease-out 1.2s both}
-        .anim-ready .feature-card:nth-child(4){animation:cardSlideUp .5s ease-out 1.3s both}
-        .anim-ready .feature-card:nth-child(5){animation:cardSlideUp .5s ease-out 1.4s both}
-        .anim-ready .feature-card:nth-child(6){animation:cardSlideUp .5s ease-out 1.5s both}
-        .anim-ready .feature-card:nth-child(7){animation:cardSlideUp .5s ease-out 1.6s both}
-        .anim-ready .feature-card:nth-child(8){animation:cardSlideUp .5s ease-out 1.7s both}
-        .anim-ready .highlight-item:nth-child(1){animation:cardSlideUp .5s ease-out 1.8s both}
-        .anim-ready .highlight-item:nth-child(2){animation:cardSlideUp .5s ease-out 1.9s both}
-        .anim-ready .highlight-item:nth-child(3){animation:cardSlideUp .5s ease-out 2s both}
-        .anim-ready .highlight-item:nth-child(4){animation:cardSlideUp .5s ease-out 2.1s both}
-        .anim-ready footer{animation:cardSlideUp .5s ease-out 2.2s both}
+        /* LOGO GLOW + DANCE (CSS, always plays) */
+        @keyframes logoGlow{0%,100%{box-shadow:0 8px 40px rgba(0,212,255,.2)}50%{box-shadow:0 12px 60px rgba(0,212,255,.45),0 0 80px rgba(0,212,255,.2)}}
+        @keyframes logoDance{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-10px) rotate(3deg)}75%{transform:translateY(-8px) rotate(-3deg)}}
+        #landing-content.anim-ready .hero-icon{animation:logoGlow 2.5s ease-in-out infinite,logoDance 3s ease-in-out infinite}
 
         /* RESPONSIVE */
         @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}.micro-grid{grid-template-columns:1fr}}
@@ -1830,9 +1807,12 @@ async function ensureLibs(){
     function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 </script>
 
-<!-- LOADER + ANIMATIONS -->
+<!-- GSAP + ScrollTrigger -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 (function(){
+    /* ── LOADER ── */
     var fill=document.querySelector('.loader-fill');
     var pctEl=document.querySelector('.loader-pct');
     var loader=document.getElementById('loader');
@@ -1843,15 +1823,63 @@ async function ensureLibs(){
             progress=100;clearInterval(iv);
             setTimeout(function(){
                 loader.classList.add('hide');
-                var landing=document.getElementById('landing-content');
-                if(landing&&landing.style.display!=='none'){
-                    landing.classList.add('anim-ready');
-                }
+                startAnimations();
             },300);
         }
         fill.style.width=progress+'%';
         pctEl.textContent=Math.round(progress)+'%';
     },70);
+
+    /* ── SCROLL ANIMATIONS (like marketing.html) ── */
+    function startAnimations(){
+        var landing=document.getElementById('landing-content');
+        if(!landing||landing.style.display==='none')return;
+        landing.classList.add('anim-ready');
+
+        if(typeof gsap==='undefined'||typeof ScrollTrigger==='undefined')return;
+        gsap.registerPlugin(ScrollTrigger);
+
+        var replay='restart none restart none';
+
+        /* Hero entrance — plays once on load */
+        var heroTl=gsap.timeline({defaults:{ease:'power3.out'}});
+        heroTl
+            .from('#landing-content .hero-icon',{scale:0.3,opacity:0,duration:0.8,ease:'back.out(1.4)'})
+            .from('#landing-content .hero h1',{y:40,opacity:0,duration:0.7},'-=0.4')
+            .from('#landing-content .hero .tagline',{y:24,opacity:0,duration:0.5},'-=0.3')
+            .from('#landing-content .store-buttons',{y:24,opacity:0,duration:0.5},'-=0.3');
+
+        /* Section titles — replay on scroll */
+        gsap.utils.toArray('#landing-content .section-title').forEach(function(el){
+            gsap.from(el,{y:30,opacity:0,duration:0.6,ease:'power2.out',
+                scrollTrigger:{trigger:el,start:'top 88%',toggleActions:replay}
+            });
+        });
+        gsap.utils.toArray('#landing-content .section-subtitle').forEach(function(el){
+            gsap.from(el,{y:20,opacity:0,duration:0.5,ease:'power2.out',
+                scrollTrigger:{trigger:el,start:'top 88%',toggleActions:replay}
+            });
+        });
+
+        /* Feature cards — staggered, replay on scroll */
+        gsap.utils.toArray('#landing-content .feature-card').forEach(function(card,i){
+            gsap.from(card,{y:60,opacity:0,duration:0.6,delay:i*0.1,ease:'power2.out',
+                scrollTrigger:{trigger:'#landing-content .features-grid',start:'top 80%',toggleActions:replay}
+            });
+        });
+
+        /* Highlight items — staggered, replay on scroll */
+        gsap.utils.toArray('#landing-content .highlight-item').forEach(function(item,i){
+            gsap.from(item,{y:40,opacity:0,duration:0.6,delay:i*0.1,ease:'power2.out',
+                scrollTrigger:{trigger:'#landing-content .highlights-grid',start:'top 85%',toggleActions:replay}
+            });
+        });
+
+        /* Footer */
+        gsap.from('#landing-content footer',{y:30,opacity:0,duration:0.5,
+            scrollTrigger:{trigger:'#landing-content footer',start:'top 95%',toggleActions:replay}
+        });
+    }
 })();
 </script>
 </body>
