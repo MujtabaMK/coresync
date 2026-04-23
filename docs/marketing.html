@@ -86,6 +86,8 @@
         .hero-glow { position: absolute; top: -200px; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(74,95,224,.1) 0%, transparent 70%); pointer-events: none; }
         .hero-text { max-width: 700px; margin: 0 auto; }
         .hero-3d-stage { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
+        .floating-cube-wrap { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none; }
+        .floating-cube-wrap .hero-3d-wrap { perspective: 1200px; }
         .hero-3d-wrap { perspective: 1200px; }
         .hero-3d-cube { width: 180px; height: 180px; position: relative; transform-style: preserve-3d; will-change: transform; }
         .hero-3d-cube .cube-face { position: absolute; width: 180px; height: 180px; overflow: hidden; backface-visibility: visible; background: #e8ecf3; }
@@ -183,7 +185,14 @@
             .hero { padding: 120px 24px 60px; min-height: auto; }
             .hero h1 { font-size: 2.2rem; }
             .hero p { font-size: 1rem; }
-            .hero-3d-icon { width: 100px; height: 100px; border-radius: 24px; }
+            .hero-3d-cube { width: 120px; height: 120px; }
+            .hero-3d-cube .cube-face { width: 120px; height: 120px; }
+            .cube-front  { transform: translateZ(60px); }
+            .cube-back   { transform: rotateY(180deg) translateZ(60px); }
+            .cube-left   { transform: rotateY(-90deg) translateZ(60px); }
+            .cube-right  { transform: rotateY(90deg) translateZ(60px); }
+            .cube-top    { transform: rotateX(90deg) translateZ(60px); }
+            .cube-bottom { transform: rotateX(-90deg) translateZ(60px); }
             .problem-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
             .feature-row, .feature-row.reverse { flex-direction: column; text-align: center; gap: 24px; }
@@ -224,21 +233,24 @@
         </div>
     </nav>
 
-    <!-- HERO — 3D stage is pinned, icon rotates with scroll -->
-    <section class="hero">
-        <div class="hero-glow"></div>
-        <div class="hero-3d-stage">
-            <div class="hero-3d-wrap">
-                <div class="hero-3d-cube">
-                    <div class="cube-face cube-front"><img src="app_icon.png" alt="CoreSync Go"></div>
-                    <div class="cube-face cube-back"><img src="app_icon.png" alt="CoreSync Go"></div>
-                    <div class="cube-face cube-left"><img src="app_icon.png" alt="CoreSync Go"></div>
-                    <div class="cube-face cube-right"><img src="app_icon.png" alt="CoreSync Go"></div>
-                    <div class="cube-face cube-top"><img src="app_icon.png" alt="CoreSync Go"></div>
-                    <div class="cube-face cube-bottom"><img src="app_icon.png" alt="CoreSync Go"></div>
-                </div>
+    <!-- FLOATING 3D CUBE — fixed, moves with scroll across whole page -->
+    <div class="floating-cube-wrap" id="floatingCube">
+        <div class="hero-3d-wrap">
+            <div class="hero-3d-cube">
+                <div class="cube-face cube-front"><img src="app_icon.png" alt="CoreSync Go"></div>
+                <div class="cube-face cube-back"><img src="app_icon.png" alt="CoreSync Go"></div>
+                <div class="cube-face cube-left"><img src="app_icon.png" alt="CoreSync Go"></div>
+                <div class="cube-face cube-right"><img src="app_icon.png" alt="CoreSync Go"></div>
+                <div class="cube-face cube-top"><img src="app_icon.png" alt="CoreSync Go"></div>
+                <div class="cube-face cube-bottom"><img src="app_icon.png" alt="CoreSync Go"></div>
             </div>
         </div>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-glow"></div>
+        <div class="hero-3d-stage"></div>
         <div class="hero-text">
             <div class="hero-badge">8 Apps in 1</div>
             <h1>Stop Juggling Apps.<br>Start Syncing Your Life.</h1>
@@ -454,33 +466,52 @@
             .from('.hero-cta', { y: 24, opacity: 0, duration: 0.5 }, '-=0.3');
 
         /* ──────────────────────────────────
-           3D CUBE — pinned, rotates with scroll
-           showing all 6 faces like a real 3D
-           object. App icon on every face.
+           PHASE 1: HERO — cube pinned center,
+           rotates showing all faces
            ────────────────────────────────── */
-        var iconTl = gsap.timeline({
+        var heroCubeTl = gsap.timeline({
             scrollTrigger: {
                 trigger: '.hero-3d-stage',
                 start: 'top top',
-                end: '+=2400',
+                end: '+=2000',
                 scrub: 0.6,
                 pin: true,
                 pinSpacing: true
             }
         });
-        iconTl
-            /* Show front → rotate to right face */
+        heroCubeTl
             .to('.hero-3d-cube', { rotateY: 90, rotateX: 10, duration: 1, ease: 'none' })
-            /* Right face → rotate to back */
             .to('.hero-3d-cube', { rotateY: 180, rotateX: -5, duration: 1, ease: 'none' })
-            /* Back → tilt to show top face */
-            .to('.hero-3d-cube', { rotateY: 220, rotateX: -60, duration: 1, ease: 'none' })
-            /* Top → swing to show left face */
             .to('.hero-3d-cube', { rotateY: 270, rotateX: 0, duration: 1, ease: 'none' })
-            /* Left → tilt to show bottom */
-            .to('.hero-3d-cube', { rotateY: 320, rotateX: 60, duration: 1, ease: 'none' })
-            /* Bottom → back to front (full loop) */
             .to('.hero-3d-cube', { rotateY: 360, rotateX: 0, duration: 1, ease: 'none' });
+
+        /* ──────────────────────────────────
+           PHASE 2: AFTER HERO — cube moves
+           left/right across the whole page
+           ────────────────────────────────── */
+        var pageCubeTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: '.hero-text',
+                start: 'top bottom',
+                endTrigger: 'footer',
+                end: 'bottom bottom',
+                scrub: 0.8
+            }
+        });
+        pageCubeTl
+            /* Scale down slightly + move right */
+            .to('.hero-3d-cube', { scale: 0.75, duration: 0.3, ease: 'none' })
+            .to('#floatingCube', { x: 300, duration: 1, ease: 'power1.inOut' })
+            .to('.hero-3d-cube', { rotateY: 450, rotateX: 10, duration: 1, ease: 'none' }, '<')
+            /* Move left */
+            .to('#floatingCube', { x: -300, duration: 1, ease: 'power1.inOut' })
+            .to('.hero-3d-cube', { rotateY: 540, rotateX: -5, duration: 1, ease: 'none' }, '<')
+            /* Move right */
+            .to('#floatingCube', { x: 300, duration: 1, ease: 'power1.inOut' })
+            .to('.hero-3d-cube', { rotateY: 630, rotateX: -60, duration: 1, ease: 'none' }, '<')
+            /* Move left */
+            .to('#floatingCube', { x: -300, duration: 1, ease: 'power1.inOut' })
+            .to('.hero-3d-cube', { rotateY: 720, rotateX: 0, duration: 1, ease: 'none' }, '<');
 
         /* Hero glow parallax — scrub */
         gsap.to('.hero-glow', {
