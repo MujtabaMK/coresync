@@ -98,7 +98,6 @@
         .cube-right  { transform: rotateY(90deg) translateZ(50px); }
         .cube-top    { transform: rotateX(90deg) translateZ(50px); }
         .cube-bottom { transform: rotateX(-90deg) translateZ(50px); }
-        .scrolling-content { will-change: transform; }
         .hero-badge { display: inline-block; padding: 6px 18px; border-radius: 50px; background: rgba(74,95,224,.08); color: var(--primary); font-size: .85rem; font-weight: 600; margin-bottom: 20px; border: 1px solid rgba(74,95,224,.15); }
         .hero h1 { font-size: 3.6rem; font-weight: 800; letter-spacing: -.03em; background: linear-gradient(135deg, #1E2432 30%, #4A5FE0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 16px; line-height: 1.15; max-width: 700px; }
         .hero p { font-size: 1.15rem; color: var(--text2); max-width: 600px; margin: 0 auto 32px; }
@@ -499,29 +498,44 @@
                 scrub: 0.8
             }
         });
-        /* Target all inner content containers to shift */
-        var contentEls = '.section-tag, .section-title, .section-subtitle, .problem-grid, .stats-grid, .features-list, .comparison-wrap, .cta-box';
-
         pageCubeTl
-            /* ── Move 1: cube RIGHT, content LEFT ── */
+            /* ── Move 1: cube RIGHT ── */
             .to('#floatingCube', { x: 350, duration: 1, ease: 'power1.inOut' })
-            .to(contentEls, { x: -150, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 450, rotateX: 5, duration: 1, ease: 'none' }, '<')
-
-            /* ── Move 2: cube LEFT, content RIGHT ── */
+            /* ── Move 2: cube LEFT ── */
             .to('#floatingCube', { x: -350, duration: 1, ease: 'power1.inOut' })
-            .to(contentEls, { x: 150, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 540, rotateX: -5, duration: 1, ease: 'none' }, '<')
-
-            /* ── Move 3: cube RIGHT, content LEFT ── */
+            /* ── Move 3: cube RIGHT ── */
             .to('#floatingCube', { x: 350, duration: 1, ease: 'power1.inOut' })
-            .to(contentEls, { x: -150, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 630, rotateX: 5, duration: 1, ease: 'none' }, '<')
-
-            /* ── Move 4: cube LEFT, content RIGHT ── */
+            /* ── Move 4: cube LEFT ── */
             .to('#floatingCube', { x: -350, duration: 1, ease: 'power1.inOut' })
-            .to(contentEls, { x: 150, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 720, rotateX: 0, duration: 1, ease: 'none' }, '<');
+
+        /* ──────────────────────────────────
+           SECTION CONTENT — slides in from
+           opposite side of cube (alternating)
+           ────────────────────────────────── */
+        var sectionSlides = [
+            /* cube right → content slides from LEFT */
+            { el: '.problem-grid', from: -250 },
+            /* cube left → content slides from RIGHT */
+            { el: '.stats-grid', from: 250 },
+            /* cube right → content slides from LEFT */
+            { el: '.features-list', from: -250 },
+            /* cube left → content slides from RIGHT */
+            { el: '.comparison-wrap', from: 250 },
+            /* cube right → content slides from LEFT */
+            { el: '.cta-box', from: -250 }
+        ];
+        sectionSlides.forEach(function (s) {
+            gsap.fromTo(s.el,
+                { x: s.from, opacity: 0 },
+                { x: 0, opacity: 1, ease: 'none',
+                  scrollTrigger: { trigger: s.el, start: 'top 95%', end: 'top 45%', scrub: 1 }
+                }
+            );
+        });
 
         /* Hero glow parallax — scrub */
         gsap.to('.hero-glow', {
@@ -537,17 +551,7 @@
             }
         });
 
-        /* ──────────────────────────────────
-           PROBLEM / SOLUTION — replay on scroll
-           ────────────────────────────────── */
-        gsap.from('.problem-card', {
-            x: -80, opacity: 0, rotateY: -15, duration: 0.9, ease: 'power3.out',
-            scrollTrigger: { trigger: '.problem-grid', start: 'top 80%', toggleActions: replay }
-        });
-        gsap.from('.solution-card', {
-            x: 80, opacity: 0, rotateY: 15, duration: 0.9, ease: 'power3.out',
-            scrollTrigger: { trigger: '.problem-grid', start: 'top 80%', toggleActions: replay }
-        });
+        /* Problem/Solution cards handled by sectionSlides above */
 
         /* ──────────────────────────────────
            SECTION HEADERS — replay on scroll
