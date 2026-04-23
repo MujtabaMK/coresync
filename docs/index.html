@@ -1842,31 +1842,31 @@ async function ensureLibs(){
 
         /* Section titles */
         gsap.utils.toArray('#landing-content .section-title').forEach(function(el){
-            gsap.from(el,{y:30,opacity:0,duration:0.6,ease:'power2.out',
+            gsap.from(el,{y:30,duration:0.6,ease:'power2.out',
                 scrollTrigger:{trigger:el,start:'top 90%',toggleActions:'play none none none'}
             });
         });
         gsap.utils.toArray('#landing-content .section-subtitle').forEach(function(el){
-            gsap.from(el,{y:20,opacity:0,duration:0.5,ease:'power2.out',
+            gsap.from(el,{y:20,duration:0.5,ease:'power2.out',
                 scrollTrigger:{trigger:el,start:'top 90%',toggleActions:'play none none none'}
             });
         });
 
         /* Feature cards stagger */
         gsap.from('#landing-content .feature-card',{
-            y:60,opacity:0,duration:0.5,stagger:0.08,ease:'power2.out',
+            y:60,duration:0.5,stagger:0.08,ease:'power2.out',
             scrollTrigger:{trigger:'#landing-content .features-grid',start:'top 85%',toggleActions:'play none none none'}
         });
 
         /* Highlight items stagger */
         gsap.from('#landing-content .highlight-item',{
-            y:30,opacity:0,duration:0.5,stagger:0.08,ease:'power2.out',
+            y:30,duration:0.5,stagger:0.08,ease:'power2.out',
             scrollTrigger:{trigger:'#landing-content .highlights-grid',start:'top 88%',toggleActions:'play none none none'}
         });
 
         /* Footer */
         gsap.from('#landing-content footer',{
-            y:20,opacity:0,duration:0.5,
+            y:20,duration:0.5,
             scrollTrigger:{trigger:'#landing-content footer',start:'top 95%',toggleActions:'play none none none'}
         });
     }
