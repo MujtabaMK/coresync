@@ -513,28 +513,17 @@
             .to('.hero-3d-cube', { rotateY: 720, rotateX: 0, duration: 1, ease: 'none' }, '<');
 
         /* ──────────────────────────────────
-           SECTION CONTENT — slides in from
-           opposite side of cube (alternating)
+           SECTION CONTENT — shifts opposite
+           to cube using onUpdate callback.
+           Uses marginLeft to avoid transform conflicts.
            ────────────────────────────────── */
-        var sectionSlides = [
-            /* cube right → content slides from LEFT */
-            { el: '.problem-grid', from: -250 },
-            /* cube left → content slides from RIGHT */
-            { el: '.stats-grid', from: 250 },
-            /* cube right → content slides from LEFT */
-            { el: '.features-list', from: -250 },
-            /* cube left → content slides from RIGHT */
-            { el: '.comparison-wrap', from: 250 },
-            /* cube right → content slides from LEFT */
-            { el: '.cta-box', from: -250 }
-        ];
-        sectionSlides.forEach(function (s) {
-            gsap.fromTo(s.el,
-                { x: s.from, opacity: 0 },
-                { x: 0, opacity: 1, ease: 'none',
-                  scrollTrigger: { trigger: s.el, start: 'top 95%', end: 'top 45%', scrub: 1 }
-                }
-            );
+        var shiftEls = document.querySelectorAll('.problem-grid, .stats-grid, .features-list, .comparison-wrap, .cta-box, .section-tag, .section-title, .section-subtitle');
+        pageCubeTl.eventCallback('onUpdate', function () {
+            var cubeX = gsap.getProperty('#floatingCube', 'x') || 0;
+            var shift = -cubeX * 0.4;
+            shiftEls.forEach(function (el) {
+                el.style.marginLeft = shift + 'px';
+            });
         });
 
         /* Hero glow parallax — scrub */
