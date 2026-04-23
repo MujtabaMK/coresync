@@ -62,7 +62,7 @@
         }
         html, body { scrollbar-width: none; }
         html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; overflow: clip; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
 
         /* ── LOADER ── */
         #loader { position: fixed; inset: 0; z-index: 10000; background: linear-gradient(170deg, #F2F4F8 0%, #E8ECF5 50%, #F0F2F8 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity .6s cubic-bezier(.16,1,.3,1), visibility .6s; }
@@ -88,17 +88,17 @@
         .hero-3d-stage { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
         .floating-cube-wrap { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none; }
         .floating-cube-wrap .hero-3d-wrap { perspective: 1200px; }
-        #pageContent { will-change: transform; }
         .hero-3d-wrap { perspective: 1200px; }
-        .hero-3d-cube { width: 180px; height: 180px; position: relative; transform-style: preserve-3d; will-change: transform; }
-        .hero-3d-cube .cube-face { position: absolute; width: 180px; height: 180px; overflow: hidden; backface-visibility: visible; background: #e8ecf3; }
+        .hero-3d-cube { width: 100px; height: 100px; position: relative; transform-style: preserve-3d; will-change: transform; }
+        .hero-3d-cube .cube-face { position: absolute; width: 100px; height: 100px; overflow: hidden; backface-visibility: visible; background: #e8ecf3; }
         .hero-3d-cube .cube-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .cube-front  { transform: translateZ(90px); }
-        .cube-back   { transform: rotateY(180deg) translateZ(90px); }
-        .cube-left   { transform: rotateY(-90deg) translateZ(90px); }
-        .cube-right  { transform: rotateY(90deg) translateZ(90px); }
-        .cube-top    { transform: rotateX(90deg) translateZ(90px); }
-        .cube-bottom { transform: rotateX(-90deg) translateZ(90px); }
+        .cube-front  { transform: translateZ(50px); }
+        .cube-back   { transform: rotateY(180deg) translateZ(50px); }
+        .cube-left   { transform: rotateY(-90deg) translateZ(50px); }
+        .cube-right  { transform: rotateY(90deg) translateZ(50px); }
+        .cube-top    { transform: rotateX(90deg) translateZ(50px); }
+        .cube-bottom { transform: rotateX(-90deg) translateZ(50px); }
+        .scrolling-content { will-change: transform; }
         .hero-badge { display: inline-block; padding: 6px 18px; border-radius: 50px; background: rgba(74,95,224,.08); color: var(--primary); font-size: .85rem; font-weight: 600; margin-bottom: 20px; border: 1px solid rgba(74,95,224,.15); }
         .hero h1 { font-size: 3.6rem; font-weight: 800; letter-spacing: -.03em; background: linear-gradient(135deg, #1E2432 30%, #4A5FE0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 16px; line-height: 1.15; max-width: 700px; }
         .hero p { font-size: 1.15rem; color: var(--text2); max-width: 600px; margin: 0 auto 32px; }
@@ -186,14 +186,14 @@
             .hero { padding: 120px 24px 60px; min-height: auto; }
             .hero h1 { font-size: 2.2rem; }
             .hero p { font-size: 1rem; }
-            .hero-3d-cube { width: 120px; height: 120px; }
-            .hero-3d-cube .cube-face { width: 120px; height: 120px; }
-            .cube-front  { transform: translateZ(60px); }
-            .cube-back   { transform: rotateY(180deg) translateZ(60px); }
-            .cube-left   { transform: rotateY(-90deg) translateZ(60px); }
-            .cube-right  { transform: rotateY(90deg) translateZ(60px); }
-            .cube-top    { transform: rotateX(90deg) translateZ(60px); }
-            .cube-bottom { transform: rotateX(-90deg) translateZ(60px); }
+            .hero-3d-cube { width: 70px; height: 70px; }
+            .hero-3d-cube .cube-face { width: 70px; height: 70px; }
+            .cube-front  { transform: translateZ(35px); }
+            .cube-back   { transform: rotateY(180deg) translateZ(35px); }
+            .cube-left   { transform: rotateY(-90deg) translateZ(35px); }
+            .cube-right  { transform: rotateY(90deg) translateZ(35px); }
+            .cube-top    { transform: rotateX(90deg) translateZ(35px); }
+            .cube-bottom { transform: rotateX(-90deg) translateZ(35px); }
             .problem-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
             .feature-row, .feature-row.reverse { flex-direction: column; text-align: center; gap: 24px; }
@@ -263,7 +263,6 @@
         </div>
     </section>
 
-    <div id="pageContent">
     <!-- PROBLEM / SOLUTION -->
     <section>
         <p class="section-tag">The Problem &amp; Solution</p>
@@ -393,8 +392,6 @@
         </div>
     </section>
 
-    </div><!-- /pageContent -->
-
     <!-- FOOTER -->
     <footer>
         <nav class="footer-links">
@@ -502,28 +499,28 @@
                 scrub: 0.8
             }
         });
-        pageCubeTl
-            /* Scale down cube for floating mode */
-            .to('.hero-3d-cube', { scale: 0.5, duration: 0.3, ease: 'none' })
+        /* Target all inner content containers to shift */
+        var contentEls = '.section-tag, .section-title, .section-subtitle, .problem-grid, .stats-grid, .features-list, .comparison-wrap, .cta-box';
 
+        pageCubeTl
             /* ── Move 1: cube RIGHT, content LEFT ── */
             .to('#floatingCube', { x: 350, duration: 1, ease: 'power1.inOut' })
-            .to('#pageContent', { x: -100, duration: 1, ease: 'power1.inOut' }, '<')
+            .to(contentEls, { x: -150, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 450, rotateX: 5, duration: 1, ease: 'none' }, '<')
 
             /* ── Move 2: cube LEFT, content RIGHT ── */
             .to('#floatingCube', { x: -350, duration: 1, ease: 'power1.inOut' })
-            .to('#pageContent', { x: 100, duration: 1, ease: 'power1.inOut' }, '<')
+            .to(contentEls, { x: 150, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 540, rotateX: -5, duration: 1, ease: 'none' }, '<')
 
             /* ── Move 3: cube RIGHT, content LEFT ── */
             .to('#floatingCube', { x: 350, duration: 1, ease: 'power1.inOut' })
-            .to('#pageContent', { x: -100, duration: 1, ease: 'power1.inOut' }, '<')
+            .to(contentEls, { x: -150, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 630, rotateX: 5, duration: 1, ease: 'none' }, '<')
 
             /* ── Move 4: cube LEFT, content RIGHT ── */
             .to('#floatingCube', { x: -350, duration: 1, ease: 'power1.inOut' })
-            .to('#pageContent', { x: 100, duration: 1, ease: 'power1.inOut' }, '<')
+            .to(contentEls, { x: 150, duration: 1, ease: 'power1.inOut' }, '<')
             .to('.hero-3d-cube', { rotateY: 720, rotateX: 0, duration: 1, ease: 'none' }, '<');
 
         /* Hero glow parallax — scrub */
