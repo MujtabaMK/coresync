@@ -52,7 +52,7 @@ class _CoreSyncAppState extends State<CoreSyncApp> {
     _authCubit = AuthCubit(authRepository: _authRepository)..init();
     _themeCubit = ThemeCubit()..init();
 
-    // Start notification listener if user is already logged in
+    // Start services if user is already logged in
     if (FirebaseAuth.instance.currentUser != null) {
       PushNotificationService.saveTokenForUser();
       PushNotificationService.listenForNotifications();

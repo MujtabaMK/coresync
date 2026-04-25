@@ -16,10 +16,6 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
     <uses-permission android:name="android.permission.NFC"/>
-    <uses-permission android:name="android.permission.health.READ_STEPS"/>
-    <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
-    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED"/>
-    <uses-permission android:name="android.permission.health.READ_DISTANCE"/>
     <application
         android:label="CoreSync Go"
         android:name="${applicationName}"
@@ -46,21 +42,7 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Health Connect permissions rationale -->
-            <intent-filter>
-                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-            </intent-filter>
         </activity>
-        <activity-alias
-            android:name="ViewPermissionUsageActivity"
-            android:exported="true"
-            android:targetActivity=".MainActivity"
-            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
-                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
-            </intent-filter>
-        </activity-alias>
         <!-- Step counter foreground service -->
         <service
             android:name=".StepCounterForegroundService"
@@ -102,10 +84,6 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
-        <package android:name="com.google.android.apps.healthdata" />
-        <intent>
-            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

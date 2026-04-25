@@ -35,6 +35,7 @@ class StepCounterService {
 
   // Android periodic polling
   Timer? _androidPollTimer;
+  int? _lastPolledNativeSteps;
 
   // iOS specific
   int _platformBaseline = 0;
@@ -139,6 +140,7 @@ class StepCounterService {
       await box.put(_kDate, _todayKey());
       await box.delete(_kRaw);
       _isRefreshing = false;
+      _lastPolledNativeSteps = null;
     }
 
     _stepSub = _pedometer.stepCountStream().listen(
@@ -197,10 +199,18 @@ class StepCounterService {
   }
 
   /// Set the initial step count (e.g. from Firestore) so we never go below it.
+  /// On Android, also updates the native service baseline so it counts from
+  /// this value instead of 0 (fixes steps not incrementing after reinstall).
   void setMinSteps(int steps) {
     if (steps > _currentSteps) {
       _currentSteps = steps;
       _stepsController.add(_currentSteps);
+
+      if (Platform.isAndroid) {
+        _channel
+            .invokeMethod('setBaseline', {'steps': steps})
+            .catchError((_) => null);
+      }
     }
   }
 
@@ -217,15 +227,38 @@ class StepCounterService {
   // ── Android ──
 
   /// Poll the native foreground service for the latest step count.
-  /// Called periodically to keep the UI in sync even when the pedometer
-  /// stream is not delivering events.
+  /// Uses delta-based tracking so steps still increment even when native
+  /// is below [_currentSteps] (e.g. after reinstall with Firestore baseline).
   Future<void> _pollNativeSteps() async {
     if (_isRefreshing) return;
     final nativeSteps = await getNativeSteps();
-    if (nativeSteps > _currentSteps) {
-      _currentSteps = nativeSteps;
-      _stepsController.add(_currentSteps);
 
+    bool changed = false;
+
+    if (nativeSteps > _currentSteps) {
+      // Normal case: native has the baseline and is ahead — use it directly.
+      _currentSteps = nativeSteps;
+      _lastPolledNativeSteps = nativeSteps;
+      changed = true;
+    } else if (_lastPolledNativeSteps != null &&
+        nativeSteps > _lastPolledNativeSteps! &&
+        nativeSteps < _currentSteps) {
+      // Native increased since last poll but is still below _currentSteps.
+      // This happens right after reinstall before the Firestore baseline is
+      // applied to native SharedPrefs. Add the delta so the UI still updates.
+      // The guard `nativeSteps < _currentSteps` ensures we skip large jumps
+      // caused by setBaseline (those are caught by the first branch above).
+      final delta = nativeSteps - _lastPolledNativeSteps!;
+      _currentSteps += delta;
+      _lastPolledNativeSteps = nativeSteps;
+      changed = true;
+    } else {
+      // First poll or no change — just record the native value.
+      _lastPolledNativeSteps ??= nativeSteps;
+    }
+
+    if (changed) {
+      _stepsController.add(_currentSteps);
       final box = await Hive.openBox(_boxName);
       await box.put(_kSteps, _currentSteps);
       await box.put(_kDate, _todayKey());
@@ -248,6 +281,7 @@ class StepCounterService {
     await box.put(_kDate, _todayKey());
     await box.delete(_kRaw);
     _isRefreshing = false;
+    _lastPolledNativeSteps = null;
 
     // Re-subscribe to the sensor stream in case the OS killed it
     _stepSub?.cancel();

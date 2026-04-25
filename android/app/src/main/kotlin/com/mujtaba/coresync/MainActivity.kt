@@ -32,6 +32,34 @@ class MainActivity : FlutterFragmentActivity() {
                     "getSteps" -> {
                         result.success(StepCounterForegroundService.getSteps(this))
                     }
+                    "setBaseline" -> {
+                        val baseline = call.argument<Int>("steps") ?: 0
+                        if (baseline > 0) {
+                            val prefs = getSharedPreferences(
+                                StepCounterForegroundService.PREFS_NAME,
+                                MODE_PRIVATE
+                            )
+                            val today = StepCounterForegroundService.todayKey()
+                            val currentSteps = if (prefs.getString(
+                                    StepCounterForegroundService.KEY_DATE, null
+                                ) == today
+                            ) {
+                                prefs.getInt(StepCounterForegroundService.KEY_STEPS, 0)
+                            } else 0
+
+                            // Only add baseline when native has fewer steps than
+                            // Firestore (fresh install: native started from 0).
+                            // On a normal day native >= Firestore so this is a no-op.
+                            if (currentSteps < baseline) {
+                                val newSteps = currentSteps + baseline
+                                prefs.edit()
+                                    .putString(StepCounterForegroundService.KEY_DATE, today)
+                                    .putInt(StepCounterForegroundService.KEY_STEPS, newSteps)
+                                    .apply()
+                            }
+                        }
+                        result.success(null)
+                    }
                     "isIgnoringBatteryOptimizations" -> {
                         val pm = getSystemService(POWER_SERVICE) as PowerManager
                         result.success(pm.isIgnoringBatteryOptimizations(packageName))

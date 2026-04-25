@@ -76,6 +76,11 @@ class StepCounterForegroundService : Service(), SensorEventListener {
             startForeground(NOTIFICATION_ID, notification)
         }
 
+        // On fresh install, load today's steps from Firestore so we don't
+        // start from 0 when Firestore already has a higher count.
+        // Must run BEFORE registerSensor() so the check sees empty SharedPrefs.
+        loadFirestoreBaseline()
+
         registerSensor()
         startPeriodicSync()
 
@@ -123,6 +128,11 @@ class StepCounterForegroundService : Service(), SensorEventListener {
                 // Device rebooted — counter reset to 0
                 savedSteps + rawSteps
             }
+        } else if (savedDate == today) {
+            // Today's date is set (e.g. from Firestore baseline after reinstall)
+            // but no raw sensor baseline yet. Preserve existing step count and
+            // establish the raw baseline so future deltas add on top.
+            savedSteps
         } else {
             // New day or first run — sync old day's final count before resetting
             if (savedDate != null && savedSteps > 0) {
@@ -209,6 +219,57 @@ class StepCounterForegroundService : Service(), SensorEventListener {
             }
         } catch (_: Exception) {
         }
+    }
+
+    // ── Firestore baseline (fresh install recovery) ──
+
+    /**
+     * On fresh install (or data clear), SharedPreferences are empty so the
+     * sensor would start counting from 0.  If Firestore already has today's
+     * steps (from a previous install), fetch that value and ADD it to any
+     * steps the sensor may have already counted during the async gap.
+     *
+     * A [KEY_BASELINE_DATE] flag prevents double-counting when both this
+     * method and the Flutter-side `setBaseline` call succeed.
+     */
+    private fun loadFirestoreBaseline() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+
+        // Only needed on fresh install — if we already have step data, skip.
+        if (prefs.contains(KEY_DATE)) return
+
+        try {
+            if (FirebaseApp.getApps(this).isEmpty()) return
+            val user = FirebaseAuth.getInstance().currentUser ?: return
+
+            val today = todayKey()
+            val dateKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+            FirebaseFirestore.getInstance()
+                .collection("users").document(user.uid)
+                .collection("gym_steps").document(dateKey)
+                .get()
+                .addOnSuccessListener { doc ->
+                    val firestoreSteps = doc.getLong("steps")?.toInt() ?: 0
+                    if (firestoreSteps <= 0) return@addOnSuccessListener
+
+                    val p = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    val currentSteps = if (p.getString(KEY_DATE, null) == today) {
+                        p.getInt(KEY_STEPS, 0)
+                    } else 0
+
+                    // Only add if native has fewer steps (fresh install).
+                    // If setBaseline already ran, currentSteps >= firestoreSteps.
+                    if (currentSteps < firestoreSteps) {
+                        val newSteps = currentSteps + firestoreSteps
+                        p.edit()
+                            .putString(KEY_DATE, today)
+                            .putInt(KEY_STEPS, newSteps)
+                            .apply()
+
+                        updateNotification(newSteps)
+                    }
+                }
+        } catch (_: Exception) {}
     }
 
     // ── Notification ──

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -415,7 +416,9 @@ class _TrackerView extends StatelessWidget {
     final consumed = state.trackedCalories;
     final now = DateTime.now();
     final todayKey = DateTime(now.year, now.month, now.day);
-    final todaySteps = state.stepsHistory[todayKey] ?? 0;
+    final historySteps = state.stepsHistory[todayKey] ?? 0;
+    final liveSteps = StepCounterService.instance.currentSteps;
+    final todaySteps = max(historySteps, liveSteps);
     final weight = state.userWeight ?? 70.0;
     final stepCalories =
         StepCounterService.instance.cachedActiveEnergy?.round() ??
@@ -424,7 +427,7 @@ class _TrackerView extends StatelessWidget {
           weightKg: weight,
           heightCm: state.userHeight,
         ).round();
-    final workoutCalories = state.todayWorkoutCalories;
+    final workoutCalories = state.todayWorkoutCalories.round();
     final burnt = stepCalories + workoutCalories;
     final target = profile.dailyCalorieTarget;
     final net = consumed - burnt;
