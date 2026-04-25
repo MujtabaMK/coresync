@@ -33,6 +33,9 @@ class StepCounterService {
   bool _initialized = false;
   bool _isRefreshing = false;
 
+  // Android periodic polling
+  Timer? _androidPollTimer;
+
   // iOS specific
   int _platformBaseline = 0;
   int? _streamBaseline;
@@ -120,15 +123,7 @@ class StepCounterService {
       // Start the native foreground service so steps are tracked 24/7.
       await startNativeService();
 
-      // Prefer Health Connect (matches Samsung Health / Google Fit exactly).
-      // Fall back to native foreground service only if HC is unavailable.
-      // Always use max() to never go below the Firestore-saved floor
-      // (set via setMinSteps before initialize).
-      final hcSteps = await _getHealthSteps();
-      if (hcSteps != null && hcSteps > _currentSteps) {
-        _currentSteps = hcSteps;
-        _stepsController.add(_currentSteps);
-      }
+      // Use native foreground service for step counting on Android.
       final nativeSteps = await getNativeSteps();
       if (nativeSteps > _currentSteps) {
         _currentSteps = nativeSteps;
@@ -138,27 +133,12 @@ class StepCounterService {
       // Persist the authoritative step count and clear the stale pedometer
       // raw baseline. Without this, the first pedometer stream event would
       // compute a delta from the old _kRaw and add it on top of the
-      // native/HC value, double-counting steps taken before this init.
+      // native value, double-counting steps taken before this init.
       final box = await Hive.openBox(_boxName);
       await box.put(_kSteps, _currentSteps);
       await box.put(_kDate, _todayKey());
       await box.delete(_kRaw);
       _isRefreshing = false;
-
-      // Health Connect data may not be available immediately after granting
-      // permissions (Samsung Health syncs to HC asynchronously). Retry after
-      // a short delay so we pick up data that wasn't ready on the first query.
-      if (_healthAvailable) {
-        Future.delayed(const Duration(seconds: 3), () async {
-          final retrySteps = await _getHealthSteps();
-          if (retrySteps != null && retrySteps > _currentSteps) {
-            _currentSteps = retrySteps;
-            _stepsController.add(_currentSteps);
-            final b = await Hive.openBox(_boxName);
-            await b.put(_kSteps, _currentSteps);
-          }
-        });
-      }
     }
 
     _stepSub = _pedometer.stepCountStream().listen(
@@ -183,6 +163,17 @@ class StepCounterService {
         debugPrint('Pedestrian status error: $error');
       },
     );
+
+    // Android: poll native foreground service every 1s for live updates.
+    // The pedometer stream can be unreliable on many devices, so this
+    // ensures the UI always reflects the latest step count immediately.
+    if (Platform.isAndroid) {
+      _androidPollTimer?.cancel();
+      _androidPollTimer = Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => _pollNativeSteps(),
+      );
+    }
 
     // iOS: get initial baseline from HealthKit (auth already requested above)
     if (Platform.isIOS) {
@@ -225,34 +216,40 @@ class StepCounterService {
 
   // ── Android ──
 
+  /// Poll the native foreground service for the latest step count.
+  /// Called periodically to keep the UI in sync even when the pedometer
+  /// stream is not delivering events.
+  Future<void> _pollNativeSteps() async {
+    if (_isRefreshing) return;
+    final nativeSteps = await getNativeSteps();
+    if (nativeSteps > _currentSteps) {
+      _currentSteps = nativeSteps;
+      _stepsController.add(_currentSteps);
+
+      final box = await Hive.openBox(_boxName);
+      await box.put(_kSteps, _currentSteps);
+      await box.put(_kDate, _todayKey());
+    }
+  }
+
   Future<void> _refreshAndroidOnResume() async {
     _isRefreshing = true;
-    // Prefer Health Connect (matches Samsung Health / Google Fit exactly).
-    // Fall back to native foreground service only if HC is unavailable.
-    // Always use max() to never go below the previously known value.
-    final hcSteps = await _getHealthSteps();
-    if (hcSteps != null && hcSteps > _currentSteps) {
-      _currentSteps = hcSteps;
-      _stepsController.add(_currentSteps);
-    }
+    // Use native foreground service for step counting on Android.
     final nativeSteps = await getNativeSteps();
     if (nativeSteps > _currentSteps) {
       _currentSteps = nativeSteps;
       _stepsController.add(_currentSteps);
     }
 
-    // 3. Persist the authoritative step count and clear the stale pedometer
-    //    raw baseline to prevent double-counting. Without this, the next
-    //    pedometer event would compute a delta from the old _kRaw (set
-    //    before the app went to background) and add it on top of the
-    //    native/HC value — counting background steps twice.
+    // Persist the authoritative step count and clear the stale pedometer
+    // raw baseline to prevent double-counting.
     final box = await Hive.openBox(_boxName);
     await box.put(_kSteps, _currentSteps);
     await box.put(_kDate, _todayKey());
     await box.delete(_kRaw);
     _isRefreshing = false;
 
-    // 4. Re-subscribe to the sensor stream in case the OS killed it
+    // Re-subscribe to the sensor stream in case the OS killed it
     _stepSub?.cancel();
     _stepSub = _pedometer.stepCountStream().listen(
       (rawSteps) async => _handleAndroidSensorEvent(rawSteps),
@@ -285,10 +282,9 @@ class StepCounterService {
       // Keep existing steps and establish a new raw baseline for future deltas.
       todaySteps = savedSteps;
     } else {
-      // New day — prefer Health Connect, fall back to native service
-      final hcSteps = await _getHealthSteps();
+      // New day — use native service
       final nativeSteps = await getNativeSteps();
-      todaySteps = (hcSteps != null && hcSteps > 0) ? hcSteps : nativeSteps;
+      todaySteps = nativeSteps;
       // Reset _currentSteps for the new day so max() below doesn't carry
       // yesterday's value forward.
       _currentSteps = 0;
@@ -334,13 +330,11 @@ class StepCounterService {
     return (walkingMET - 1.0) * weightKg * timeHours;
   }
 
-  /// Check if HealthKit (iOS) or Health Connect (Android) is installed.
+  /// Check if HealthKit (iOS) is available.
+  /// Health Connect on Android is disabled — native foreground service handles steps.
   Future<bool> _isHealthPlatformAvailable() async {
     try {
       if (Platform.isIOS) return true; // HealthKit is always on iOS
-      if (Platform.isAndroid) {
-        return await _health.isHealthConnectAvailable();
-      }
       return false;
     } catch (_) {
       return false;
@@ -349,6 +343,7 @@ class StepCounterService {
 
   /// Request health permissions and check availability.
   /// Call once at startup; result is cached in [isHealthAvailable].
+  /// Only HealthKit on iOS — Health Connect on Android is disabled.
   Future<bool> _initHealthPlatform() async {
     _healthAvailable = await _isHealthPlatformAvailable();
     if (!_healthAvailable) return false;
@@ -358,8 +353,7 @@ class StepCounterService {
       final types = [
         HealthDataType.STEPS,
         HealthDataType.ACTIVE_ENERGY_BURNED,
-        if (Platform.isIOS) HealthDataType.DISTANCE_WALKING_RUNNING,
-        if (Platform.isAndroid) HealthDataType.DISTANCE_DELTA,
+        HealthDataType.DISTANCE_WALKING_RUNNING,
       ];
       await _health.requestAuthorization(
         types,
@@ -417,16 +411,13 @@ class StepCounterService {
     }
   }
 
-  /// Read today's walking/running distance (km) from HealthKit / Health Connect.
+  /// Read today's walking/running distance (km) from HealthKit (iOS only).
   Future<double?> _readWalkingDistanceKm() async {
     final now = DateTime.now();
     final midnight = DateTime(now.year, now.month, now.day);
     try {
-      final type = Platform.isIOS
-          ? HealthDataType.DISTANCE_WALKING_RUNNING
-          : HealthDataType.DISTANCE_DELTA;
       final data = await _health.getHealthDataFromTypes(
-        types: [type],
+        types: [HealthDataType.DISTANCE_WALKING_RUNNING],
         startTime: midnight,
         endTime: now,
       );
@@ -550,24 +541,13 @@ class StepCounterService {
           }
         }
       }
-    } else if (Platform.isAndroid) {
-      try {
-        for (var d = today.subtract(const Duration(days: 1));
-            !d.isBefore(firstOfMonth);
-            d = d.subtract(const Duration(days: 1))) {
-          final dayEnd = d.add(const Duration(days: 1));
-          final steps = await _health.getTotalStepsInInterval(d, dayEnd);
-          if (steps != null && steps > 0) {
-            await saveSteps(d, steps);
-          }
-        }
-      } catch (e) {
-        debugPrint('Historical sync error: $e');
-      }
     }
+    // Android: historical steps are synced by the native foreground service
+    // to Firestore, so no Health Connect query needed here.
   }
 
   void dispose() {
+    _androidPollTimer?.cancel();
     _healthKitTimer?.cancel();
     _stepSub?.cancel();
     _statusSub?.cancel();

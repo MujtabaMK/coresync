@@ -11,7 +11,7 @@ class FoodDatabaseService {
   static final FoodDatabaseService instance = FoodDatabaseService._();
 
   static const _dbName = 'foods.db';
-  static const _dbVersion = 9; // bumped: added soaked moth + air fryer/grilled variants
+  static const _dbVersion = 12; // split Roti/Chapati, added roti types, fixed nutrition, removed 15 duplicates
   static const _table = 'foods';
 
   Database? _db;

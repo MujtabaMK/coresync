@@ -65,7 +65,6 @@
         <service
             android:name=".StepCounterForegroundService"
             android:exported="false"
-            android:process=":step_counter"
             android:foregroundServiceType="health" />
         <!-- Restart step counter on boot -->
         <receiver

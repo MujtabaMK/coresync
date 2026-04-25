@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -242,6 +244,12 @@ class GymCubit extends Cubit<GymState> {
         super(const GymState());
 
   final GymRepository _repository;
+
+  // Debounce Firestore writes for steps to avoid excessive writes.
+  Timer? _stepsSaveDebounce;
+  DateTime? _pendingStepsDate;
+  int? _pendingSteps;
+  int? _pendingGoal;
 
   GymRepository get repository => _repository;
 
@@ -560,14 +568,44 @@ class GymCubit extends Cubit<GymState> {
   Future<void> saveSteps(DateTime date, int steps, {int? goalSteps}) async {
     try {
       final normalized = DateTime(date.year, date.month, date.day);
-      await _repository.saveStepsForDate(normalized, steps, goalSteps: goalSteps);
+
+      // Skip if the value hasn't increased (avoid duplicate writes)
+      final current = state.stepsHistory[normalized] ?? 0;
+      if (steps <= current && goalSteps == null) return;
+
+      // Update in-memory state immediately so the UI stays responsive
       final newHistory = Map<DateTime, int>.from(state.stepsHistory);
       newHistory[normalized] = steps;
       final newGoalHistory = Map<DateTime, int>.from(state.stepsGoalHistory);
       if (goalSteps != null) newGoalHistory[normalized] = goalSteps;
       emit(state.copyWith(stepsHistory: newHistory, stepsGoalHistory: newGoalHistory));
+
+      // Debounce Firestore write — at most once every 15 seconds
+      _pendingStepsDate = normalized;
+      _pendingSteps = steps;
+      if (goalSteps != null) _pendingGoal = goalSteps;
+      _stepsSaveDebounce?.cancel();
+      _stepsSaveDebounce = Timer(const Duration(seconds: 15), () {
+        _flushPendingSteps();
+      });
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  /// Flush any pending step data to Firestore immediately.
+  Future<void> _flushPendingSteps() async {
+    final date = _pendingStepsDate;
+    final steps = _pendingSteps;
+    if (date == null || steps == null) return;
+    final goal = _pendingGoal;
+    _pendingStepsDate = null;
+    _pendingSteps = null;
+    _pendingGoal = null;
+    try {
+      await _repository.saveStepsForDate(date, steps, goalSteps: goal);
+    } catch (e) {
+      // Silently fail — next write will include the latest value
     }
   }
 
@@ -763,5 +801,12 @@ class GymCubit extends Cubit<GymState> {
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _stepsSaveDebounce?.cancel();
+    _flushPendingSteps();
+    return super.close();
   }
 }

@@ -87,7 +87,7 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
     _stepSub = _service.stepsStream.listen((steps) {
       if (!mounted) return;
       final prevSteps = _steps;
-      if (_activityType != ActivityType.IN_VEHICLE) {
+      if (_activityType != ActivityType.IN_VEHICLE && steps > _steps) {
         setState(() => _steps = steps);
         _gymCubit.saveSteps(DateTime.now(), steps, goalSteps: _computeStepGoal());
       }

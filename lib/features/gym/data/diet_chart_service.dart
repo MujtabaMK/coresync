@@ -232,6 +232,11 @@ class DietChartService {
         n.contains('croissant') ||
         n.contains('puff pastry') ||
         n.contains('puff') ||
+        n.contains('kellogg') ||
+        n.contains('cornflakes') ||
+        n.contains('corn flakes') ||
+        n.contains('chocos') ||
+        n.contains('bagrry') ||
         n.contains('bhatura') ||
         n.contains('manchurian') ||
         n.contains('chilli chicken') ||
