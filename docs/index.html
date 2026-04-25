@@ -904,6 +904,7 @@ async function ensureLibs(){
         $('qs-stepkcal').textContent=dashData.stepKcal.toLocaleString();
         $('qs-workoutkcal').textContent=dashData.workoutKcal.toLocaleString();
         $('qs-totalburnt').textContent=dashData.totalBurnt.toLocaleString();
+        if(dashData.calories>0)renderFoodUI(dashData.calories);
     }
     async function loadTasks(uid){
         try{const s=await getDocs(query(collection(db,'tasks'),where('ownerId','==',uid)));
