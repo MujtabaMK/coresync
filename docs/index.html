@@ -805,7 +805,7 @@ async function ensureLibs(){
             const label=num+(parseInt(num)===1?' Month':' Months');
             $('memb-plan').textContent=label;
             const today=new Date();const total=Math.max(1,Math.ceil((end-start)/(864e5)));
-            const elapsed=Math.ceil((today-start)/(864e5));const remaining=Math.max(0,Math.ceil((end-today)/(864e5)));
+            const elapsed=Math.floor((today-start)/(864e5));const remaining=Math.max(0,Math.floor((end-today)/(864e5)));
             const pct=Math.min(100,Math.round(elapsed/total*100));
             $('memb-start').innerHTML='&#128197; Start: '+start.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
             $('memb-end').innerHTML='&#128197; End: '+end.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
@@ -889,7 +889,11 @@ async function ensureLibs(){
         const baseWater=Math.round(w*33);
         const effectiveWater=baseWater+waterBoost;
         if(effectiveWater>0){goals.water=effectiveWater;$('goal-water').textContent='of '+goals.water.toLocaleString()+' ml';setRing('ring-water',dashData.water,goals.water);}
-        dashData.stepKcal=Math.round(dashData.steps*0.04*w/70);
+        const hCm=userProfile.wl_heightCm||userProfile.userHeight||null;
+        const strideM=hCm?hCm*0.415/100:0.75;
+        const distKm=dashData.steps*strideM/1000;
+        const timeH=distKm/4.5;
+        dashData.stepKcal=Math.round((3.5-1.0)*w*timeH);
         dashData.workoutKcal=0;
         dashData.workouts.forEach(wk=>{
             if(wk.caloriesBurnt){dashData.workoutKcal+=wk.caloriesBurnt;}
@@ -982,7 +986,7 @@ async function ensureLibs(){
     async function loadReportData(uid){
         if(!membership)return;
         const start=membership._start;const today=new Date();
-        const totalDays=Math.max(1,Math.ceil((today-start)/(864e5))+1);
+        const totalDays=Math.max(1,Math.floor((today-start)/(864e5))+1);
         try{
             // Attendance
             const attSnap=await getDocs(collection(db,'users',uid,'gym_attendance'));
