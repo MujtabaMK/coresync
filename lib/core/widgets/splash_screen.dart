@@ -14,10 +14,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  String _status = '';
-
-  bool _navigated = false;
-
   @override
   void initState() {
     super.initState();
@@ -27,6 +23,8 @@ class _SplashScreenState extends State<SplashScreen> {
     // user never sees an infinite blank screen.
     Future.delayed(const Duration(seconds: 6), _fallbackNavigate);
   }
+
+  bool _navigated = false;
 
   void _fallbackNavigate() {
     if (_navigated || !mounted) return;
@@ -43,9 +41,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initialize() async {
     try {
-      // PushNotificationService.init() is now called in main() to avoid the
-      // race condition where app.dart's initState calls saveTokenForUser()
-      // before FCM permissions have been requested.
       await NotificationService.init().timeout(const Duration(seconds: 3));
       await NotificationService.requestPermissions().timeout(const Duration(seconds: 3));
     } catch (_) {}
@@ -59,17 +54,15 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    // Initialize food database (seeds from JSON on first launch).
-    try {
-      if (mounted) setState(() => _status = 'Loading food database...');
-      await FoodDatabaseService.instance.initialize().timeout(const Duration(seconds: 5));
-    } catch (_) {}
+    // Initialize food database in background — never block navigation.
+    FoodDatabaseService.instance.initialize().then((_) {
+      // One-time: upload existing local custom foods to Firestore
+      FoodDatabaseService.instance.syncCustomFoodsToFirestore().catchError((_) {});
+    }).catchError((_) {});
 
     if (!mounted || _navigated) return;
 
     // If user is already logged in, skip walkthrough and go to home.
-    // This handles both normal launches and reinstalls where Firebase
-    // auth persists via Keychain — no need to sign them out.
     final isLoggedIn = FirebaseAuth.instance.currentUser != null;
     if (isLoggedIn) {
       await appBox.put('walkthrough_shown', true);
@@ -79,7 +72,6 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     // Sign out stale Firebase session after app reinstall.
-    // Hive data is deleted on uninstall, but Keychain (Firebase auth) persists.
     final hasLaunchedBefore = appBox.get(
       'has_launched_before',
       defaultValue: false,
@@ -87,7 +79,6 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!hasLaunchedBefore) {
       try {
         await FirebaseAuth.instance.signOut();
-        // Wait for auth to fully settle after sign-out before navigating.
         await FirebaseAuth.instance.authStateChanges().first
             .timeout(const Duration(seconds: 3));
       } catch (_) {}
@@ -96,7 +87,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted || _navigated) return;
 
-    // Walkthrough is only for new users who are not logged in.
     final walkthroughShown =
         appBox.get('walkthrough_shown', defaultValue: false);
     if (!walkthroughShown) {
@@ -111,28 +101,9 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFD5D8DE),
       body: SizedBox.expand(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.asset(
-              'assets/splash_screen.jpg',
-              fit: BoxFit.cover,
-            ),
-            if (_status.isNotEmpty)
-              Positioned(
-                bottom: 48,
-                left: 0,
-                right: 0,
-                child: Text(
-                  _status,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-          ],
+        child: Image.asset(
+          'assets/splash_screen.jpg',
+          fit: BoxFit.cover,
         ),
       ),
     );

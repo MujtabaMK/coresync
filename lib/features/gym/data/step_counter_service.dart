@@ -58,6 +58,9 @@ class StepCounterService {
   /// Stream controller that broadcasts pedestrian status changes.
   final _statusController = StreamController<PedestrianStatus>.broadcast();
 
+  /// Stream controller that fires when cached health metrics (kcal, distance) update.
+  final _healthMetricsController = StreamController<void>.broadcast();
+
   /// Current step count for today.
   int get currentSteps => _currentSteps;
 
@@ -78,6 +81,9 @@ class StepCounterService {
 
   /// Stream of pedestrian status updates.
   Stream<PedestrianStatus> get statusStream => _statusController.stream;
+
+  /// Stream that fires when health metrics (kcal, distance) are refreshed.
+  Stream<void> get healthMetricsStream => _healthMetricsController.stream;
 
   // ── Native service helpers (Android only) ──
 
@@ -187,7 +193,10 @@ class StepCounterService {
       if (_hasHealthKit) {
         _healthKitTimer = Timer.periodic(
           const Duration(seconds: 30),
-          (_) => _refreshIOSBaseline(),
+          (_) {
+            _refreshIOSBaseline();
+            refreshHealthMetrics();
+          },
         );
       }
     }
@@ -404,6 +413,7 @@ class StepCounterService {
     if (!_healthAvailable) return;
     _cachedActiveEnergy = await _readActiveEnergy();
     _cachedDistanceKm = await _readWalkingDistanceKm();
+    _healthMetricsController.add(null);
   }
 
   /// Read today's steps from HealthKit (iOS) or Health Connect (Android).
@@ -587,6 +597,7 @@ class StepCounterService {
     _statusSub?.cancel();
     _stepsController.close();
     _statusController.close();
+    _healthMetricsController.close();
     _initialized = false;
   }
 }

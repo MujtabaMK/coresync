@@ -8,6 +8,9 @@ I # Miscellaneous
 .atom/
 .build/
 .buildlog/
+.venv/
+*.csv
+*.py
 .history
 .svn/
 .swiftpm/

@@ -57,6 +57,9 @@ service cloud.firestore {
       match /habits/{docId} {
         allow read, write: if request.auth.uid == userId;
       }
+      match /custom_foods/{docId} {
+        allow read, write: if request.auth.uid == userId;
+      }
 
       // Notifications subcollection (legacy)
       match /notifications/{notifId} {
@@ -88,6 +91,13 @@ service cloud.firestore {
                         || request.auth.uid in resource.data.sharedWith);
       allow delete: if request.auth != null
                     && resource.data.ownerId == request.auth.uid;
+
+      // Comments: owner and shared users can read and create comments.
+      match /comments/{commentId} {
+        allow read, create: if request.auth != null
+                            && (get(/databases/$(database)/documents/tasks/$(taskId)).data.ownerId == request.auth.uid
+                                || request.auth.uid in get(/databases/$(database)/documents/tasks/$(taskId)).data.sharedWith);
+      }
     }
   }
 }

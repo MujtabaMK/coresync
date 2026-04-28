@@ -33,7 +33,27 @@ class RecipeRepository {
     return snapshot.docs.isNotEmpty;
   }
 
-  Future<void> seedRecipes(List<RecipeModel> recipes) async {
+  Future<int> getSeededVersion() async {
+    final doc = await _collection.doc('_meta').get();
+    if (!doc.exists) return 0;
+    return (doc.data()?['version'] as int?) ?? 0;
+  }
+
+  Future<void> deleteAllRecipes() async {
+    _cache.clear();
+    const batchSize = 500;
+    while (true) {
+      final snapshot = await _collection.limit(batchSize).get();
+      if (snapshot.docs.isEmpty) break;
+      final batch = _firestore.batch();
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    }
+  }
+
+  Future<void> seedRecipes(List<RecipeModel> recipes, {int version = 1}) async {
     const batchSize = 500;
     for (var i = 0; i < recipes.length; i += batchSize) {
       final batch = _firestore.batch();
@@ -45,6 +65,8 @@ class RecipeRepository {
       }
       await batch.commit();
     }
+    // Store version metadata
+    await _collection.doc('_meta').set({'version': version});
   }
 
   /// Loads all categories into cache and returns a flat list of all recipes.

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -11,7 +13,7 @@ class FoodDatabaseService {
   static final FoodDatabaseService instance = FoodDatabaseService._();
 
   static const _dbName = 'foods.db';
-  static const _dbVersion = 12; // split Roti/Chapati, added roti types, fixed nutrition, removed 15 duplicates
+  static const _dbVersion = 18;
   static const _table = 'foods';
 
   Database? _db;
@@ -22,16 +24,99 @@ class FoodDatabaseService {
 
   Future<Database> _open() async {
     final dbPath = join(await getDatabasesPath(), _dbName);
-    return openDatabase(
-      dbPath,
-      version: _dbVersion,
-      onCreate: _createTable,
-      onUpgrade: (db, oldVersion, newVersion) async {
-        // Drop and recreate to reseed with cleaned data
-        await db.execute('DROP TABLE IF EXISTS $_table');
-        await _createTable(db, newVersion);
-      },
-    );
+    try {
+      // Pre-upgrade: sync custom foods to Firestore BEFORE the table is dropped
+      final probe = await openDatabase(dbPath, singleInstance: false);
+      final oldVersion = await probe.getVersion();
+      if (oldVersion > 0 && oldVersion < _dbVersion) {
+        await _syncCustomFoodsBeforeUpgrade(probe);
+      }
+      await probe.close();
+    } catch (_) {
+      // DB doesn't exist or is corrupted — nothing to sync
+    }
+
+    try {
+      return await openDatabase(
+        dbPath,
+        version: _dbVersion,
+        onCreate: _createTable,
+        onUpgrade: (db, oldVersion, newVersion) async {
+          await db.execute('DROP TABLE IF EXISTS $_table');
+          await db.execute('DROP TABLE IF EXISTS _foods_custom_backup');
+          await _createTable(db, newVersion);
+        },
+      );
+    } catch (_) {
+      await deleteDatabase(dbPath);
+      return openDatabase(
+        dbPath,
+        version: _dbVersion,
+        onCreate: _createTable,
+      );
+    }
+  }
+
+  /// Syncs local custom foods to Firestore before a DB upgrade drops the table.
+  Future<void> _syncCustomFoodsBeforeUpgrade(Database db) async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return;
+
+      // Check if table exists
+      final tableCheck = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+        [_table],
+      );
+      if (tableCheck.isEmpty) return;
+
+      final allRows = await db.query(_table);
+      if (allRows.isEmpty) return;
+
+      // Load bundled names to identify custom foods
+      final jsonStr =
+          await rootBundle.loadString('assets/foods/common_foods.json');
+      final List<dynamic> items = json.decode(jsonStr) as List<dynamic>;
+      final bundledNames = <String>{
+        for (final m in items) (m['name'] as String).toLowerCase(),
+      };
+
+      final customRows = allRows
+          .where(
+              (r) => !bundledNames.contains((r['nameLower'] as String?) ?? ''))
+          .toList();
+
+      if (customRows.isEmpty) return;
+
+      final userDoc =
+          FirebaseFirestore.instance.collection('users').doc(uid);
+      final batch = FirebaseFirestore.instance.batch();
+      final collection = userDoc.collection('custom_foods');
+
+      for (final row in customRows) {
+        final name = row['name'] as String? ?? '';
+        if (name.isEmpty) continue;
+        final docId =
+            name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+        batch.set(collection.doc(docId), {
+          'name': name,
+          'servingSize': row['servingSize'] ?? '100g',
+          'calories': row['calories'] ?? 0,
+          'protein': row['protein'] ?? 0,
+          'carbs': row['carbs'] ?? 0,
+          'fat': row['fat'] ?? 0,
+          'fiber': row['fiber'] ?? 0,
+          'sodium': row['sodium'] ?? 0,
+          'sugar': row['sugar'] ?? 0,
+          'cholesterol': row['cholesterol'] ?? 0,
+          'category': row['category'] ?? 'Other',
+        });
+      }
+      await batch.commit();
+      await userDoc.set({'customFoodsSynced': true}, SetOptions(merge: true));
+    } catch (_) {
+      // Best effort — don't block upgrade if Firestore is unavailable
+    }
   }
 
   Future<void> _createTable(Database db, int version) async {
@@ -101,7 +186,104 @@ class FoodDatabaseService {
       }
       await batch.commit(noResult: true);
     }
+    // Restore user-created custom foods from Firestore in background
+    _restoreCustomFoodsFromFirestore(db);
+
     return true;
+  }
+
+  /// One-time migration: upload any local custom foods to Firestore so they
+  /// survive future DB upgrades. Call after DB is open and seeded.
+  /// Safe to call multiple times — skips if already synced.
+  Future<void> syncCustomFoodsToFirestore() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    // Check if we already synced
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(uid);
+    final userData = await userDoc.get();
+    if (userData.data()?['customFoodsSynced'] == true) return;
+
+    final db = await _database;
+
+    // Load bundled names to identify which local foods are custom
+    final jsonStr =
+        await rootBundle.loadString('assets/foods/common_foods.json');
+    final List<dynamic> items = json.decode(jsonStr) as List<dynamic>;
+    final bundledNames = <String>{
+      for (final m in items) (m['name'] as String).toLowerCase(),
+    };
+
+    final allRows = await db.query(_table);
+    final customRows = allRows
+        .where((r) => !bundledNames.contains((r['nameLower'] as String?) ?? ''))
+        .toList();
+
+    if (customRows.isNotEmpty) {
+      final batch = FirebaseFirestore.instance.batch();
+      final collection = userDoc.collection('custom_foods');
+      for (final row in customRows) {
+        final name = row['name'] as String? ?? '';
+        if (name.isEmpty) continue;
+        final docId = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+        batch.set(collection.doc(docId), {
+          'name': name,
+          'servingSize': row['servingSize'] ?? '100g',
+          'calories': row['calories'] ?? 0,
+          'protein': row['protein'] ?? 0,
+          'carbs': row['carbs'] ?? 0,
+          'fat': row['fat'] ?? 0,
+          'fiber': row['fiber'] ?? 0,
+          'sodium': row['sodium'] ?? 0,
+          'sugar': row['sugar'] ?? 0,
+          'cholesterol': row['cholesterol'] ?? 0,
+          'category': row['category'] ?? 'Other',
+        });
+      }
+      await batch.commit();
+    }
+
+    // Mark as synced so we don't repeat this
+    await userDoc.set({'customFoodsSynced': true}, SetOptions(merge: true));
+  }
+
+  void _restoreCustomFoodsFromFirestore(Database db) {
+    Future(() async {
+      try {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) return;
+
+        final snapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('custom_foods')
+            .get();
+
+        if (snapshot.docs.isEmpty) return;
+
+        final batch = db.batch();
+        for (final doc in snapshot.docs) {
+          final d = doc.data();
+          final name = d['name'] as String? ?? '';
+          if (name.isEmpty) continue;
+          batch.insert(_table, {
+            'name': name,
+            'nameLower': name.toLowerCase(),
+            'servingSize': d['servingSize'] ?? '100g',
+            'calories': (d['calories'] as num?)?.toDouble() ?? 0,
+            'protein': (d['protein'] as num?)?.toDouble() ?? 0,
+            'carbs': (d['carbs'] as num?)?.toDouble() ?? 0,
+            'fat': (d['fat'] as num?)?.toDouble() ?? 0,
+            'fiber': (d['fiber'] as num?)?.toDouble() ?? 0,
+            'sodium': (d['sodium'] as num?)?.toDouble() ?? 0,
+            'sugar': (d['sugar'] as num?)?.toDouble() ?? 0,
+            'cholesterol': (d['cholesterol'] as num?)?.toDouble() ?? 0,
+            'category': d['category'] ?? 'Other',
+          });
+        }
+        await batch.commit(noResult: true);
+      } catch (_) {}
+    });
   }
 
   /// Full-text-ish search on name (case-insensitive via nameLower column).

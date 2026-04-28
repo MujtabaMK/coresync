@@ -24,6 +24,7 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
   late final GymCubit _gymCubit;
 
   StreamSubscription<int>? _stepSub;
+  StreamSubscription<void>? _healthMetricsSub;
   StreamSubscription<Activity>? _activitySub;
 
   int _steps = 0;
@@ -115,6 +116,11 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
       });
     });
 
+    // 2b. Rebuild UI when HealthKit kcal/distance refresh (every 30s)
+    _healthMetricsSub = _service.healthMetricsStream.listen((_) {
+      if (mounted) setState(() {});
+    });
+
     // UI is ready — show whatever we have (even 0)
     if (mounted && _initializing) {
       setState(() => _initializing = false);
@@ -132,7 +138,17 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
       return;
     }
 
-    // Subscribe to activity recognition AFTER permissions are granted
+    // Check activity recognition permission (especially important on iOS)
+    final activityPermission =
+        await FlutterActivityRecognition.instance.checkPermission();
+    if (activityPermission == PermissionRequestResult.PERMANENTLY_DENIED) {
+      // On iOS, motion permission was denied — activity detection won't work.
+      // Request via settings; on iOS the permission prompt is automatic on
+      // first access, so this only fires if the user previously denied it.
+      debugPrint('Activity recognition permission denied');
+    }
+
+    // Subscribe to activity recognition
     _activitySub = FlutterActivityRecognition.instance.activityStream.listen(
       (activity) {
         if (mounted) {
@@ -143,7 +159,9 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
           }
         }
       },
-      onError: (_) {},
+      onError: (error) {
+        debugPrint('Activity recognition error: $error');
+      },
     );
 
     // Use the best known value after all sources are checked
@@ -206,6 +224,7 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _stillDebounce?.cancel();
     _stepSub?.cancel();
+    _healthMetricsSub?.cancel();
     _activitySub?.cancel();
     super.dispose();
   }
@@ -234,21 +253,25 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
     final gymState = context.watch<GymCubit>().state;
     final weight = gymState.userWeight ?? 70.0;
     final heightCm = gymState.userHeight;
-    // Prefer HealthKit/Health Connect values; fall back to MET-based estimate
-    final calories = _service.cachedActiveEnergy?.round() ??
-        StepCounterService.calculateStepCalories(
-          steps: _steps,
-          weightKg: weight,
-          heightCm: heightCm,
-        ).round();
+    // Prefer Apple Health active energy when available; fall back to formula
+    final healthCalories = _service.cachedActiveEnergy?.round() ?? 0;
+    final calories = healthCalories > 0
+        ? healthCalories
+        : StepCounterService.calculateStepCalories(
+            steps: _steps,
+            weightKg: weight,
+            heightCm: heightCm,
+          ).round();
     final minutes = (_steps / 100).round();
 
     // Personalized step goal based on BMI (if height & weight available)
     final goal = _computeStepGoal() ?? 10000;
 
-    // Km walked: prefer health data, fall back to stride estimate
-    final strideLengthM = heightCm != null ? heightCm * 0.415 / 100 : 0.75;
-    final kmWalked = _service.cachedDistanceKm ?? _steps * strideLengthM / 1000;
+    // Prefer Apple Health distance when available; fall back to formula
+    final healthDistanceKm = _service.cachedDistanceKm ?? 0.0;
+    final kmWalked = healthDistanceKm > 0
+        ? healthDistanceKm
+        : _steps * (heightCm != null ? heightCm * 0.415 / 100 : 0.75) / 1000;
 
     final stepsProgress = (_steps / goal).clamp(0.0, 1.0);
     final minutesProgress = (minutes / 60).clamp(0.0, 1.0); // 60 min goal

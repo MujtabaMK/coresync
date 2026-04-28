@@ -11,6 +11,9 @@ class RecipeSeedService {
 
   final RecipeRepository _repository;
 
+  /// Bump this version whenever recipe data changes to trigger re-seeding.
+  static const _currentVersion = 4;
+
   static const _assetFiles = [
     'assets/recipes/breakfast.json',
     'assets/recipes/lunch.json',
@@ -23,8 +26,13 @@ class RecipeSeedService {
   ];
 
   Future<void> seedIfNeeded() async {
-    final seeded = await _repository.isSeeded();
-    if (seeded) return;
+    final storedVersion = await _repository.getSeededVersion();
+    if (storedVersion >= _currentVersion) return;
+
+    // Delete old recipes if they exist (version mismatch)
+    if (await _repository.isSeeded()) {
+      await _repository.deleteAllRecipes();
+    }
 
     final allRecipes = <RecipeModel>[];
 
@@ -37,6 +45,6 @@ class RecipeSeedService {
       allRecipes.addAll(recipes);
     }
 
-    await _repository.seedRecipes(allRecipes);
+    await _repository.seedRecipes(allRecipes, version: _currentVersion);
   }
 }

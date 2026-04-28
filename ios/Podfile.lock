@@ -1483,6 +1483,8 @@ PODS:
     - Flutter
   - PromisesObjC (2.4.0)
   - RecaptchaInterop (101.0.0)
+  - sensors_plus (0.0.1):
+    - Flutter
   - share_plus (0.0.1):
     - Flutter
   - speech_to_text (7.2.0):
@@ -1525,6 +1527,7 @@ DEPENDENCIES:
   - pedometer_2 (from `.symlinks/plugins/pedometer_2/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - printing (from `.symlinks/plugins/printing/ios`)
+  - sensors_plus (from `.symlinks/plugins/sensors_plus/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - speech_to_text (from `.symlinks/plugins/speech_to_text/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
@@ -1618,6 +1621,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   printing:
     :path: ".symlinks/plugins/printing/ios"
+  sensors_plus:
+    :path: ".symlinks/plugins/sensors_plus/ios"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
   speech_to_text:
@@ -1687,6 +1692,7 @@ SPEC CHECKSUMS:
   printing: 233e1b73bd1f4a05615548e9b5a324c98588640b
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
+  sensors_plus: 7229095999f30740798f0eeef5cd120357a8f4f2
   share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
   speech_to_text: 87bf9298952e8d9073be1b6aade6d5758db5170c
   sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d

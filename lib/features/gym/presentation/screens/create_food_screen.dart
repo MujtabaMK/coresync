@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -85,8 +87,60 @@ class _CreateFoodScreenState extends State<CreateFoodScreen> {
 
     setState(() => _saving = true);
 
+    final name = _nameCtrl.text.trim();
+
+    // Check if food already exists in the database
+    try {
+      final existing = await FoodDatabaseService.instance.getFoodByName(name);
+      if (existing != null && mounted) {
+        setState(() => _saving = false);
+        final action = await showDialog<String>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Food Already Exists'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  existing.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text('Serving: ${existing.servingSize}'),
+                Text('Calories: ${existing.calories.toStringAsFixed(0)} kcal'),
+                Text('Protein: ${existing.protein.toStringAsFixed(1)}g'),
+                Text('Carbs: ${existing.carbs.toStringAsFixed(1)}g'),
+                Text('Fat: ${existing.fat.toStringAsFixed(1)}g'),
+                const SizedBox(height: 12),
+                const Text(
+                  'Use existing food or change the name to create a new one?',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, 'change'),
+                child: const Text('Change Name'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, 'use'),
+                child: const Text('Use Existing'),
+              ),
+            ],
+          ),
+        );
+        if (action == 'use' && mounted) {
+          Navigator.pop(context, existing);
+        }
+        // 'change' or dismissed → stay on screen to edit name
+        return;
+      }
+    } catch (_) {}
+
     final food = CommonFoodItem(
-      name: _nameCtrl.text.trim(),
+      name: name,
       servingSize: _servingSizeCtrl.text.trim(),
       calories: _parseDouble(_caloriesCtrl),
       protein: _parseDouble(_proteinCtrl),
@@ -101,6 +155,30 @@ class _CreateFoodScreenState extends State<CreateFoodScreen> {
 
     try {
       await FoodDatabaseService.instance.insertFood(food);
+
+      // Also save to Firestore so custom foods survive DB upgrades
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('custom_foods')
+            .doc(food.name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_'))
+            .set({
+          'name': food.name,
+          'servingSize': food.servingSize,
+          'calories': food.calories,
+          'protein': food.protein,
+          'carbs': food.carbs,
+          'fat': food.fat,
+          'fiber': food.fiber,
+          'sodium': food.sodium,
+          'sugar': food.sugar,
+          'cholesterol': food.cholesterol,
+          'category': food.category,
+        });
+      }
+
       if (!mounted) return;
       Navigator.pop(context, food);
     } catch (e) {

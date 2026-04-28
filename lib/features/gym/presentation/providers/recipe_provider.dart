@@ -29,6 +29,7 @@ class RecipeState {
     this.isSearching = false,
     this.isCalorieSearch = false,
     this.calorieTarget = 0,
+    this.vegOnly = false,
   });
 
   final List<RecipeModel> recipes;
@@ -42,6 +43,7 @@ class RecipeState {
   final bool isSearching;
   final bool isCalorieSearch;
   final int calorieTarget;
+  final bool vegOnly;
 
   /// Active when there's a text search, calorie search, or a sort chip selected.
   bool get isInSearchMode =>
@@ -60,6 +62,7 @@ class RecipeState {
     bool? isSearching,
     bool? isCalorieSearch,
     int? calorieTarget,
+    bool? vegOnly,
   }) {
     return RecipeState(
       recipes: recipes ?? this.recipes,
@@ -73,6 +76,7 @@ class RecipeState {
       isSearching: isSearching ?? this.isSearching,
       isCalorieSearch: isCalorieSearch ?? this.isCalorieSearch,
       calorieTarget: calorieTarget ?? this.calorieTarget,
+      vegOnly: vegOnly ?? this.vegOnly,
     );
   }
 }
@@ -84,6 +88,20 @@ class RecipeCubit extends Cubit<RecipeState> {
 
   final RecipeRepository _repository;
   List<RecipeModel>? _allRecipesCache;
+
+  List<RecipeModel> _applyVegFilter(List<RecipeModel> recipes) {
+    if (!state.vegOnly) return recipes;
+    return recipes.where((r) => r.isVegetarian).toList();
+  }
+
+  Future<void> toggleVegOnly() async {
+    emit(state.copyWith(vegOnly: !state.vegOnly));
+    if (state.isInSearchMode) {
+      await searchRecipes(state.searchQuery);
+    } else {
+      await loadCategory(state.selectedCategory);
+    }
+  }
 
   Future<void> seedAndLoad() async {
     emit(state.copyWith(isSeeding: true, clearError: true));
@@ -107,7 +125,7 @@ class RecipeCubit extends Cubit<RecipeState> {
     ));
     try {
       final recipes = await _repository.getByCategory(category);
-      emit(state.copyWith(recipes: recipes, isLoading: false));
+      emit(state.copyWith(recipes: _applyVegFilter(recipes), isLoading: false));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
     }
@@ -149,7 +167,8 @@ class RecipeCubit extends Cubit<RecipeState> {
         ));
         try {
           final all = await _ensureAllRecipes();
-          final sorted = _applySorting(List.of(all), state.sortType);
+          final sorted = _applySorting(
+              _applyVegFilter(List.of(all)), state.sortType);
           emit(state.copyWith(searchResults: sorted, isSearching: false));
         } catch (e) {
           emit(state.copyWith(isSearching: false, error: e.toString()));
@@ -178,9 +197,9 @@ class RecipeCubit extends Cubit<RecipeState> {
       if (kcalTarget != null) {
         final min = (kcalTarget - 50).clamp(0, 99999);
         final max = kcalTarget + 50;
-        var filtered = all
+        var filtered = _applyVegFilter(all
             .where((r) => r.calories >= min && r.calories <= max)
-            .toList()
+            .toList())
           ..sort((a, b) =>
               (a.calories - kcalTarget).abs().compareTo(
                   (b.calories - kcalTarget).abs()));
@@ -195,9 +214,9 @@ class RecipeCubit extends Cubit<RecipeState> {
       }
 
       // Name search
-      var filtered = all
+      var filtered = _applyVegFilter(all
           .where((r) => r.name.toLowerCase().contains(lower))
-          .toList();
+          .toList());
       filtered = _applySorting(filtered, state.sortType);
 
       emit(state.copyWith(
@@ -238,22 +257,22 @@ class RecipeCubit extends Cubit<RecipeState> {
         if (kcalTarget != null) {
           final min = (kcalTarget - 50).clamp(0, 99999);
           final max = kcalTarget + 50;
-          results = all
+          results = _applyVegFilter(all
               .where((r) => r.calories >= min && r.calories <= max)
-              .toList();
+              .toList());
           if (newSort == RecipeSortType.none) {
             results.sort((a, b) =>
                 (a.calories - kcalTarget).abs().compareTo(
                     (b.calories - kcalTarget).abs()));
           }
         } else {
-          results = all
+          results = _applyVegFilter(all
               .where((r) => r.name.toLowerCase().contains(lower))
-              .toList();
+              .toList());
         }
       } else {
         // No text query — show all recipes with this sort
-        results = List.of(all);
+        results = _applyVegFilter(List.of(all));
       }
 
       results = _applySorting(results, newSort);

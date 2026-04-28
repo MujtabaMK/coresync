@@ -20,6 +20,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
   final _stepService = StepCounterService.instance;
   late final GymCubit _gymCubit;
   StreamSubscription<int>? _stepSub;
+  StreamSubscription<void>? _healthMetricsSub;
   int _liveSteps = 0;
   bool _stepsLoading = true;
 
@@ -83,6 +84,11 @@ class _GymHomeScreenState extends State<GymHomeScreen>
       }
     });
 
+    // 2b. Rebuild UI when HealthKit kcal refreshes
+    _healthMetricsSub = _stepService.healthMetricsStream.listen((_) {
+      if (mounted) setState(() {});
+    });
+
     // 3. Initialize sensor + Health Connect (may update _liveSteps via stream)
     await _stepService.initialize();
 
@@ -105,6 +111,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _stepSub?.cancel();
+    _healthMetricsSub?.cancel();
     super.dispose();
   }
 

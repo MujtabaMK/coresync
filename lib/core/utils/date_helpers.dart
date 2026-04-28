@@ -41,4 +41,18 @@ class DateHelpers {
     final toDate = startOfDay(to);
     return toDate.difference(fromDate).inDays;
   }
+
+  static String formatRelativeTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final diff = now.difference(dateTime);
+
+    if (diff.inSeconds < 60) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+
+    final yesterday = startOfDay(now).subtract(const Duration(days: 1));
+    if (startOfDay(dateTime) == yesterday) return 'Yesterday';
+
+    return formatDateTime(dateTime);
+  }
 }

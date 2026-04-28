@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:uuid/uuid.dart';
 
+import '../../data/common_foods_data.dart';
 import '../../data/food_database_service.dart';
 import '../../data/step_counter_service.dart';
 import '../../data/gemini_food_service.dart';
@@ -20,6 +21,7 @@ import '../providers/gym_provider.dart';
 import '../widgets/food_scan_result_sheet.dart';
 import '../widgets/recipe_detail_sheet.dart';
 import '../widgets/voice_food_result_sheet.dart';
+import 'create_food_screen.dart';
 import 'food_explorer_screen.dart';
 import 'food_search_screen.dart';
 import 'log_sleep_screen.dart';
@@ -39,6 +41,7 @@ class _TrackFoodScreenState extends State<TrackFoodScreen>
   final _stepService = StepCounterService.instance;
   late final GymCubit _gymCubit;
   StreamSubscription<int>? _stepSub;
+  StreamSubscription<void>? _healthMetricsSub;
 
   @override
   void initState() {
@@ -92,6 +95,11 @@ class _TrackFoodScreenState extends State<TrackFoodScreen>
       }
     });
 
+    // 2b. Rebuild UI when HealthKit kcal refreshes
+    _healthMetricsSub = _stepService.healthMetricsStream.listen((_) {
+      if (mounted) setState(() {});
+    });
+
     // 3. Initialize sensor + Health Connect
     await _stepService.initialize();
 
@@ -106,6 +114,7 @@ class _TrackFoodScreenState extends State<TrackFoodScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _stepSub?.cancel();
+    _healthMetricsSub?.cancel();
     super.dispose();
   }
 
@@ -3002,6 +3011,30 @@ class _TrackTab extends StatelessWidget {
                   ),
                 );
               },
+              onCreateFood: () async {
+                final food = await Navigator.push<CommonFoodItem>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CreateFoodScreen(),
+                  ),
+                );
+                if (food != null && context.mounted) {
+                  final cubit = context.read<GymCubit>();
+                  final tracked = TrackedFoodModel(
+                    id: const Uuid().v4(),
+                    name: food.name,
+                    servingSize: food.servingSize,
+                    calories: food.calories,
+                    protein: food.protein,
+                    carbs: food.carbs,
+                    fat: food.fat,
+                    mealType: meal,
+                    quantity: 1.0,
+                    trackedAt: DateTime.now(),
+                  );
+                  cubit.saveTrackedFood(tracked);
+                }
+              },
               onScan: (source) => onScanFood(meal, source),
               onVoice: () => onVoiceFood(meal),
             )),
@@ -3279,6 +3312,7 @@ class _MealSection extends StatelessWidget {
     required this.foods,
     required this.caloriesConsumed,
     required this.onAddManually,
+    required this.onCreateFood,
     required this.onScan,
     required this.onVoice,
   });
@@ -3288,6 +3322,7 @@ class _MealSection extends StatelessWidget {
   final List<TrackedFoodModel> foods;
   final double caloriesConsumed;
   final VoidCallback onAddManually;
+  final VoidCallback onCreateFood;
   final void Function(ImageSource source) onScan;
   final VoidCallback onVoice;
 
@@ -3438,6 +3473,15 @@ class _MealSection extends StatelessWidget {
                 onScan(ImageSource.gallery);
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.edit_note),
+              title: const Text('Add Food Manually'),
+              subtitle: const Text('Enter nutrition info yourself'),
+              onTap: () {
+                Navigator.pop(context);
+                onCreateFood();
+              },
+            ),
             const SizedBox(height: 8),
           ],
         ),
@@ -3494,10 +3538,31 @@ class _RecipesTabState extends State<_RecipesTab>
   _RecipeSortType _sortType = _RecipeSortType.none;
   bool _isCalorieSearch = false;
   int _calorieTarget = 0;
+  bool _vegOnly = false;
   Timer? _debounce;
 
   bool get _isInSearchMode =>
       _searchQuery.isNotEmpty || _sortType != _RecipeSortType.none;
+
+  List<RecipeModel> _applyVegFilter(List<RecipeModel> recipes) {
+    if (!_vegOnly) return recipes;
+    return recipes.where((r) => r.isVegetarian).toList();
+  }
+
+  void _toggleVegOnly() {
+    setState(() {
+      _vegOnly = !_vegOnly;
+      // Re-apply current view with new filter
+      if (_isInSearchMode) {
+        if (_searchQuery.isNotEmpty) {
+          _performSearch(_searchQuery);
+        } else {
+          _searchResults = _applySorting(
+              _applyVegFilter(List.of(_allRecipes)), _sortType);
+        }
+      }
+    });
+  }
 
   static const _categories = RecipeCategory.values;
   static const _assetFiles = {
@@ -3568,7 +3633,8 @@ class _RecipesTabState extends State<_RecipesTab>
         _isCalorieSearch = false;
         _calorieTarget = 0;
         if (_sortType != _RecipeSortType.none) {
-          _searchResults = _applySorting(List.of(_allRecipes), _sortType);
+          _searchResults = _applySorting(
+              _applyVegFilter(List.of(_allRecipes)), _sortType);
         } else {
           _searchResults = [];
         }
@@ -3587,9 +3653,9 @@ class _RecipesTabState extends State<_RecipesTab>
     if (kcalTarget != null) {
       final min = (kcalTarget - 50).clamp(0, 99999);
       final max = kcalTarget + 50;
-      var filtered = _allRecipes
+      var filtered = _applyVegFilter(_allRecipes
           .where((r) => r.calories >= min && r.calories <= max)
-          .toList()
+          .toList())
         ..sort((a, b) => (a.calories - kcalTarget)
             .abs()
             .compareTo((b.calories - kcalTarget).abs()));
@@ -3601,9 +3667,9 @@ class _RecipesTabState extends State<_RecipesTab>
         _calorieTarget = kcalTarget;
       });
     } else {
-      var filtered = _allRecipes
+      var filtered = _applyVegFilter(_allRecipes
           .where((r) => r.name.toLowerCase().contains(lower))
-          .toList();
+          .toList());
       filtered = _applySorting(filtered, _sortType);
       setState(() {
         _searchQuery = query;
@@ -3634,21 +3700,21 @@ class _RecipesTabState extends State<_RecipesTab>
       if (kcalTarget != null) {
         final min = (kcalTarget - 50).clamp(0, 99999);
         final max = kcalTarget + 50;
-        results = _allRecipes
+        results = _applyVegFilter(_allRecipes
             .where((r) => r.calories >= min && r.calories <= max)
-            .toList();
+            .toList());
         if (newSort == _RecipeSortType.none) {
           results.sort((a, b) => (a.calories - kcalTarget)
               .abs()
               .compareTo((b.calories - kcalTarget).abs()));
         }
       } else {
-        results = _allRecipes
+        results = _applyVegFilter(_allRecipes
             .where((r) => r.name.toLowerCase().contains(lower))
-            .toList();
+            .toList());
       }
     } else {
-      results = List.of(_allRecipes);
+      results = _applyVegFilter(List.of(_allRecipes));
     }
 
     results = _applySorting(results, newSort);
@@ -3730,29 +3796,44 @@ class _RecipesTabState extends State<_RecipesTab>
               onChanged: _onSearchChanged,
             ),
           ),
-          // Sort chips
+          // Filter & sort chips
           SizedBox(
             height: 48,
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: _RecipeSortType.values
-                  .where((s) => s != _RecipeSortType.none)
-                  .map((sort) {
-                final selected = _sortType == sort;
-                return Padding(
+              children: [
+                Padding(
                   padding: const EdgeInsets.only(right: 6),
                   child: FilterChip(
-                    label: Text(sort.label),
-                    selected: selected,
-                    onSelected: (_) => _onSortTapped(sort),
+                    label: const Text('Veg Only'),
+                    selected: _vegOnly,
+                    onSelected: (_) => _toggleVegOnly(),
                     visualDensity: VisualDensity.compact,
                     materialTapTargetSize:
                         MaterialTapTargetSize.shrinkWrap,
+                    selectedColor: Colors.green.withValues(alpha: 0.2),
+                    checkmarkColor: Colors.green,
                   ),
-                );
-              }).toList(),
+                ),
+                ..._RecipeSortType.values
+                    .where((s) => s != _RecipeSortType.none)
+                    .map((sort) {
+                  final selected = _sortType == sort;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: FilterChip(
+                      label: Text(sort.label),
+                      selected: selected,
+                      onSelected: (_) => _onSortTapped(sort),
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize:
+                          MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  );
+                }),
+              ],
             ),
           ),
           // Calorie search banner
@@ -3792,7 +3873,8 @@ class _RecipesTabState extends State<_RecipesTab>
                 : TabBarView(
                     controller: _catTabCtrl,
                     children: _categories.map((cat) {
-                      final recipes = _recipes[cat] ?? [];
+                      final recipes =
+                          _applyVegFilter(_recipes[cat] ?? []);
                       if (recipes.isEmpty) {
                         return const Center(child: Text('No recipes'));
                       }
@@ -3865,23 +3947,32 @@ class _RecipeCard extends StatelessWidget {
                           ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
-                  if (recipe.isVegetarian)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: Colors.green),
-                      ),
-                      child: const Text(
-                        'Veg',
-                        style: TextStyle(
-                            color: Colors.green,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: recipe.isVegetarian
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: recipe.isVegetarian
+                            ? Colors.green
+                            : Colors.red,
+                        width: 0.5,
                       ),
                     ),
+                    child: Text(
+                      recipe.isVegetarian ? 'Veg' : 'Non Veg',
+                      style: TextStyle(
+                        color: recipe.isVegetarian
+                            ? Colors.green
+                            : Colors.red,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),

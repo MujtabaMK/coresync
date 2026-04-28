@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../../../core/constants/notification_ids.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/push_notification_service.dart';
 import '../../data/share_repository.dart';
 import '../../data/todo_repository.dart';
 import '../../domain/task_model.dart';
@@ -197,11 +200,25 @@ class TodoCubit extends Cubit<TodoState> {
   }
 
   /// Update task status and update local state immediately.
+  /// If updated by someone other than the owner, notify the owner.
   Future<void> updateTaskStatus(String taskId, TaskStatus status) async {
     if (status == TaskStatus.completed) {
       await NotificationService.cancel(NotificationIds.taskAlarm(taskId));
     }
     await _todoRepository.updateTaskStatus(taskId, status);
+
+    // Notify the owner if status was changed by a shared user
+    final task = state.allTasks.where((t) => t.id == taskId).firstOrNull;
+    if (task != null && task.ownerId != _uid && task.ownerId.isNotEmpty) {
+      final updaterName =
+          FirebaseAuth.instance.currentUser?.displayName ?? 'Someone';
+      await PushNotificationService.sendNotification(
+        targetUid: task.ownerId,
+        title: 'Task Status Updated',
+        body: '$updaterName changed "${task.title}" to ${status.label}',
+      );
+    }
+
     TaskModel updater(TaskModel t) {
       if (t.id == taskId) {
         return t.copyWith(status: status, updatedAt: DateTime.now());

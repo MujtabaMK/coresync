@@ -106,6 +106,9 @@ class HabitCubit extends Cubit<HabitState> {
   }
 
   Future<void> _rescheduleAllReminders(List<HabitModel> habits) async {
+    // Clean up orphaned notifications scheduled with empty habit ID
+    await cancelHabitReminders('');
+
     for (final habit in habits) {
       if (habit.reminderEnabled) {
         await scheduleHabitReminders(habit);
@@ -188,9 +191,9 @@ class HabitCubit extends Cubit<HabitState> {
 
   Future<void> addHabit(HabitModel habit) async {
     try {
-      await _repository.addHabit(habit);
+      final id = await _repository.addHabit(habit);
       if (habit.reminderEnabled) {
-        await scheduleHabitReminders(habit);
+        await scheduleHabitReminders(habit.copyWith(id: id));
       }
     } catch (e) {
       emit(state.copyWith(error: e.toString()));

@@ -157,28 +157,43 @@ class _WeightLossRecipesScreenState extends State<WeightLossRecipesScreen>
             onChanged: _onSearchChanged,
           ),
         ),
-        // Sort chips — always visible
+        // Filter & sort chips — always visible
         SizedBox(
           height: 48,
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            children: RecipeSortType.values
-                .where((s) => s != RecipeSortType.none)
-                .map((sort) {
-              final selected = state.sortType == sort;
-              return Padding(
+            children: [
+              Padding(
                 padding: const EdgeInsets.only(right: 6),
                 child: FilterChip(
-                  label: Text(sort.label),
-                  selected: selected,
+                  label: const Text('Veg Only'),
+                  selected: state.vegOnly,
                   onSelected: (_) =>
-                      context.read<RecipeCubit>().sortRecipes(sort),
+                      context.read<RecipeCubit>().toggleVegOnly(),
                   visualDensity: VisualDensity.compact,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  selectedColor: Colors.green.withValues(alpha: 0.2),
+                  checkmarkColor: Colors.green,
                 ),
-              );
-            }).toList(),
+              ),
+              ...RecipeSortType.values
+                  .where((s) => s != RecipeSortType.none)
+                  .map((sort) {
+                final selected = state.sortType == sort;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: FilterChip(
+                    label: Text(sort.label),
+                    selected: selected,
+                    onSelected: (_) =>
+                        context.read<RecipeCubit>().sortRecipes(sort),
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                );
+              }),
+            ],
           ),
         ),
         // Calorie search banner
@@ -321,23 +336,32 @@ class _RecipeCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (recipe.isVegetarian)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'Veg',
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: recipe.isVegetarian
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: recipe.isVegetarian
+                            ? Colors.green
+                            : Colors.red,
+                        width: 0.5,
                       ),
                     ),
+                    child: Text(
+                      recipe.isVegetarian ? 'Veg' : 'Non Veg',
+                      style: TextStyle(
+                        color: recipe.isVegetarian
+                            ? Colors.green
+                            : Colors.red,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),

@@ -50,24 +50,31 @@ class RecipeDetailSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (recipe.isVegetarian)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.green),
-                      ),
-                      child: const Text(
-                        'Veg',
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: recipe.isVegetarian
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: recipe.isVegetarian
+                            ? Colors.green
+                            : Colors.red,
                       ),
                     ),
+                    child: Text(
+                      recipe.isVegetarian ? 'Veg' : 'Non Veg',
+                      style: TextStyle(
+                        color: recipe.isVegetarian
+                            ? Colors.green
+                            : Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
@@ -77,10 +84,10 @@ class RecipeDetailSheet extends StatelessWidget {
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
-              if (recipe.servings > 0) ...[
+              if (recipe.servings > 1) ...[
                 const SizedBox(height: 2),
                 Text(
-                  'Serves ${recipe.servings} ${recipe.servings == 1 ? 'person' : 'people'}',
+                  'Serves ${recipe.servings} people',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),

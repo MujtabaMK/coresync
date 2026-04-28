@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
+import '../domain/comment_model.dart';
 import '../domain/task_model.dart';
 import '../domain/task_status.dart';
 
@@ -31,6 +32,14 @@ class TodoRepository {
   }
 
   Future<void> deleteTask(String taskId) async {
+    // Delete comments subcollection first to avoid ghost documents
+    final comments = await _tasksCollection
+        .doc(taskId)
+        .collection('comments')
+        .get();
+    for (final doc in comments.docs) {
+      await doc.reference.delete();
+    }
     await _tasksCollection.doc(taskId).delete();
   }
 
@@ -58,6 +67,25 @@ class TodoRepository {
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList());
+  }
+
+  Stream<List<CommentModel>> watchComments(String taskId) {
+    return _tasksCollection
+        .doc(taskId)
+        .collection('comments')
+        .orderBy('createdAt')
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => CommentModel.fromFirestore(doc)).toList());
+  }
+
+  Future<void> addComment(String taskId, CommentModel comment) async {
+    final id = _uuid.v4();
+    await _tasksCollection
+        .doc(taskId)
+        .collection('comments')
+        .doc(id)
+        .set(comment.toFirestore());
   }
 
   Future<void> updateTaskStatus(String taskId, TaskStatus status) async {
