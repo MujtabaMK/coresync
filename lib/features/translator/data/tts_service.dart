@@ -105,6 +105,14 @@ class TtsService {
     return false;
   }
 
+  void setProgressHandler(void Function(String, int, int, String)? handler) {
+    if (handler != null) {
+      _tts.setProgressHandler(handler);
+    } else {
+      _tts.setProgressHandler((text, start, end, word) {});
+    }
+  }
+
   Future<void> stop() async {
     await _tts.stop();
   }

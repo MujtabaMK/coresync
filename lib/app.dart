@@ -22,6 +22,8 @@ import 'features/gym/data/recipe_repository.dart';
 import 'features/gym/presentation/providers/recipe_provider.dart';
 import 'features/habits/data/habit_repository.dart';
 import 'features/habits/presentation/providers/habit_provider.dart';
+import 'features/pdf_reader/data/pdf_reader_repository.dart';
+import 'features/pdf_reader/presentation/providers/pdf_reader_provider.dart';
 import 'features/qr_scanner/data/qr_scanner_repository.dart';
 import 'features/qr_scanner/presentation/providers/qr_scanner_provider.dart';
 import 'features/scanner/data/scanner_repository.dart';
@@ -184,6 +186,16 @@ class _CoreSyncAppState extends State<CoreSyncApp> {
                     repository: HabitRepository(uid: uid),
                   );
                   if (uid.isNotEmpty) cubit.loadHabits();
+                  return cubit;
+                },
+              ),
+              BlocProvider<PdfReaderCubit>(
+                key: ValueKey('pdf_reader_$uid'),
+                create: (_) {
+                  final cubit = PdfReaderCubit(
+                    repository: PdfReaderRepository(uid: uid),
+                  );
+                  if (uid.isNotEmpty) cubit.loadDocuments();
                   return cubit;
                 },
               ),

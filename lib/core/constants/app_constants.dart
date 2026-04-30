@@ -23,6 +23,8 @@ class AppConstants {
   static const String medicinesBox = 'medicines';
   static const String scannedDocumentsBox = 'scanned_documents';
   static const String qrScanHistoryBox = 'qr_scan_history';
+  static const String pdfDocumentsBox = 'pdf_documents';
+  static const String pdfAnnotationsBox = 'pdf_annotations';
   static const String encryptionKeyName = 'coresync_hive_key';
 
   // Gemini AI

@@ -61,6 +61,11 @@ class _MainShellState extends State<MainShell> {
       selectedIcon: Icons.translate,
       label: 'Translator',
     ),
+    (
+      icon: Icons.picture_as_pdf_outlined,
+      selectedIcon: Icons.picture_as_pdf,
+      label: 'PDF Reader',
+    ),
   ];
 
   void _onDestinationSelected(int index) {

@@ -51,6 +51,8 @@ import '../../features/todo/presentation/screens/task_detail_screen.dart';
 import '../../features/habits/presentation/screens/add_edit_habit_screen.dart';
 import '../../features/habits/presentation/screens/habit_shell_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/pdf_reader/presentation/screens/pdf_list_screen.dart';
+import '../../features/pdf_reader/presentation/screens/pdf_viewer_screen.dart';
 import '../../features/todo/presentation/screens/todo_list_screen.dart';
 import '../widgets/main_shell.dart';
 
@@ -81,6 +83,7 @@ final _qrScannerNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'qrScanner'
 final _calculatorNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'calculator');
 final _translatorNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'translator');
 final _habitsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'habits');
+final _pdfReaderNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'pdfReader');
 
 GoRouter createRouter() {
   return GoRouter(
@@ -391,6 +394,28 @@ GoRouter createRouter() {
               GoRoute(
                 path: '/translator',
                 builder: (context, state) => const TranslatorShellScreen(),
+              ),
+            ],
+          ),
+          // PDF Reader branch
+          StatefulShellBranch(
+            navigatorKey: _pdfReaderNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/pdf-reader',
+                builder: (context, state) => const PdfListScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'view/:documentId',
+                    builder: (context, state) {
+                      final docId = state.pathParameters['documentId']!;
+                      return PdfViewerScreen(
+                        key: ValueKey('pdf_viewer_$docId'),
+                        documentId: docId,
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),

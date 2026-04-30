@@ -103,6 +103,13 @@ class _HomeScreenState extends State<HomeScreen> {
       color: Color(0xFF3F51B5),
       branch: 8,
     ),
+    (
+      icon: Icons.picture_as_pdf_rounded,
+      title: 'PDF Reader',
+      subtitle: 'View & annotate PDFs',
+      color: Color(0xFFE53935),
+      branch: 9,
+    ),
   ];
 
   @override

@@ -887,7 +887,56 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
         onPressed: () => _addFood(food),
       ),
       onTap: () => _addFood(food),
+      onLongPress: () => _showDeleteOption(food),
     );
+  }
+
+  Future<void> _showDeleteOption(CommonFoodItem food) async {
+    final isCustom = await _foodDb.isCustomFood(food.name);
+    if (!isCustom || !mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Food'),
+        content: Text(
+          'Delete "${food.name}" from your food database?\n\n'
+          'This will remove it from both local storage and cloud backup.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    await _foodDb.deleteCustomFood(food.name);
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('"${food.name}" deleted')),
+    );
+
+    // Refresh current view
+    if (_query.trim().length >= 2) {
+      _searchLocal(_query.trim());
+    } else {
+      _loadCategories();
+      if (_expandedCategory != null) {
+        _toggleCategory(_expandedCategory!);
+      }
+    }
   }
 }
 

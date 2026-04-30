@@ -9,6 +9,7 @@ import 'features/gym/domain/attendance_model.dart';
 import 'features/gym/domain/membership_model.dart';
 import 'features/passwords/domain/password_entry_model.dart';
 import 'features/qr_scanner/domain/scan_result_model.dart';
+import 'features/pdf_reader/domain/pdf_document_model.dart';
 import 'features/scanner/domain/scanned_document_model.dart';
 import 'firebase_options.dart';
 
@@ -47,5 +48,6 @@ Future<void> main() async {
   Hive.registerAdapter(AttendanceModelAdapter());
   Hive.registerAdapter(ScannedDocumentModelAdapter());
   Hive.registerAdapter(ScanResultModelAdapter());
+  Hive.registerAdapter(PdfDocumentModelAdapter());
   runApp(const CoreSyncApp());
 }

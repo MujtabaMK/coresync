@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 
 import '../constants/app_constants.dart';
 import '../constants/notification_ids.dart';
@@ -357,7 +358,27 @@ class SmartReminderService {
           final icon = data['icon'] as String? ?? '';
           final name = data['name'] as String? ?? 'Habit';
 
+          // Check if habit is already completed today so we don't
+          // re-schedule a notification the user already dismissed.
+          final now = DateTime.now();
+          final todayKey = DateFormat('yyyy-MM-dd').format(now);
+          final todayDow = now.weekday;
+          final completions =
+              (data['completions'] as Map<String, dynamic>?) ?? {};
+          final todayCount =
+              (completions[todayKey] as num?)?.toInt() ?? 0;
+          final execType = data['executionType'] as String?;
+          final dailyVolume =
+              (data['dailyVolume'] as num?)?.toInt() ?? 1;
+          final completedToday =
+              (execType == 'multiple' || execType == 'trackVolume')
+                  ? todayCount >= dailyVolume
+                  : todayCount >= 1;
+
           for (final day in reminderDays) {
+            // Skip today if habit is already completed
+            if (day == todayDow && completedToday) continue;
+
             await NotificationService.scheduleWeeklyNotification(
               id: NotificationIds.habitReminder(id, day),
               title: '$icon $name',

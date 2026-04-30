@@ -109,9 +109,25 @@ class HabitCubit extends Cubit<HabitState> {
     // Clean up orphaned notifications scheduled with empty habit ID
     await cancelHabitReminders('');
 
+    final now = DateTime.now();
+    final todayDow = now.weekday;
+
     for (final habit in habits) {
       if (habit.reminderEnabled) {
-        await scheduleHabitReminders(habit);
+        final completedToday = habit.isCompletedOn(now);
+        for (final day in habit.reminderDays) {
+          // Skip today if habit is already completed
+          if (day == todayDow && completedToday) continue;
+
+          await NotificationService.scheduleWeeklyNotification(
+            id: NotificationIds.habitReminder(habit.id, day),
+            title: '${habit.icon} ${habit.name}',
+            body: 'Time to complete your habit!',
+            dayOfWeek: day,
+            hour: habit.reminderHour,
+            minute: habit.reminderMinute,
+          );
+        }
       }
     }
   }
@@ -143,26 +159,33 @@ class HabitCubit extends Cubit<HabitState> {
     try {
       final habit = state.habits.firstWhere((h) => h.id == habitId);
       final date = state.effectiveDate;
+      bool willBeCompleted = false;
 
       switch (habit.executionType) {
         case ExecutionType.oneTime:
         case ExecutionType.dayCounter:
+          final current = habit.completionsOnDate(date);
+          willBeCompleted = current < 1;
           await _repository.toggleCompletion(habitId, date);
           break;
         case ExecutionType.multiple:
           final current = habit.completionsOnDate(date);
           if (current >= habit.dailyVolume) {
-            // Already complete – reset to 0
+            willBeCompleted = false;
             await _repository.decrementCompletion(habitId, date);
           } else {
+            willBeCompleted = (current + 1) >= habit.dailyVolume;
             await _repository.incrementCompletion(habitId, date);
           }
           break;
         case ExecutionType.trackVolume:
           final current = habit.completionsOnDate(date);
           if (current >= habit.dailyVolume) {
+            willBeCompleted = false;
             await _repository.decrementCompletion(habitId, date);
           } else {
+            willBeCompleted =
+                (current + habit.volumePerPress) >= habit.dailyVolume;
             await _repository.incrementCompletion(
               habitId,
               date,
@@ -171,6 +194,8 @@ class HabitCubit extends Cubit<HabitState> {
           }
           break;
       }
+
+      await _updateTodayReminder(habit, date, willBeCompleted);
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
@@ -184,6 +209,11 @@ class HabitCubit extends Cubit<HabitState> {
           ? habit.volumePerPress
           : 1;
       await _repository.incrementCompletion(habitId, date, amount: amount);
+
+      final newCount = habit.completionsOnDate(date) + amount;
+      if (newCount >= habit.dailyVolume) {
+        await _updateTodayReminder(habit, date, true);
+      }
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
@@ -255,6 +285,41 @@ class HabitCubit extends Cubit<HabitState> {
       await _repository.setArchived(habitId, false);
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  /// Cancels today's reminder if the habit is completed, or reschedules it
+  /// if uncompleted. Only acts when [date] is today and the habit has a
+  /// reminder enabled for today's weekday. On next app launch,
+  /// [_rescheduleAllReminders] restores all weekly notifications.
+  Future<void> _updateTodayReminder(
+    HabitModel habit,
+    DateTime date,
+    bool isCompleted,
+  ) async {
+    if (!habit.reminderEnabled) return;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final effectiveDay = DateTime(date.year, date.month, date.day);
+    if (effectiveDay != today) return;
+
+    final dayOfWeek = today.weekday; // Monday=1 … Sunday=7
+    if (!habit.reminderDays.contains(dayOfWeek)) return;
+
+    final notifId = NotificationIds.habitReminder(habit.id, dayOfWeek);
+
+    if (isCompleted) {
+      await NotificationService.cancel(notifId);
+    } else {
+      await NotificationService.scheduleWeeklyNotification(
+        id: notifId,
+        title: '${habit.icon} ${habit.name}',
+        body: 'Time to complete your habit!',
+        dayOfWeek: dayOfWeek,
+        hour: habit.reminderHour,
+        minute: habit.reminderMinute,
+      );
     }
   }
 

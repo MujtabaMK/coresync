@@ -423,6 +423,54 @@ class FoodDatabaseService {
     });
   }
 
+  // ── Custom food helpers ────────────────────────────────────────────────────
+
+  Set<String>? _bundledNames;
+
+  /// Load and cache bundled food names for custom-food detection.
+  Future<Set<String>> _getBundledNames() async {
+    if (_bundledNames != null) return _bundledNames!;
+    final jsonStr =
+        await rootBundle.loadString('assets/foods/common_foods.json');
+    final List<dynamic> items = json.decode(jsonStr) as List<dynamic>;
+    _bundledNames = {
+      for (final m in items) (m['name'] as String).toLowerCase(),
+    };
+    return _bundledNames!;
+  }
+
+  /// Returns true if the food was manually added (not in bundled data).
+  Future<bool> isCustomFood(String name) async {
+    final bundled = await _getBundledNames();
+    return !bundled.contains(name.toLowerCase());
+  }
+
+  /// Delete a food from the local database by exact name.
+  Future<void> deleteFood(String name) async {
+    final db = await _database;
+    await db.delete(
+      _table,
+      where: 'nameLower = ?',
+      whereArgs: [name.toLowerCase()],
+    );
+  }
+
+  /// Delete a custom food from both local DB and Firestore.
+  Future<void> deleteCustomFood(String name) async {
+    await deleteFood(name);
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return;
+      final docId = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('custom_foods')
+          .doc(docId)
+          .delete();
+    } catch (_) {}
+  }
+
   /// Get a single food by exact name for detail view.
   Future<CommonFoodItem?> getFoodByName(String name) async {
     final db = await _database;
