@@ -101,7 +101,17 @@ class CoachMarkService {
       targets: targets,
       colorShadow: Colors.black,
       opacityShadow: 0.92,
-      textSkip: 'SKIP',
+      skipWidget: const Padding(
+        padding: EdgeInsets.only(top: 48),
+        child: Text(
+          'SKIP',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+      ),
       alignSkip: Alignment.topRight,
       paddingFocus: 10,
       // beforeFocus is async & awaited by the package BEFORE it reads

@@ -42,18 +42,18 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
           'and gym attendance — all in one place.',
     ),
     _PageData(
-      icon: Icons.document_scanner,
-      title: 'Document Scanner',
-      description:
-          'Scan documents, extract text with OCR, fill & sign, '
-          'and export as PDF.',
-    ),
-    _PageData(
       icon: Icons.repeat,
       title: 'Habit Tracker',
       description:
           'Build positive habits with daily tracking, streaks, '
           'reminders, and weekly progress insights.',
+    ),
+    _PageData(
+      icon: Icons.document_scanner,
+      title: 'Document Scanner',
+      description:
+          'Scan documents, extract text with OCR, fill & sign, '
+          'and export as PDF.',
     ),
     _PageData(
       icon: Icons.translate,
@@ -73,6 +73,13 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
       description:
           'Simple calculator, scientific calculator, '
           'and unit/currency converter.',
+    ),
+    _PageData(
+      icon: Icons.picture_as_pdf,
+      title: 'PDF Reader',
+      description:
+          'Import, read, and annotate PDF files.\n'
+          'Search your library and listen with text-to-speech.',
     ),
   ];
 
