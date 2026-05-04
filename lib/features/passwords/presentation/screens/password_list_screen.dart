@@ -109,14 +109,19 @@ class _PasswordListScreenState extends State<PasswordListScreen>
         _AuthState.locked => _buildLockedView(context),
         _AuthState.unlocked => _buildPasswordList(),
       },
-      floatingActionButton: _authState == _AuthState.unlocked
-          ? FloatingActionButton(
-              key: CoachMarkKeys.passwordFab,
-              heroTag: 'passwordFab',
-              onPressed: () => context.go('/passwords/add'),
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: IgnorePointer(
+        ignoring: _authState != _AuthState.unlocked,
+        child: AnimatedOpacity(
+          opacity: _authState == _AuthState.unlocked ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          child: FloatingActionButton(
+            key: CoachMarkKeys.passwordFab,
+            heroTag: 'passwordFab',
+            onPressed: () => context.go('/passwords/add'),
+            child: const Icon(Icons.add),
+          ),
+        ),
+      ),
     );
   }
 

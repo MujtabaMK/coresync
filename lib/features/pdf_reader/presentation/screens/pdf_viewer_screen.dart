@@ -10,6 +10,7 @@ import 'package:turn_page_transition/turn_page_transition.dart';
 import '../../../scanner/domain/annotation_model.dart';
 import '../../../scanner/presentation/widgets/annotation_painter.dart';
 import '../../../translator/data/tts_service.dart';
+import '../../data/tts_number_preprocessor.dart';
 import '../../domain/pdf_document_model.dart';
 import '../providers/pdf_reader_provider.dart';
 import '../providers/pdf_viewer_provider.dart';
@@ -34,6 +35,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
   TurnPageController? _turnPageController;
   bool _loading = true;
   bool _initialSyncDone = false;
+  bool _isLeaving = false;
 
   // Annotation drawing state
   List<Offset> _currentStroke = [];
@@ -88,6 +90,20 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
     cubit.clearTtsHighlight();
   }
 
+  /// Synchronously stop TTS before leaving the screen.
+  /// Called from the back button and PopScope to ensure TTS stops on Android
+  /// where dispose-time async stop() can be unreliable.
+  void _stopTtsBeforeLeaving() {
+    _isLeaving = true;
+    if (_viewerCubit == null) return;
+    if (_viewerCubit!.state.ttsStatus != PdfTtsStatus.idle) {
+      _viewerCubit!.stopTtsAndRememberPage();
+      _viewerCubit!.clearTtsHighlight();
+    }
+    TtsService.instance.stop();
+    TtsService.instance.setProgressHandler(null);
+  }
+
   Future<void> _loadDocument() async {
     final doc = await context
         .read<PdfReaderCubit>()
@@ -124,8 +140,13 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
   /// Called by onSwipe / onTap after the controller already moved.
   /// Always reads the controller's actual position (source of truth).
   void _onPageTurned(bool isTurnForward) {
-    final page = _turnPageController!.currentIndex + 1; // 0-based → 1-based
-    _viewerCubit!.setCurrentPage(page);
+    if (_isLeaving) return;
+    try {
+      final page = _turnPageController!.currentIndex + 1; // 0-based → 1-based
+      _viewerCubit!.setCurrentPage(page);
+    } catch (_) {
+      // Controller disposed during route transition — ignore.
+    }
   }
 
   /// Persist the current page position for the loaded document.
@@ -134,9 +155,15 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
     if (_document == null || _viewerCubit == null) return;
 
     // 1. Sync cubit page with controller so every subsequent read is correct.
-    final page = _turnPageController != null
-        ? _turnPageController!.currentIndex + 1
-        : _viewerCubit!.state.currentPage;
+    //    Guard against disposed controller (can happen during swipe-back).
+    int page = _viewerCubit!.state.currentPage;
+    if (_turnPageController != null && !_isLeaving) {
+      try {
+        page = _turnPageController!.currentIndex + 1;
+      } catch (_) {
+        // Controller may already be disposed by TurnPageView — use cubit value.
+      }
+    }
     _viewerCubit!.setCurrentPage(page);
 
     // 2. If TTS is active, stop it and remember the position (uses cubit
@@ -156,6 +183,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
 
   @override
   void dispose() {
+    _isLeaving = true;
     WidgetsBinding.instance.removeObserver(this);
     _saveCurrentPosition();
     // Do NOT dispose _turnPageController here — TurnPageView already
@@ -259,9 +287,12 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
     }
 
     // Use the controller's actual page (source of truth for visual position)
-    final visualPage = _turnPageController != null
-        ? _turnPageController!.currentIndex + 1
-        : state.currentPage;
+    int visualPage = state.currentPage;
+    if (_turnPageController != null && !_isLeaving) {
+      try {
+        visualPage = _turnPageController!.currentIndex + 1;
+      } catch (_) {}
+    }
 
     // If there's a saved resume point, offer to resume from it
     if (state.hasTtsResumePoint) {
@@ -276,9 +307,12 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
 
   void _showTtsResumeDialog(int lastStoppedPage, int lastStoppedOffset) {
     // Use the controller's actual page — never trust the cubit alone.
-    final visualPage = _turnPageController != null
-        ? _turnPageController!.currentIndex + 1
-        : _viewerCubit!.state.currentPage;
+    int visualPage = _viewerCubit!.state.currentPage;
+    if (_turnPageController != null && !_isLeaving) {
+      try {
+        visualPage = _turnPageController!.currentIndex + 1;
+      } catch (_) {}
+    }
     final isSamePage = lastStoppedPage == visualPage;
     final description = isSamePage
         ? 'You paused on this page. Resume from where you left off or start over?'
@@ -338,25 +372,28 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
     // Determine text to speak — skip to offset if resuming mid-page
     final resumeOffset =
         (offset > 0 && result.fullText.length > offset) ? offset : 0;
-    final textToSpeak = resumeOffset > 0
+    final originalText = resumeOffset > 0
         ? result.fullText.substring(resumeOffset)
         : result.fullText;
 
-    if (textToSpeak.isEmpty) {
+    if (originalText.isEmpty) {
       cubit.clearTtsHighlight();
       cubit.stopTtsAndRememberPage();
       return;
     }
 
+    // Preprocess: plain numbers → digit-by-digit, currency numbers → natural
+    final preprocessed = preprocessTtsNumbers(originalText);
+
     final lang = cubit.state.ttsLanguage;
 
-    // Set up progress handler — add resumeOffset so highlight maps to the full text
+    // Set up progress handler — map preprocessed offsets back to original text
     TtsService.instance.setProgressHandler((text, start, end, word) {
-      cubit.setTtsHighlightFromOffset(start + resumeOffset);
+      final originalOffset = preprocessed.toOriginalOffset(start);
+      cubit.setTtsHighlightFromOffset(originalOffset + resumeOffset);
     });
 
-    // Speak original text (no preprocessNumbersForTts) to keep offsets consistent
-    final spoke = await TtsService.instance.speak(textToSpeak, lang);
+    final spoke = await TtsService.instance.speak(preprocessed.text, lang);
     if (mounted) {
       if (!spoke) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -502,11 +539,18 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
             prev.annotations != curr.annotations ||
             prev.isLoading != curr.isLoading,
         builder: (context, viewerState) {
-          return Scaffold(
+          return PopScope(
+            onPopInvokedWithResult: (didPop, _) {
+              if (didPop) _stopTtsBeforeLeaving();
+            },
+            child: Scaffold(
             appBar: AppBar(
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: () => context.pop(),
+                onPressed: () {
+                  _stopTtsBeforeLeaving();
+                  context.pop();
+                },
               ),
               title: Text(
                 _document!.title,
@@ -566,6 +610,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
                 _buildPageIndicator(),
               ],
             ),
+          ),
           );
         },
       ),
@@ -592,6 +637,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
         if (!_initialSyncDone) {
           _initialSyncDone = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_isLeaving) return;
             if (_turnPageController != null && _viewerCubit != null) {
               final visualPage = _turnPageController!.currentIndex + 1;
               if (visualPage != _viewerCubit!.state.currentPage) {
@@ -653,7 +699,10 @@ class _PdfViewerScreenState extends State<PdfViewerScreen>
             Positioned.fill(
               child: BlocSelector<PdfViewerCubit, PdfViewerState, Rect?>(
                 selector: (state) {
-                  if (index != state.currentPage - 1) return null;
+                  // Use ttsActivePage (the page word positions were extracted
+                  // from) instead of currentPage so the highlight doesn't
+                  // bleed onto a different page after the user turns pages.
+                  if (index != state.ttsActivePage - 1) return null;
                   final hi = state.ttsHighlightIndex;
                   if (hi == null || hi >= state.ttsWordPositions.length) {
                     return null;

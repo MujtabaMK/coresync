@@ -51,6 +51,7 @@ class PdfViewerState {
     this.isLoading = false,
     this.ttsWordPositions = const [],
     this.ttsHighlightIndex,
+    this.ttsActivePage = 0,
   });
 
   final int currentPage;
@@ -79,6 +80,11 @@ class PdfViewerState {
   /// Index into [ttsWordPositions] of the currently spoken word.
   final int? ttsHighlightIndex;
 
+  /// The page (1-based) that [ttsWordPositions] belong to. Highlight only
+  /// renders on this page — prevents stale highlights on a different page
+  /// after the user turns pages while TTS is playing.
+  final int ttsActivePage;
+
   /// Whether the user has a previous TTS position to resume from.
   bool get hasTtsResumePoint => ttsLastStoppedPage != null;
 
@@ -103,6 +109,7 @@ class PdfViewerState {
     List<TtsWordPosition>? ttsWordPositions,
     int? ttsHighlightIndex,
     bool clearTtsHighlightIndex = false,
+    int? ttsActivePage,
   }) {
     return PdfViewerState(
       currentPage: currentPage ?? this.currentPage,
@@ -123,6 +130,7 @@ class PdfViewerState {
       ttsHighlightIndex: clearTtsHighlightIndex
           ? null
           : (ttsHighlightIndex ?? this.ttsHighlightIndex),
+      ttsActivePage: ttsActivePage ?? this.ttsActivePage,
     );
   }
 }
@@ -196,12 +204,13 @@ class PdfViewerCubit extends Cubit<PdfViewerState> {
   Future<PageTextWithPositions> extractCurrentPageTextWithPositions({
     int? page,
   }) async {
+    final targetPage = page ?? state.currentPage;
     if (page != null && page != state.currentPage) {
       emit(state.copyWith(currentPage: page, isLoading: true));
     } else {
       emit(state.copyWith(isLoading: true));
     }
-    final pageIndex = (page ?? state.currentPage) - 1;
+    final pageIndex = targetPage - 1;
     try {
       final result = await PdfTextExtractionService.extractTextWithPositions(
         filePath,
@@ -216,6 +225,7 @@ class PdfViewerCubit extends Cubit<PdfViewerState> {
           emit(state.copyWith(
             ttsPageText: result.fullText,
             ttsWordPositions: result.words,
+            ttsActivePage: targetPage,
             ttsLanguage: detected,
             isLoading: false,
           ));
@@ -227,6 +237,7 @@ class PdfViewerCubit extends Cubit<PdfViewerState> {
       emit(state.copyWith(
         ttsPageText: result.fullText,
         ttsWordPositions: result.words,
+        ttsActivePage: targetPage,
         isLoading: false,
       ));
       return result;

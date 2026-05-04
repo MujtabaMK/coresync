@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../translator/data/tts_service.dart';
+import '../../data/tts_number_preprocessor.dart';
 import '../providers/pdf_viewer_provider.dart' show PdfTtsStatus, PdfViewerCubit, PdfViewerState, kTtsLanguages;
 
 class PdfTtsControls extends StatelessWidget {
@@ -104,30 +105,34 @@ class PdfTtsControls extends StatelessWidget {
     // Figure out where to resume
     final resumeOffset = _resumeOffset(state);
 
-    String textToSpeak;
+    String originalText;
     if (resumeOffset > 0 && state.ttsPageText.length > resumeOffset) {
       // Resume — use the already-extracted text, skip to paused position
-      textToSpeak = state.ttsPageText.substring(resumeOffset);
+      originalText = state.ttsPageText.substring(resumeOffset);
     } else {
       // Fresh start — extract text with positions
       final result = await cubit.extractCurrentPageTextWithPositions();
-      textToSpeak = result.fullText;
+      originalText = result.fullText;
     }
 
-    if (textToSpeak.isEmpty) {
+    if (originalText.isEmpty) {
       cubit.clearTtsHighlight();
       cubit.setTtsStatus(PdfTtsStatus.idle);
       return;
     }
 
+    // Preprocess: plain numbers → digit-by-digit, currency numbers → natural
+    final preprocessed = preprocessTtsNumbers(originalText);
+
     final lang = cubit.state.ttsLanguage;
 
-    // Progress handler — add resumeOffset so highlight maps to the full text
+    // Progress handler — map preprocessed offsets back to original text
     TtsService.instance.setProgressHandler((text, start, end, word) {
-      cubit.setTtsHighlightFromOffset(start + resumeOffset);
+      final originalOffset = preprocessed.toOriginalOffset(start);
+      cubit.setTtsHighlightFromOffset(originalOffset + resumeOffset);
     });
 
-    await TtsService.instance.speak(textToSpeak, lang);
+    await TtsService.instance.speak(preprocessed.text, lang);
     TtsService.instance.setProgressHandler(null);
     // Only clean up if still playing — if user paused, keep positions for resume
     if (cubit.state.ttsStatus == PdfTtsStatus.playing) {
