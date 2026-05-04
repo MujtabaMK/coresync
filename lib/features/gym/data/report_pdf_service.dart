@@ -11,20 +11,14 @@ class ReportPdfService {
   static Future<pw.Document> generate({
     required GymState state,
     required String userName,
+    required DateTime startDate,
+    required DateTime endDate,
   }) async {
     final pdf = pw.Document();
     final dateFormat = DateFormat('dd MMM yyyy', 'en_US');
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final today = endDate;
 
     final membership = state.activeMembership;
-    final startDate = membership != null
-        ? DateTime(
-            membership.startDate.year,
-            membership.startDate.month,
-            membership.startDate.day,
-          )
-        : DateTime(now.year, now.month, 1);
 
     // ── Compute all stats (mirrors report_screen.dart) ──
 
@@ -33,14 +27,17 @@ class ReportPdfService {
 
     int totalDays = 0;
     int absentCount = 0;
+    int presentCount = 0;
     for (var d = startDate;
         !d.isAfter(today);
         d = d.add(const Duration(days: 1))) {
       totalDays++;
-      if (!presentSet.contains(d)) absentCount++;
+      if (presentSet.contains(d)) {
+        presentCount++;
+      } else {
+        absentCount++;
+      }
     }
-
-    final presentCount = state.presentCount;
     final attendanceRate =
         totalDays > 0 ? (presentCount / totalDays * 100) : 0.0;
 
@@ -278,7 +275,7 @@ class ReportPdfService {
               pw.Text(userName, style: subtitleStyle),
               pw.SizedBox(height: 2),
               pw.Text(
-                '${dateFormat.format(startDate)} - ${dateFormat.format(today)}',
+                '${dateFormat.format(startDate)} - ${dateFormat.format(endDate)}',
                 style: subtitleStyle,
               ),
             ],

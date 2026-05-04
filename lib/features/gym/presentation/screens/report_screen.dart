@@ -22,8 +22,11 @@ class ReportScreen extends StatefulWidget {
 
 class _ReportScreenState extends State<ReportScreen> {
   bool _exporting = false;
+  DateTime? _rangeStart;
+  DateTime? _rangeEnd;
 
-  Future<void> _exportPdf(BuildContext context, GymState state) async {
+  Future<void> _exportPdf(BuildContext context, GymState state,
+      {required DateTime rangeStart, required DateTime rangeEnd}) async {
     setState(() => _exporting = true);
     try {
       final authState = context.read<AuthCubit>().state;
@@ -47,6 +50,8 @@ class _ReportScreenState extends State<ReportScreen> {
       final pdf = await ReportPdfService.generate(
         state: state,
         userName: userName,
+        startDate: rangeStart,
+        endDate: rangeEnd,
       );
 
       final dir = await getTemporaryDirectory();
@@ -91,8 +96,8 @@ class _ReportScreenState extends State<ReportScreen> {
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
 
-        // Date range: from membership start to today
-        final startDate = membership != null
+        // Membership start (or first of month as fallback)
+        final membershipStart = membership != null
             ? DateTime(
                 membership.startDate.year,
                 membership.startDate.month,
@@ -100,31 +105,36 @@ class _ReportScreenState extends State<ReportScreen> {
               )
             : DateTime(now.year, now.month, 1);
 
+        // User-selected date range (defaults to full membership period)
+        final startDate = _rangeStart ?? membershipStart;
+        final endDate = _rangeEnd ?? today;
+
         final presentSet = state.presentDates
             .map((d) => DateTime(d.year, d.month, d.day))
             .toSet();
 
-        // Calculate total days & absent count
+        // Calculate total days & absent count within range
         int totalDays = 0;
         int absentCount = 0;
+        int presentCount = 0;
         final absentDates = <DateTime>[];
         for (var d = startDate;
-            !d.isAfter(today);
+            !d.isAfter(endDate);
             d = d.add(const Duration(days: 1))) {
           totalDays++;
-          if (!presentSet.contains(d)) {
+          if (presentSet.contains(d)) {
+            presentCount++;
+          } else {
             absentCount++;
             absentDates.add(d);
           }
         }
-
-        final presentCount = state.presentCount;
         final attendanceRate =
             totalDays > 0 ? (presentCount / totalDays * 100) : 0.0;
 
         // Streaks
         int currentStreak = 0;
-        for (var d = today;
+        for (var d = endDate;
             !d.isBefore(startDate);
             d = d.subtract(const Duration(days: 1))) {
           if (presentSet.contains(d)) {
@@ -137,7 +147,7 @@ class _ReportScreenState extends State<ReportScreen> {
         int bestStreak = 0;
         int tempStreak = 0;
         for (var d = startDate;
-            !d.isAfter(today);
+            !d.isAfter(endDate);
             d = d.add(const Duration(days: 1))) {
           if (presentSet.contains(d)) {
             tempStreak++;
@@ -155,7 +165,7 @@ class _ReportScreenState extends State<ReportScreen> {
         int waterDaysGoalMet = 0;
         int totalWaterMl = 0;
         for (var d = startDate;
-            !d.isAfter(today);
+            !d.isAfter(endDate);
             d = d.add(const Duration(days: 1))) {
           final ml = state.waterHistory[d] ?? 0;
           final dayGoal = state.waterGoalHistory[d] ?? waterGoalFallback;
@@ -172,7 +182,7 @@ class _ReportScreenState extends State<ReportScreen> {
         int stepsDaysGoalMet = 0;
         int totalSteps = 0;
         for (var d = startDate;
-            !d.isAfter(today);
+            !d.isAfter(endDate);
             d = d.add(const Duration(days: 1))) {
           final steps = state.stepsHistory[d] ?? 0;
           final dayGoal = state.stepsGoalHistory[d] ?? stepsGoalFallback;
@@ -192,7 +202,7 @@ class _ReportScreenState extends State<ReportScreen> {
         double totalFoodCal = 0;
         final goalType = state.weightLossProfile?.goalType;
         for (var d = startDate;
-            !d.isAfter(today);
+            !d.isAfter(endDate);
             d = d.add(const Duration(days: 1))) {
           final cal = foodCalHistory[d] ?? 0;
           final dayGoal = state.calorieGoalHistory[d] ?? calorieGoalFallback;
@@ -225,7 +235,7 @@ class _ReportScreenState extends State<ReportScreen> {
         const sleepGoalMin = 480; // 8 hours
         int sleepDaysGoalMet = 0;
         for (var d = startDate;
-            !d.isAfter(today);
+            !d.isAfter(endDate);
             d = d.add(const Duration(days: 1))) {
           final min = sleepHist[d] ?? 0;
           if (min > 0) sleepDaysTracked++;
@@ -237,21 +247,21 @@ class _ReportScreenState extends State<ReportScreen> {
 
         // Build daily lists for collapsible sections (newest first)
         final waterDailyEntries = <MapEntry<DateTime, int>>[];
-        for (var d = today;
+        for (var d = endDate;
             !d.isBefore(startDate);
             d = d.subtract(const Duration(days: 1))) {
           waterDailyEntries.add(MapEntry(d, state.waterHistory[d] ?? 0));
         }
 
         final stepsDailyEntries = <MapEntry<DateTime, int>>[];
-        for (var d = today;
+        for (var d = endDate;
             !d.isBefore(startDate);
             d = d.subtract(const Duration(days: 1))) {
           stepsDailyEntries.add(MapEntry(d, state.stepsHistory[d] ?? 0));
         }
 
         final foodDailyEntries = <MapEntry<DateTime, int>>[];
-        for (var d = today;
+        for (var d = endDate;
             !d.isBefore(startDate);
             d = d.subtract(const Duration(days: 1))) {
           foodDailyEntries.add(
@@ -259,7 +269,7 @@ class _ReportScreenState extends State<ReportScreen> {
         }
 
         final sleepDailyEntries = <MapEntry<DateTime, int>>[];
-        for (var d = today;
+        for (var d = endDate;
             !d.isBefore(startDate);
             d = d.subtract(const Duration(days: 1))) {
           sleepDailyEntries.add(MapEntry(d, sleepHist[d] ?? 0));
@@ -267,7 +277,10 @@ class _ReportScreenState extends State<ReportScreen> {
 
         return Scaffold(
           floatingActionButton: FloatingActionButton.extended(
-            onPressed: _exporting ? null : () => _exportPdf(context, state),
+            onPressed: _exporting
+                ? null
+                : () => _exportPdf(context, state,
+                    rangeStart: startDate, rangeEnd: endDate),
             icon: _exporting
                 ? const SizedBox(
                     width: 20,
@@ -285,6 +298,50 @@ class _ReportScreenState extends State<ReportScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── Date Range Picker ──
+              Row(
+                children: [
+                  Expanded(
+                    child: ActionChip(
+                      avatar: const Icon(Icons.calendar_today, size: 16),
+                      label: Text('From: ${dateFormat.format(startDate)}'),
+                      onPressed: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: startDate,
+                          firstDate: membershipStart,
+                          lastDate: endDate,
+                        );
+                        if (picked != null) {
+                          setState(() => _rangeStart = DateTime(
+                              picked.year, picked.month, picked.day));
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ActionChip(
+                      avatar: const Icon(Icons.calendar_today, size: 16),
+                      label: Text('To: ${dateFormat.format(endDate)}'),
+                      onPressed: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: endDate,
+                          firstDate: startDate,
+                          lastDate: today,
+                        );
+                        if (picked != null) {
+                          setState(() => _rangeEnd = DateTime(
+                              picked.year, picked.month, picked.day));
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
               // ── 4 Summary Stats ──
               GridView.count(
                 crossAxisCount: 2,
@@ -629,11 +686,19 @@ class _ReportScreenState extends State<ReportScreen> {
               ),
               const SizedBox(height: 12),
 
-              // ── Present Dates (collapsible) ──
-              if (state.presentDates.isNotEmpty)
+              // ── Present Dates (collapsible, filtered to range) ──
+              if (state.presentDates
+                  .where((d) {
+                    final dn = DateTime(d.year, d.month, d.day);
+                    return !dn.isBefore(startDate) && !dn.isAfter(endDate);
+                  })
+                  .isNotEmpty)
                 _CollapsibleDatesSection(
                   title: 'PRESENT DATES',
-                  dates: state.presentDates,
+                  dates: state.presentDates.where((d) {
+                    final dn = DateTime(d.year, d.month, d.day);
+                    return !dn.isBefore(startDate) && !dn.isAfter(endDate);
+                  }).toList(),
                   dateFormat: dateFormat,
                   icon: Icons.check_circle,
                   iconColor: Colors.green,
