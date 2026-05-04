@@ -26,6 +26,9 @@ class StepCounterBootReceiver : BroadcastReceiver() {
                     // Schedule WorkManager sync in case the foreground service
                     // gets killed before its Handler fires
                     try { StepSyncWorker.schedule(context) } catch (_: Exception) {}
+
+                    // Schedule AlarmManager backup for Doze-resilient sync
+                    try { StepAlarmReceiver.schedule(context) } catch (_: Exception) {}
                 }
             }
         } catch (_: Exception) {

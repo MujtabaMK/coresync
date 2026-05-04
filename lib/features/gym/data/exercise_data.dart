@@ -2836,6 +2836,20 @@ class ExerciseData {
         if (exercise.id == id) return exercise;
       }
     }
+    // Check dynamically registered exercises (e.g. yoga from API)
+    for (final exercise in _dynamicExercises) {
+      if (exercise.id == id) return exercise;
+    }
     return null;
+  }
+
+  // ── Dynamic exercises (populated at runtime from APIs) ──
+
+  static final List<ExerciseModel> _dynamicExercises = [];
+
+  static void registerDynamicExercises(List<ExerciseModel> exercises) {
+    _dynamicExercises
+      ..clear()
+      ..addAll(exercises);
   }
 }

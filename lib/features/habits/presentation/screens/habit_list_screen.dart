@@ -3,16 +3,48 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/habits_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../../../core/widgets/main_shell_drawer.dart';
 import '../../domain/habit_model.dart';
 import '../providers/habit_provider.dart';
 import '../widgets/habit_card.dart';
 
-class HabitListScreen extends StatelessWidget {
+class HabitListScreen extends StatefulWidget {
   const HabitListScreen({super.key});
 
   @override
+  State<HabitListScreen> createState() => _HabitListScreenState();
+}
+
+class _HabitListScreenState extends State<HabitListScreen> {
+  int _coachMarkVersion = -1;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_habits_shown',
+          targets: habitsCoachTargets(),
+        );
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -57,11 +89,13 @@ class HabitListScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            key: CoachMarkKeys.habitFilter,
             icon: const Icon(Icons.filter_list),
             tooltip: 'Filter',
             onPressed: () => _showFilterMenu(context),
           ),
           IconButton(
+            key: CoachMarkKeys.habitArchive,
             icon: const Icon(Icons.archive_outlined),
             tooltip: 'Archived habits',
             onPressed: () => _showArchivedSheet(context),
@@ -170,12 +204,13 @@ class HabitListScreen extends StatelessWidget {
                 ),
               ),
               // Date navigator at bottom
-              const _DateNavigator(),
+              _DateNavigator(key: CoachMarkKeys.habitDateNav),
             ],
           ),
 
           // Floating fire + completion counter (bottom-right)
           Positioned(
+            key: CoachMarkKeys.habitCounter,
             right: 16,
             bottom: 70,
             child: BlocBuilder<HabitCubit, HabitState>(
@@ -303,7 +338,7 @@ class HabitListScreen extends StatelessWidget {
 }
 
 class _DateNavigator extends StatelessWidget {
-  const _DateNavigator();
+  const _DateNavigator({super.key});
 
   @override
   Widget build(BuildContext context) {

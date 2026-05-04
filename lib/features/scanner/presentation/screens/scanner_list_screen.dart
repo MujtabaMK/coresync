@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/scanner_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../../../core/widgets/main_shell_drawer.dart';
 import '../providers/scanner_provider.dart';
 import '../widgets/document_card.dart';
@@ -19,6 +22,28 @@ class ScannerListScreen extends StatefulWidget {
 class _ScannerListScreenState extends State<ScannerListScreen> {
   bool _isSelectionMode = false;
   final _selectedIds = <String>{};
+  int _coachMarkVersion = -1;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_scanner_shown',
+          targets: scannerCoachTargets(),
+        );
+      });
+    });
+  }
 
   void _toggleSelection(String id) {
     setState(() {
@@ -205,6 +230,7 @@ class _ScannerListScreenState extends State<ScannerListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     return Scaffold(
       appBar: AppBar(
         title: _isSelectionMode
@@ -237,6 +263,7 @@ class _ScannerListScreenState extends State<ScannerListScreen> {
         children: [
           if (!_isSelectionMode)
             Padding(
+              key: CoachMarkKeys.scannerSearch,
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: TextField(
                 decoration: const InputDecoration(
@@ -348,6 +375,7 @@ class _ScannerListScreenState extends State<ScannerListScreen> {
       floatingActionButton: _isSelectionMode
           ? null
           : FloatingActionButton(
+              key: CoachMarkKeys.scannerFab,
               heroTag: 'scannerFab',
               onPressed: () => _showAddOptions(context),
               child: const Icon(Icons.add),

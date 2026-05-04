@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../data/step_counter_service.dart';
 import '../providers/gym_provider.dart';
 import '../widgets/membership_card.dart';
@@ -23,6 +26,8 @@ class _GymHomeScreenState extends State<GymHomeScreen>
   StreamSubscription<void>? _healthMetricsSub;
   int _liveSteps = 0;
   bool _stepsLoading = true;
+
+  int _coachMarkVersion = -1;
 
   @override
   void initState() {
@@ -115,8 +120,25 @@ class _GymHomeScreenState extends State<GymHomeScreen>
     super.dispose();
   }
 
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_gym_home_shown',
+          targets: [...gymHomeStatsCoachTargets(), ...gymHomeCoachTargets()],
+        );
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     final theme = Theme.of(context);
 
     return BlocBuilder<GymCubit, GymState>(
@@ -235,11 +257,13 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                             state.todayWorkoutCalories.round();
                         final totalBurnt = stepCalories + workoutCalories;
                         return Column(
+                          key: CoachMarkKeys.gymHomeStats,
                           children: [
                             Row(
                               children: [
                                 Expanded(
                                   child: _QuickStatCard(
+                                    key: CoachMarkKeys.gymStatPresent,
                                     icon: Icons.check_circle,
                                     label: 'Present',
                                     value: '${state.presentCount}',
@@ -249,6 +273,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: _QuickStatCard(
+                                    key: CoachMarkKeys.gymStatAbsent,
                                     icon: Icons.cancel,
                                     label: 'Absent',
                                     value: '$absentCount',
@@ -258,6 +283,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: _QuickStatCard(
+                                    key: CoachMarkKeys.gymStatWater,
                                     icon: Icons.water_drop,
                                     label: 'Water',
                                     value: (state.waterMl / 250).toStringAsFixed(1),
@@ -271,6 +297,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                               children: [
                                 Expanded(
                                   child: _QuickStatCard(
+                                    key: CoachMarkKeys.gymStatSteps,
                                     icon: Icons.directions_walk,
                                     label: 'Steps',
                                     value: _stepsLoading ? '...' : '$_liveSteps',
@@ -280,6 +307,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: _QuickStatCard(
+                                    key: CoachMarkKeys.gymStatFoodCal,
                                     icon: Icons.restaurant,
                                     label: 'Food Cal',
                                     value:
@@ -290,6 +318,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: _QuickStatCard(
+                                    key: CoachMarkKeys.gymStatSleep,
                                     icon: Icons.bedtime,
                                     label: 'Sleep',
                                     value: state.todaySleepFormatted,
@@ -303,6 +332,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                               children: [
                                 Expanded(
                                   child: _QuickStatCard(
+                                    key: CoachMarkKeys.gymStatStepKcal,
                                     icon: Icons.local_fire_department,
                                     label: 'Step kcal',
                                     value: _stepsLoading ? '...' : '$stepCalories',
@@ -312,6 +342,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: _QuickStatCard(
+                                    key: CoachMarkKeys.gymStatWorkoutKcal,
                                     icon: Icons.fitness_center,
                                     label: 'Workout kcal',
                                     value: '$workoutCalories',
@@ -321,6 +352,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: _QuickStatCard(
+                                    key: CoachMarkKeys.gymStatTotalBurnt,
                                     icon: Icons.local_fire_department,
                                     label: 'Total Burnt',
                                     value: _stepsLoading ? '...' : '$totalBurnt',
@@ -349,6 +381,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: GridView.count(
+                    key: CoachMarkKeys.gymQuickAccess,
                     crossAxisCount: 2,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -357,6 +390,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                     childAspectRatio: 1.3,
                     children: [
                       _DashCard(
+                        key: CoachMarkKeys.gymExercises,
                         icon: Icons.fitness_center,
                         label: 'Exercises',
                         subtitle: 'Fitness routines',
@@ -364,6 +398,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                         onTap: () => context.go('/gym/exercises'),
                       ),
                       _DashCard(
+                        key: CoachMarkKeys.gymReminders,
                         icon: Icons.notifications_active,
                         label: 'Reminders',
                         subtitle: 'Health reminders',
@@ -371,6 +406,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                         onTap: () => context.go('/gym/reminders'),
                       ),
                       _DashCard(
+                        key: CoachMarkKeys.gymMedicine,
                         icon: Icons.medication,
                         label: 'Medicine',
                         subtitle: 'Supplements & meds',
@@ -378,6 +414,7 @@ class _GymHomeScreenState extends State<GymHomeScreen>
                         onTap: () => context.go('/gym/medicines'),
                       ),
                       _DashCard(
+                        key: CoachMarkKeys.gymWeightPlan,
                         icon: Icons.monitor_weight,
                         label: 'Weight Plan',
                         subtitle: 'Lose, gain, maintain',
@@ -404,6 +441,7 @@ class _QuickStatCard extends StatelessWidget {
   final Color color;
 
   const _QuickStatCard({
+    super.key,
     required this.icon,
     required this.label,
     required this.value,
@@ -454,6 +492,7 @@ class _DashCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const _DashCard({
+    super.key,
     required this.icon,
     required this.label,
     required this.subtitle,

@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../data/common_foods_data.dart';
 import '../../data/food_database_service.dart';
 
@@ -30,6 +33,29 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
   int _calorieTarget = 0;
 
   Timer? _debounce;
+
+  int _coachMarkVersion = -1;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_food_explorer_shown',
+          targets: foodExplorerCoachTargets(),
+        );
+      });
+    });
+  }
 
   static const _nutrientMap = {
     'vitamin a': 'vitaminA',
@@ -281,6 +307,7 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -288,10 +315,10 @@ class _FoodExplorerScreenState extends State<FoodExplorerScreen> {
       body: Column(
         children: [
           Padding(
+            key: CoachMarkKeys.foodExplorerSearch,
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: _searchCtrl,
-              autofocus: true,
               decoration: InputDecoration(
                 hintText: 'Search food, nutrient, or kcal (e.g. "200 kcal")...',
                 prefixIcon: const Icon(Icons.search),

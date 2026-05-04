@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
 import 'habit_list_screen.dart';
 import 'habit_meanings_screen.dart';
 import 'habit_statistics_screen.dart';
@@ -69,6 +70,7 @@ class _HabitShellScreenState extends State<HabitShellScreen> {
                 ),
                 // Center Add button
                 GestureDetector(
+                  key: CoachMarkKeys.habitAddFab,
                   onTap: () => _onTabTapped(2),
                   child: Container(
                     width: 52,

@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../domain/recipe_model.dart';
 import '../providers/recipe_provider.dart';
 import '../widgets/recipe_detail_sheet.dart';
@@ -20,6 +23,7 @@ class _WeightLossRecipesScreenState extends State<WeightLossRecipesScreen>
   late final TabController _tabController;
   final _searchCtrl = TextEditingController();
   Timer? _debounce;
+  int _coachMarkVersion = -1;
 
   @override
   void initState() {
@@ -65,8 +69,25 @@ class _WeightLossRecipesScreenState extends State<WeightLossRecipesScreen>
     super.dispose();
   }
 
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_recipes_shown',
+          targets: recipesCoachTargets(),
+        );
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     return BlocBuilder<RecipeCubit, RecipeState>(
       builder: (context, state) {
         return Scaffold(
@@ -135,6 +156,7 @@ class _WeightLossRecipesScreenState extends State<WeightLossRecipesScreen>
       children: [
         // Search bar
         Padding(
+          key: CoachMarkKeys.recipesSearch,
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: TextField(
             controller: _searchCtrl,
@@ -159,6 +181,7 @@ class _WeightLossRecipesScreenState extends State<WeightLossRecipesScreen>
         ),
         // Filter & sort chips — always visible
         SizedBox(
+          key: CoachMarkKeys.recipesFilters,
           height: 48,
           child: ListView(
             scrollDirection: Axis.horizontal,

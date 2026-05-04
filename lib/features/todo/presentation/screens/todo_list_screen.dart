@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/todo_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../../core/widgets/confirm_dialog.dart';
 import '../../../../core/widgets/main_shell_drawer.dart';
@@ -25,8 +28,30 @@ class _TodoListScreenState extends State<TodoListScreen> {
   TaskStatus? _selectedFilter;
   bool _isSelectionMode = false;
   final Set<String> _selectedTaskIds = {};
+  int _coachMarkVersion = -1;
 
   String? get _currentUid => FirebaseAuth.instance.currentUser?.uid;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_todo_shown',
+          targets: todoCoachTargets(),
+        );
+      });
+    });
+  }
 
   void _enterSelectionMode(String taskId) {
     setState(() {
@@ -89,6 +114,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     return BlocBuilder<TodoCubit, TodoState>(
       builder: (context, state) {
         return Scaffold(
@@ -122,11 +148,13 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   title: const Text('Todo'),
                   actions: [
                     IconButton(
+                      key: CoachMarkKeys.todoShared,
                       icon: const Icon(Icons.people_outline),
                       tooltip: 'Shared Tasks',
                       onPressed: () => context.push('/todo/shared'),
                     ),
                     IconButton(
+                      key: CoachMarkKeys.todoReports,
                       icon: const Icon(Icons.bar_chart),
                       tooltip: 'Reports',
                       onPressed: () => context.push('/todo/reports'),
@@ -144,6 +172,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: SegmentedButton<TaskStatus?>(
+                  key: CoachMarkKeys.todoFilter,
                   showSelectedIcon: false,
                   style: ButtonStyle(
                     textStyle: WidgetStatePropertyAll(
@@ -193,6 +222,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
           floatingActionButton: _isSelectionMode
               ? null
               : FloatingActionButton(
+                  key: CoachMarkKeys.todoFab,
                   heroTag: 'todoFab',
                   onPressed: () => context.push('/todo/add'),
                   child: const Icon(Icons.add),

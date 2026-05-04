@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../domain/sleep_log_model.dart';
 import '../providers/gym_provider.dart';
 
@@ -26,6 +29,16 @@ class _LogSleepScreenState extends State<LogSleepScreen> {
     _sleepTime = DateTime(now.year, now.month, now.day - 1, 23, 0);
     _wakeTime = DateTime(now.year, now.month, now.day, 7, 0);
     context.read<GymCubit>().loadTodaySleep();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_log_sleep_shown',
+          targets: logSleepCoachTargets(),
+        );
+      });
+    });
 
     // Pre-populate quality/notes from existing entries (per-day fields),
     // but NOT bedtime/wake time (user is adding a new segment).
@@ -195,6 +208,7 @@ class _LogSleepScreenState extends State<LogSleepScreen> {
 
               // Sleep & wake time pickers side by side
               Row(
+                key: CoachMarkKeys.sleepTimePickers,
                 children: [
                   Expanded(
                     child: InkWell(
@@ -272,6 +286,7 @@ class _LogSleepScreenState extends State<LogSleepScreen> {
                   style: theme.textTheme.titleSmall),
               const SizedBox(height: 8),
               Wrap(
+                key: CoachMarkKeys.sleepQuality,
                 spacing: 8,
                 children: SleepQuality.values.map((q) {
                   final selected = _quality == q;
@@ -299,6 +314,7 @@ class _LogSleepScreenState extends State<LogSleepScreen> {
 
               // Save
               SizedBox(
+                key: CoachMarkKeys.sleepSaveBtn,
                 width: double.infinity,
                 child: FilledButton.icon(
                   onPressed: _save,

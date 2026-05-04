@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/pdf_reader_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../providers/pdf_reader_provider.dart';
 import '../widgets/pdf_card.dart';
 
@@ -16,6 +19,28 @@ class PdfListScreen extends StatefulWidget {
 class _PdfListScreenState extends State<PdfListScreen> {
   final _searchController = TextEditingController();
   bool _isImporting = false;
+  int _coachMarkVersion = -1;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_pdf_reader_shown',
+          targets: pdfReaderCoachTargets(),
+        );
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -170,6 +195,7 @@ class _PdfListScreenState extends State<PdfListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -187,6 +213,7 @@ class _PdfListScreenState extends State<PdfListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        key: CoachMarkKeys.pdfImport,
         onPressed: _isImporting ? null : _showImportOptions,
         child: _isImporting
             ? const SizedBox(
@@ -200,6 +227,7 @@ class _PdfListScreenState extends State<PdfListScreen> {
         children: [
           // Search bar
           Padding(
+            key: CoachMarkKeys.pdfSearch,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
               controller: _searchController,

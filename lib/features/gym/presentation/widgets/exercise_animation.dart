@@ -30,6 +30,17 @@ class ExerciseAnimation extends StatelessWidget {
         animate: animate,
       );
     }
+    if (exercise.networkImageUrl != null) {
+      return Image.network(
+        exercise.networkImageUrl!,
+        fit: fit,
+        errorBuilder: (_, __, ___) => Icon(
+          _categoryIcon(exercise.category),
+          size: 40,
+          color: Colors.grey,
+        ),
+      );
+    }
     return Icon(
       _categoryIcon(exercise.category),
       size: 40,

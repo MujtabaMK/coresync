@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive/hive.dart';
 
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../../core/utils/validators.dart';
@@ -96,7 +97,10 @@ class _SignupScreenState extends State<SignupScreen> {
         }
       }
 
-      if (mounted) context.go('/home');
+      if (mounted) {
+        Hive.box('app_settings').put('coach_mark_is_new_signup', true);
+        context.go('/home');
+      }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);

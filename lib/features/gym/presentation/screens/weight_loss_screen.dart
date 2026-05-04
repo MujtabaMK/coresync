@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../../../core/utils/share_utils.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/diet_chart_pdf_service.dart';
@@ -13,8 +16,28 @@ import '../../domain/weight_loss_profile_model.dart';
 import '../providers/gym_provider.dart';
 import '../widgets/bmi_gauge_widget.dart';
 
-class WeightLossScreen extends StatelessWidget {
+class WeightLossScreen extends StatefulWidget {
   const WeightLossScreen({super.key});
+
+  @override
+  State<WeightLossScreen> createState() => _WeightLossScreenState();
+}
+
+class _WeightLossScreenState extends State<WeightLossScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_weight_plan_shown',
+          targets: weightPlanCoachTargets(),
+        );
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +158,7 @@ class _SetupFormState extends State<_SetupForm> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
+      key: CoachMarkKeys.weightPlanSetup,
       padding: const EdgeInsets.all(20),
       child: Form(
         key: _formKey,
@@ -448,6 +472,21 @@ class _Dashboard extends StatefulWidget {
 class _DashboardState extends State<_Dashboard> {
   bool _exporting = false;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_weight_dashboard_shown',
+          targets: weightDashboardCoachTargets(),
+        );
+      });
+    });
+  }
+
   WeightLossProfileModel get profile => widget.profile;
   GymState get state => widget.state;
 
@@ -540,6 +579,7 @@ class _DashboardState extends State<_Dashboard> {
         children: [
           // BMI Gauge
           Card(
+            key: CoachMarkKeys.weightDashboardBmi,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -573,6 +613,7 @@ class _DashboardState extends State<_Dashboard> {
 
           // Daily Calorie Target
           Card(
+            key: CoachMarkKeys.weightDashboardCalories,
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -622,6 +663,7 @@ class _DashboardState extends State<_Dashboard> {
 
           // Macro Targets
           Card(
+            key: CoachMarkKeys.weightDashboardMacros,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -729,6 +771,7 @@ class _DashboardState extends State<_Dashboard> {
 
           // Export Diet Chart
           _ActionCard(
+            key: CoachMarkKeys.weightDashboardExport,
             icon: _exporting ? Icons.hourglass_top : Icons.restaurant_menu,
             label: 'Export Diet Chart',
             subtitle: _exporting
@@ -875,6 +918,7 @@ class _SummaryRow extends StatelessWidget {
 
 class _ActionCard extends StatelessWidget {
   const _ActionCard({
+    super.key,
     required this.icon,
     required this.label,
     required this.subtitle,

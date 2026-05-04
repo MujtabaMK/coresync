@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/qr_scanner_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../../../core/widgets/main_shell_drawer.dart';
 import '../providers/qr_scanner_provider.dart';
 import 'barcode_screen.dart';
@@ -22,6 +25,7 @@ class _QrScannerShellScreenState extends State<QrScannerShellScreen>
   bool _ready = false;
   bool _cameraReady = true;
   int _previousIndex = 0;
+  int _coachMarkVersion = -1;
 
   @override
   void initState() {
@@ -40,6 +44,22 @@ class _QrScannerShellScreenState extends State<QrScannerShellScreen>
       );
       _tabController!.addListener(_onTabChanged);
       _ready = true;
+    });
+  }
+
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_qr_scanner_shown',
+          targets: qrScannerCoachTargets(),
+        );
+      });
     });
   }
 
@@ -87,6 +107,7 @@ class _QrScannerShellScreenState extends State<QrScannerShellScreen>
 
   @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     if (!_ready) {
       return Scaffold(
         appBar: AppBar(
@@ -115,6 +136,7 @@ class _QrScannerShellScreenState extends State<QrScannerShellScreen>
         title: const Text('QR / Barcode Scanner'),
         actions: [
           IconButton(
+            key: CoachMarkKeys.qrHistory,
             icon: const Icon(Icons.history),
             tooltip: 'Scan History',
             onPressed: () => context.push('/qr-scanner/history'),
@@ -125,6 +147,7 @@ class _QrScannerShellScreenState extends State<QrScannerShellScreen>
           ),
         ],
         bottom: TabBar(
+          key: CoachMarkKeys.qrTabBar,
           controller: _tabController,
           tabs: tabs,
         ),

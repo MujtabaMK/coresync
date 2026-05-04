@@ -2,6 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive/hive.dart';
+
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/home_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,11 +19,40 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Firestore firstName (higher priority than displayName).
   /// Populated once by a one-time fetch; triggers userChanges() as backup.
   String? _firestoreName;
+  int _coachMarkVersion = -1;
 
   @override
   void initState() {
     super.initState();
     _backfillDisplayName();
+  }
+
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        final box = Hive.box('app_settings');
+        final isNewSignup =
+            box.get('coach_mark_is_new_signup', defaultValue: false) == true;
+        if (isNewSignup) {
+          box.put('coach_mark_is_new_signup', false);
+          CoachMarkService.forceShow(
+            context: context,
+            screenKey: 'coach_mark_home_shown',
+            targets: homeCoachTargets(),
+          );
+        } else {
+          CoachMarkService.showIfNeeded(
+            context: context,
+            screenKey: 'coach_mark_home_shown',
+            targets: homeCoachTargets(),
+          );
+        }
+      });
+    });
   }
 
   /// One-time Firestore fetch. If displayName is missing on the Auth user,
@@ -46,85 +80,121 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (_) {}
   }
 
-  static const _features = [
+  Future<void> _replayTraining() async {
+    await CoachMarkService.resetAll();
+    // Sync version so the build() trigger doesn't double-fire for home.
+    _coachMarkVersion = CoachMarkService.resetVersion;
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Training restarted! Tutorials will show again on every screen.'),
+      ),
+    );
+    // Re-show home coach marks immediately
+    CoachMarkService.forceShow(
+      context: context,
+      screenKey: 'coach_mark_home_shown',
+      targets: homeCoachTargets(),
+    );
+  }
+
+  static final _features = [
     (
       icon: Icons.checklist_rounded,
       title: 'Todo',
       subtitle: 'Manage your tasks',
-      color: Color(0xFF4CAF50),
+      color: const Color(0xFF4CAF50),
       branch: 1,
+      coachKey: CoachMarkKeys.homeTodo,
     ),
     (
       icon: Icons.lock_rounded,
       title: 'Passwords',
       subtitle: 'Secure vault',
-      color: Color(0xFF2196F3),
+      color: const Color(0xFF2196F3),
       branch: 2,
+      coachKey: CoachMarkKeys.homePasswords,
     ),
     (
       icon: Icons.fitness_center_rounded,
       title: 'Fitness',
       subtitle: 'Track your fitness',
-      color: Color(0xFFFF5722),
+      color: const Color(0xFFFF5722),
       branch: 3,
+      coachKey: CoachMarkKeys.homeFitness,
     ),
     (
       icon: Icons.track_changes_rounded,
       title: 'Habits',
       subtitle: 'Build daily habits',
-      color: Color(0xFFE91E63),
+      color: const Color(0xFFE91E63),
       branch: 4,
+      coachKey: CoachMarkKeys.homeHabits,
     ),
     (
       icon: Icons.document_scanner_rounded,
       title: 'Scanner',
       subtitle: 'Scan documents',
-      color: Color(0xFF9C27B0),
+      color: const Color(0xFF9C27B0),
       branch: 5,
+      coachKey: CoachMarkKeys.homeScanner,
     ),
     (
       icon: Icons.qr_code_scanner_rounded,
       title: 'QR / Barcode',
       subtitle: 'Scan & generate',
-      color: Color(0xFF009688),
+      color: const Color(0xFF009688),
       branch: 6,
+      coachKey: CoachMarkKeys.homeQr,
     ),
     (
       icon: Icons.calculate_rounded,
       title: 'Calculator',
       subtitle: 'Quick calculations',
-      color: Color(0xFFFF9800),
+      color: const Color(0xFFFF9800),
       branch: 7,
+      coachKey: CoachMarkKeys.homeCalculator,
     ),
     (
       icon: Icons.translate_rounded,
       title: 'Translator',
       subtitle: 'Voice translation',
-      color: Color(0xFF3F51B5),
+      color: const Color(0xFF3F51B5),
       branch: 8,
+      coachKey: CoachMarkKeys.homeTranslator,
     ),
     (
       icon: Icons.picture_as_pdf_rounded,
       title: 'PDF Reader',
       subtitle: 'View & annotate PDFs',
-      color: Color(0xFFE53935),
+      color: const Color(0xFFE53935),
       branch: 9,
+      coachKey: CoachMarkKeys.homePdf,
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
+          key: CoachMarkKeys.homeMenu,
           icon: const Icon(Icons.menu),
           onPressed: () => Scaffold.of(context).openDrawer(),
         ),
         title: const Text('CoreSync Go'),
         actions: [
           IconButton(
+            key: CoachMarkKeys.homeReplayTutorial,
+            icon: const Icon(Icons.school_outlined),
+            tooltip: 'Restart Training',
+            onPressed: _replayTraining,
+          ),
+          IconButton(
+            key: CoachMarkKeys.homeProfile,
             icon: const Icon(Icons.person_outline),
             onPressed: () => context.push('/profile'),
           ),
@@ -160,6 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 24),
             GridView.count(
+              key: CoachMarkKeys.homeGrid,
               crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -168,6 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
               childAspectRatio: 1.05,
               children: _features.map((f) {
                 return _FeatureCard(
+                  key: f.coachKey,
                   icon: f.icon,
                   title: f.title,
                   subtitle: f.subtitle,
@@ -187,6 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _FeatureCard extends StatelessWidget {
   const _FeatureCard({
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,

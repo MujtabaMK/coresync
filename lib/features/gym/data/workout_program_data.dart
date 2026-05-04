@@ -1,5 +1,6 @@
 import '../domain/exercise_model.dart';
 import '../domain/workout_program_model.dart';
+import 'yoga_api_service.dart';
 
 class WorkoutProgramData {
   WorkoutProgramData._();
@@ -540,6 +541,10 @@ class WorkoutProgramData {
 
   static WorkoutProgram? getById(String id) {
     for (final program in _programs) {
+      if (program.id == id) return program;
+    }
+    // Check dynamically loaded yoga programs
+    for (final program in YogaApiService.instance.programs) {
       if (program.id == id) return program;
     }
     return null;

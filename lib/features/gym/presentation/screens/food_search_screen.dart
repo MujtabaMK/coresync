@@ -5,6 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../data/common_foods_data.dart';
 import '../../data/firebase_food_service.dart';
 import '../../data/food_database_service.dart';
@@ -55,6 +58,16 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   void initState() {
     super.initState();
     _loadCategories();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_food_search_shown',
+          targets: foodSearchCoachTargets(),
+        );
+      });
+    });
   }
 
   @override
@@ -548,6 +561,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       body: Column(
         children: [
           Padding(
+            key: CoachMarkKeys.foodSearchBar,
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: _searchCtrl,

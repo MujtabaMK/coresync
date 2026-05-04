@@ -23,6 +23,7 @@ class ExerciseModel {
   final String name;
   final String? lottieAsset;
   final String? videoAsset;
+  final String? networkImageUrl;
   final String category;
   final ExerciseDifficulty difficulty;
   final List<String> muscleGroups;
@@ -39,6 +40,7 @@ class ExerciseModel {
     required this.name,
     this.lottieAsset,
     this.videoAsset,
+    this.networkImageUrl,
     required this.category,
     required this.difficulty,
     this.muscleGroups = const [],

@@ -1,15 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/translator_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../../../core/widgets/main_shell_drawer.dart';
 import 'conversation_screen.dart';
 import 'voice_translate_screen.dart';
 
-class TranslatorShellScreen extends StatelessWidget {
+class TranslatorShellScreen extends StatefulWidget {
   const TranslatorShellScreen({super.key});
 
   @override
+  State<TranslatorShellScreen> createState() => _TranslatorShellScreenState();
+}
+
+class _TranslatorShellScreenState extends State<TranslatorShellScreen> {
+  static final _keys = [
+    CoachMarkKeys.transVoice,
+    CoachMarkKeys.transConversation,
+  ];
+
+  int _coachMarkVersion = -1;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_translator_shown',
+          targets: translatorCoachTargets(),
+        );
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     final theme = Theme.of(context);
 
     final items = <_GridItem>[
@@ -60,6 +97,7 @@ class TranslatorShellScreen extends StatelessWidget {
           final item = items[index];
 
           return Card(
+            key: _keys[index],
             clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: item.onTap,

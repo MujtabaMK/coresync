@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../domain/reminder_type.dart';
 
-class RemindersHubScreen extends StatelessWidget {
+class RemindersHubScreen extends StatefulWidget {
   const RemindersHubScreen({super.key});
+
+  @override
+  State<RemindersHubScreen> createState() => _RemindersHubScreenState();
 
   static IconData _iconFor(ReminderType type) {
     switch (type) {
@@ -39,6 +45,23 @@ class RemindersHubScreen extends StatelessWidget {
         return Colors.red;
     }
   }
+}
+
+class _RemindersHubScreenState extends State<RemindersHubScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_reminders_shown',
+          targets: remindersCoachTargets(),
+        );
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,14 +74,16 @@ class RemindersHubScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          ...types.map((type) {
-            final color = _colorFor(type);
+          ...types.indexed.map((e) {
+            final (index, type) = e;
+            final color = RemindersHubScreen._colorFor(type);
             return Column(
+              key: index == 0 ? CoachMarkKeys.remindersListView : null,
               children: [
                 ListTile(
                   leading: CircleAvatar(
                     backgroundColor: color.withValues(alpha: 0.15),
-                    child: Icon(_iconFor(type), color: color),
+                    child: Icon(RemindersHubScreen._iconFor(type), color: color),
                   ),
                   title: Text(
                     type.label,

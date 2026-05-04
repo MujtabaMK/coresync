@@ -107,6 +107,27 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
         ],
       );
     }
+    if (exercise.networkImageUrl != null) {
+      return SizedBox(
+        width: double.infinity,
+        height: 300,
+        child: Image.network(
+          exercise.networkImageUrl!,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => Center(
+            child: CircleAvatar(
+              radius: 64,
+              backgroundColor: theme.colorScheme.primaryContainer,
+              child: Icon(
+                _categoryIcon(exercise.category),
+                size: 64,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return SizedBox(
       height: 300,
       child: Center(

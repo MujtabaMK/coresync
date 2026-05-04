@@ -5,7 +5,10 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/todo_coach_marks.dart';
 import '../../../../core/constants/notification_ids.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/services/push_notification_service.dart';
 import '../../../../core/utils/snackbar_utils.dart';
@@ -43,6 +46,18 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
     if (widget.taskId != null) {
       _isEditing = true;
       _loadTask();
+    }
+    if (!_isEditing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (!mounted) return;
+          CoachMarkService.showIfNeeded(
+            context: context,
+            screenKey: 'coach_mark_add_task_shown',
+            targets: addTaskCoachTargets(),
+          );
+        });
+      });
     }
   }
 
@@ -365,6 +380,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                     // Title fields
                     for (int i = 0; i < _titleControllers.length; i++) ...[
                       Row(
+                        key: i == 0 ? CoachMarkKeys.addTaskTitle : null,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
@@ -414,6 +430,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                     ),
                     const SizedBox(height: 16),
                     GestureDetector(
+                      key: CoachMarkKeys.addTaskDate,
                       onTap: _pickDate,
                       child: InputDecorator(
                         decoration: const InputDecoration(
@@ -428,6 +445,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                     ),
                     const SizedBox(height: 16),
                     GestureDetector(
+                      key: CoachMarkKeys.addTaskReminder,
                       onTap: _pickTime,
                       child: InputDecorator(
                         decoration: const InputDecoration(
@@ -442,6 +460,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<TaskStatus>(
+                      key: CoachMarkKeys.addTaskStatus,
                       initialValue: _status,
                       decoration: const InputDecoration(
                         labelText: 'Status',
@@ -490,6 +509,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                     ],
                     const SizedBox(height: 32),
                     FilledButton(
+                      key: CoachMarkKeys.addTaskSave,
                       onPressed: _isLoading ? null : _save,
                       child: _isLoading
                           ? const SizedBox(

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../../../core/widgets/main_shell_drawer.dart';
 import 'attendance_screen.dart';
 import 'gym_home_screen.dart';
@@ -20,6 +23,7 @@ class GymShellScreen extends StatefulWidget {
 class _GymShellScreenState extends State<GymShellScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  int _coachMarkVersion = -1;
 
   static const _tabs = [
     Tab(icon: Icon(Icons.dashboard_rounded), text: 'Home'),
@@ -47,6 +51,22 @@ class _GymShellScreenState extends State<GymShellScreen>
     _tabController = TabController(length: _tabs.length, vsync: this);
   }
 
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_gym_shown',
+          targets: gymCoachTargets(),
+        );
+      });
+    });
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -55,6 +75,7 @@ class _GymShellScreenState extends State<GymShellScreen>
 
   @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -69,6 +90,7 @@ class _GymShellScreenState extends State<GymShellScreen>
           ),
         ],
         bottom: TabBar(
+          key: CoachMarkKeys.gymTabBar,
           controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,

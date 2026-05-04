@@ -1,5 +1,6 @@
 package com.mujtaba.coresync
 
+import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -49,6 +50,18 @@ class StepCounterForegroundService : Service(), SensorEventListener {
             val cal = Calendar.getInstance()
             return "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.MONTH) + 1}-${cal.get(Calendar.DAY_OF_MONTH)}"
         }
+
+        /** Check if the foreground service is currently running. */
+        @Suppress("DEPRECATION")
+        fun isRunning(context: Context): Boolean {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            for (service in am.getRunningServices(Int.MAX_VALUE)) {
+                if (service.service.className == StepCounterForegroundService::class.java.name) {
+                    return true
+                }
+            }
+            return false
+        }
     }
 
     private var sensorManager: SensorManager? = null
@@ -86,6 +99,10 @@ class StepCounterForegroundService : Service(), SensorEventListener {
 
         // Schedule WorkManager for reliable sync that survives Doze mode
         try { StepSyncWorker.schedule(this) } catch (_: Exception) {}
+
+        // Schedule AlarmManager as an additional layer to restart service
+        // and sync steps even in deep Doze
+        try { StepAlarmReceiver.schedule(this) } catch (_: Exception) {}
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
@@ -97,6 +114,8 @@ class StepCounterForegroundService : Service(), SensorEventListener {
         // Final sync before the service stops
         syncToFirestore()
         try { StepSyncWorker.syncNow(this) } catch (_: Exception) {}
+        // Schedule alarm so the service can be restarted later
+        try { StepAlarmReceiver.schedule(this) } catch (_: Exception) {}
         sensorManager?.unregisterListener(this)
         syncRunnable?.let { handler.removeCallbacks(it) }
         super.onDestroy()
@@ -107,7 +126,14 @@ class StepCounterForegroundService : Service(), SensorEventListener {
     private fun registerSensor() {
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)?.let {
-            sensorManager?.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+            // Sensor batching: hardware FIFO buffers events for up to 5 minutes
+            // so the CPU can sleep while the low-power sensor hub still counts
+            // steps.  Events are delivered in bulk when the CPU wakes for any
+            // reason, the FIFO fills up, or the latency window expires.
+            val batchLatencyUs = 5 * 60 * 1_000_000  // 5 minutes
+            sensorManager?.registerListener(
+                this, it, SensorManager.SENSOR_DELAY_NORMAL, batchLatencyUs
+            )
         }
     }
 

@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../data/water_boost_foods_data.dart';
 import '../providers/gym_provider.dart';
 
@@ -20,6 +23,7 @@ class WaterIntakeScreen extends StatefulWidget {
 class _WaterIntakeScreenState extends State<WaterIntakeScreen>
     with TickerProviderStateMixin {
   bool _showSetup = false;
+  int _coachMarkVersion = -1;
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -265,7 +269,25 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen>
   }
 
   @override
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_water_shown',
+          targets: waterCoachTargets(),
+        );
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     final theme = Theme.of(context);
 
     return BlocConsumer<GymCubit, GymState>(
@@ -408,6 +430,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen>
           ),
           // Water bottle with fill animation
           SizedBox(
+            key: CoachMarkKeys.waterBottle,
             width: 260,
             height: 370,
             child: AnimatedBuilder(
@@ -495,6 +518,7 @@ class _WaterIntakeScreenState extends State<WaterIntakeScreen>
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
+                  key: CoachMarkKeys.waterAddBtn,
                   onPressed: !_isPourAnimating
                       ? () => _showMlPicker(isAdd: true)
                       : null,

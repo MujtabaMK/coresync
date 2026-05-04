@@ -5,8 +5,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../data/battery_optimization_service.dart';
 import '../../data/step_counter_service.dart';
 import '../providers/gym_provider.dart';
@@ -52,6 +57,9 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
     }
     return null;
   }
+
+  @override
+  int _coachMarkVersion = -1;
 
   @override
   void initState() {
@@ -132,6 +140,46 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
 
   /// Runs the heavy sensor/Health Connect init without blocking the UI.
   Future<void> _initSensors() async {
+    // Show permission guide coach mark before the system dialog (first visit only)
+    final box = Hive.box('app_settings');
+    if (box.get('step_permission_guide_shown', defaultValue: false) != true) {
+      if (mounted) {
+        final completer = Completer<void>();
+        // Wait a frame so the rings widget is laid out
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+
+        final targets = stepPermissionCoachTargets()
+            .where((t) => t.keyTarget?.currentContext != null)
+            .toList();
+
+        if (targets.isNotEmpty) {
+          TutorialCoachMark(
+            targets: targets,
+            colorShadow: Colors.black,
+            opacityShadow: 0.8,
+            textSkip: 'GOT IT',
+            alignSkip: Alignment.topRight,
+            paddingFocus: 10,
+            onSkip: () {
+              if (!completer.isCompleted) completer.complete();
+              return true;
+            },
+            onFinish: () {
+              if (!completer.isCompleted) completer.complete();
+            },
+            onClickOverlay: (_) {},
+          ).show(context: context);
+
+          await completer.future;
+        }
+
+        box.put('step_permission_guide_shown', true);
+      }
+    }
+
+    if (!mounted) return;
+
     final ok = await _service.initialize();
     if (!ok) {
       if (mounted) setState(() { _permissionDenied = true; _initializing = false; });
@@ -179,6 +227,18 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
     // Silently request battery optimization exemption if not already granted
     if (Platform.isAndroid) {
       _batteryService.requestIgnoreBatteryOptimizations();
+    }
+
+    // Show battery optimization coach mark (Android only)
+    if (Platform.isAndroid && mounted) {
+      Future.delayed(const Duration(seconds: 1), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'step_battery_guide_shown',
+          targets: batteryCoachTargets(),
+        );
+      });
     }
 
     // Sync historical steps in background
@@ -248,7 +308,25 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
   };
 
   @override
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_steps_shown',
+          targets: stepsCoachTargets(),
+        );
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     final theme = Theme.of(context);
     final gymState = context.watch<GymCubit>().state;
     final weight = gymState.userWeight ?? 70.0;
@@ -329,6 +407,7 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: GestureDetector(
+                    key: CoachMarkKeys.stepsBattery,
                     onTap: () async {
                       await _batteryService.openOemBatterySettings();
                     },
@@ -364,6 +443,7 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
           const SizedBox(height: 20),
           // 3-ring activity progress (Samsung Health style)
           SizedBox(
+            key: CoachMarkKeys.stepsRings,
             width: 280,
             height: 280,
             child: CustomPaint(
@@ -404,6 +484,7 @@ class _StepsScreenState extends State<StepsScreen> with WidgetsBindingObserver {
           const SizedBox(height: 24),
           // Stats row: Steps, Minutes, Calories (Samsung Health style)
           Row(
+            key: CoachMarkKeys.stepsStats,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _HealthStatColumn(

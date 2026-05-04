@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../data/common_foods_data.dart';
 import '../../data/food_database_service.dart';
 
@@ -50,6 +53,16 @@ class _CreateFoodScreenState extends State<CreateFoodScreen> {
   void initState() {
     super.initState();
     _nameCtrl = TextEditingController(text: widget.initialName ?? '');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_create_food_shown',
+          targets: createFoodCoachTargets(),
+        );
+      });
+    });
   }
 
   @override
@@ -199,6 +212,7 @@ class _CreateFoodScreenState extends State<CreateFoodScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
+          key: CoachMarkKeys.createFoodForm,
           padding: const EdgeInsets.all(16),
           children: [
             TextFormField(

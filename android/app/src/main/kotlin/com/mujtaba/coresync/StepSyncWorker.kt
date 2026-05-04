@@ -1,6 +1,7 @@
 package com.mujtaba.coresync
 
 import android.content.Context
+import android.content.Intent
 import androidx.work.*
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
@@ -19,6 +20,10 @@ import java.util.concurrent.TimeUnit
  * - Executes during Doze maintenance windows
  * - Retries on failure with exponential back-off
  * - Only runs when network is available
+ *
+ * After each sync, it also:
+ * - Restarts the foreground service if it was killed (self-healing)
+ * - Ensures the AlarmManager backup alarm is scheduled
  */
 class StepSyncWorker(
     context: Context,
@@ -113,9 +118,37 @@ class StepSyncWorker(
                 Tasks.await(docRef.set(mapOf("steps" to steps), SetOptions.merge()))
             }
 
+            ensureServiceRunning()
             return Result.success()
         } catch (_: Exception) {
+            ensureServiceRunning()
             return Result.retry()
         }
+    }
+
+    /**
+     * Self-healing: restart the foreground service if it was killed, and
+     * ensure the AlarmManager backup alarm is active.
+     */
+    private fun ensureServiceRunning() {
+        val prefs = applicationContext.getSharedPreferences(
+            StepCounterForegroundService.PREFS_NAME, Context.MODE_PRIVATE
+        )
+        if (!prefs.contains(StepCounterForegroundService.KEY_DATE)) return
+
+        // Restart foreground service if not running
+        if (!StepCounterForegroundService.isRunning(applicationContext)) {
+            try {
+                applicationContext.startForegroundService(
+                    Intent(applicationContext, StepCounterForegroundService::class.java)
+                )
+            } catch (_: Exception) {
+                // May fail on Android 12+ due to background start restrictions.
+                // AlarmManager (exact alarm) can still restart it next cycle.
+            }
+        }
+
+        // Ensure AlarmManager backup is scheduled
+        try { StepAlarmReceiver.schedule(applicationContext) } catch (_: Exception) {}
     }
 }

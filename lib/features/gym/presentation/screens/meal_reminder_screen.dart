@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
 import '../../../../core/constants/notification_ids.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../../../core/services/notification_service.dart';
 import '../providers/gym_provider.dart';
 
@@ -51,6 +54,16 @@ class _MealReminderScreenState extends State<MealReminderScreen> {
   void initState() {
     super.initState();
     _loadSettings();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_meal_reminder_shown',
+          targets: mealReminderCoachTargets(),
+        );
+      });
+    });
   }
 
   Future<void> _loadSettings() async {
@@ -147,6 +160,7 @@ class _MealReminderScreenState extends State<MealReminderScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 SwitchListTile(
+                  key: CoachMarkKeys.mealReminderMaster,
                   title: const Text('Enable Reminders'),
                   value: _masterEnabled,
                   onChanged: (val) {

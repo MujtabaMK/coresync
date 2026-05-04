@@ -9,6 +9,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../data/common_foods_data.dart';
 import '../../data/food_database_service.dart';
 import '../../data/step_counter_service.dart';
@@ -42,6 +45,7 @@ class _TrackFoodScreenState extends State<TrackFoodScreen>
   late final GymCubit _gymCubit;
   StreamSubscription<int>? _stepSub;
   StreamSubscription<void>? _healthMetricsSub;
+  int _coachMarkVersion = -1;
 
   @override
   void initState() {
@@ -118,6 +122,22 @@ class _TrackFoodScreenState extends State<TrackFoodScreen>
     super.dispose();
   }
 
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_food_shown',
+          targets: foodCoachTargets(),
+        );
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<GymCubit, GymState>(
@@ -130,6 +150,9 @@ class _TrackFoodScreenState extends State<TrackFoodScreen>
                 state.userHeight != null ? state.userHeight! * 100 : null,
           );
         }
+        // Trigger coach mark only when _TrackerView will be built
+        // (targets like foodSummary, foodGrid, foodAddButton live there).
+        _triggerCoachMark();
         return _TrackerView(profile: profile, state: state);
       },
     );
@@ -448,6 +471,7 @@ class _TrackerView extends StatelessWidget {
       children: [
         // Daily summary card
         Card(
+          key: CoachMarkKeys.foodSummary,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -850,6 +874,7 @@ class _TrackerView extends StatelessWidget {
         const SizedBox(height: 20),
         // 2x3 Grid
         GridView.count(
+          key: CoachMarkKeys.foodGrid,
           crossAxisCount: 2,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -858,6 +883,7 @@ class _TrackerView extends StatelessWidget {
           childAspectRatio: 1.05,
           children: [
             _FoodGridItem(
+              key: CoachMarkKeys.foodTrackFood,
               icon: Icons.restaurant_menu,
               label: 'Track Food',
               subtitle: 'Log your daily meals',
@@ -865,6 +891,7 @@ class _TrackerView extends StatelessWidget {
               onTap: () => _openTrackFood(context),
             ),
             _FoodGridItem(
+              key: CoachMarkKeys.foodWorkout,
               icon: Icons.fitness_center,
               label: 'Workout',
               subtitle: 'Log exercises',
@@ -872,6 +899,7 @@ class _TrackerView extends StatelessWidget {
               onTap: () => _openWorkout(context),
             ),
             _FoodGridItem(
+              key: CoachMarkKeys.foodSleep,
               icon: Icons.bedtime,
               label: 'Sleep',
               subtitle: 'Track your sleep',
@@ -879,6 +907,7 @@ class _TrackerView extends StatelessWidget {
               onTap: () => _openSleep(context),
             ),
             _FoodGridItem(
+              key: CoachMarkKeys.foodRecipes,
               icon: Icons.menu_book,
               label: 'Recipes',
               subtitle: 'Healthy recipes',
@@ -886,6 +915,7 @@ class _TrackerView extends StatelessWidget {
               onTap: () => _openRecipes(context),
             ),
             _FoodGridItem(
+              key: CoachMarkKeys.foodWeightPlan,
               icon: Icons.monitor_weight,
               label: 'Weight Plan',
               subtitle: 'Goals & BMI',
@@ -893,6 +923,7 @@ class _TrackerView extends StatelessWidget {
               onTap: () => _openWeightPlan(context),
             ),
             _FoodGridItem(
+              key: CoachMarkKeys.foodTips,
               icon: Icons.lightbulb_outline,
               label: 'Tips',
               subtitle: 'Health advice',
@@ -900,6 +931,7 @@ class _TrackerView extends StatelessWidget {
               onTap: () => _openTips(context),
             ),
             _FoodGridItem(
+              key: CoachMarkKeys.foodFoodInfo,
               icon: Icons.search,
               label: 'Food Info',
               subtitle: 'Explore nutrition',
@@ -1947,6 +1979,7 @@ class _SleepInsightCard extends StatelessWidget {
 
 class _FoodGridItem extends StatelessWidget {
   const _FoodGridItem({
+    super.key,
     required this.icon,
     required this.label,
     required this.subtitle,
@@ -2026,6 +2059,16 @@ class _TrackFoodPageState extends State<_TrackFoodPage> {
   void initState() {
     super.initState();
     context.read<GymCubit>().loadTrackedFood();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_track_food_inner_shown',
+          targets: trackFoodInnerCoachTargets(),
+        );
+      });
+    });
   }
 
   MealType _guessMealType() {
@@ -2643,6 +2686,7 @@ class _TrackTab extends StatelessWidget {
       children: [
         // Circular calorie header
         Card(
+          key: CoachMarkKeys.trackFoodCalCard,
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -2995,7 +3039,10 @@ class _TrackTab extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Meal sections
-        ...MealType.values.map((meal) => _MealSection(
+        ...MealType.values.indexed.map((e) {
+              final meal = e.$2;
+              return _MealSection(
+              key: e.$1 == 0 ? CoachMarkKeys.foodAddButton : null,
               meal: meal,
               target: profile.dailyCalorieTarget,
               foods: state.trackedFoodsForMeal(meal),
@@ -3037,7 +3084,8 @@ class _TrackTab extends StatelessWidget {
               },
               onScan: (source) => onScanFood(meal, source),
               onVoice: () => onVoiceFood(meal),
-            )),
+            );
+            }),
         const SizedBox(height: 16),
       ],
     );
@@ -3307,6 +3355,7 @@ class _MicroBar extends StatelessWidget {
 
 class _MealSection extends StatelessWidget {
   const _MealSection({
+    super.key,
     required this.meal,
     required this.target,
     required this.foods,
@@ -3581,6 +3630,16 @@ class _RecipesTabState extends State<_RecipesTab>
     super.initState();
     _catTabCtrl = TabController(length: _categories.length, vsync: this);
     _loadRecipes();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_inner_recipes_shown',
+          targets: innerRecipesCoachTargets(),
+        );
+      });
+    });
   }
 
   @override
@@ -3774,6 +3833,7 @@ class _RecipesTabState extends State<_RecipesTab>
         children: [
           // Search bar
           Padding(
+            key: CoachMarkKeys.innerRecipesSearch,
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: TextField(
               controller: _searchCtrl,
@@ -3798,6 +3858,7 @@ class _RecipesTabState extends State<_RecipesTab>
           ),
           // Filter & sort chips
           SizedBox(
+            key: CoachMarkKeys.innerRecipesFilters,
             height: 48,
             child: ListView(
               scrollDirection: Axis.horizontal,

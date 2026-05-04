@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/gym_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../providers/medicine_provider.dart';
 
 class MedicineCabinetScreen extends StatefulWidget {
@@ -16,6 +19,16 @@ class _MedicineCabinetScreenState extends State<MedicineCabinetScreen> {
   void initState() {
     super.initState();
     context.read<MedicineCubit>().loadMedicines();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_medicine_shown',
+          targets: medicineCoachTargets(),
+        );
+      });
+    });
   }
 
   @override
@@ -58,6 +71,7 @@ class _MedicineCabinetScreenState extends State<MedicineCabinetScreen> {
                     ),
                     const SizedBox(height: 24),
                     FilledButton.icon(
+                      key: CoachMarkKeys.medicineFab,
                       onPressed: () => context.go('/gym/medicines/add'),
                       icon: const Icon(Icons.add),
                       label: const Text('Schedule a Medicine'),
@@ -112,6 +126,7 @@ class _MedicineCabinetScreenState extends State<MedicineCabinetScreen> {
         builder: (context, state) {
           if (state.medicines.isEmpty) return const SizedBox.shrink();
           return FloatingActionButton(
+            key: CoachMarkKeys.medicineFab,
             onPressed: () => context.go('/gym/medicines/add'),
             child: const Icon(Icons.add),
           );

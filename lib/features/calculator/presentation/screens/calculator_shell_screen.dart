@@ -1,16 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/coach_marks/coach_mark_keys.dart';
+import '../../../../core/coach_marks/calculator_coach_marks.dart';
+import '../../../../core/services/coach_mark_service.dart';
 import '../../../../core/widgets/main_shell_drawer.dart';
 import 'converter_screen.dart';
 import 'scientific_calculator_screen.dart';
 import 'simple_calculator_screen.dart';
 
-class CalculatorShellScreen extends StatelessWidget {
+class CalculatorShellScreen extends StatefulWidget {
   const CalculatorShellScreen({super.key});
 
   @override
+  State<CalculatorShellScreen> createState() => _CalculatorShellScreenState();
+}
+
+class _CalculatorShellScreenState extends State<CalculatorShellScreen> {
+  static final _keys = [
+    CoachMarkKeys.calcSimple,
+    CoachMarkKeys.calcScientific,
+    CoachMarkKeys.calcConverter,
+  ];
+
+  int _coachMarkVersion = -1;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _triggerCoachMark() {
+    final v = CoachMarkService.resetVersion;
+    if (_coachMarkVersion == v) return;
+    _coachMarkVersion = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        CoachMarkService.showIfNeeded(
+          context: context,
+          screenKey: 'coach_mark_calculator_shown',
+          targets: calculatorCoachTargets(),
+        );
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _triggerCoachMark();
     final theme = Theme.of(context);
 
     final items = <_GridItem>[
@@ -70,6 +108,7 @@ class CalculatorShellScreen extends StatelessWidget {
           final item = items[index];
 
           return Card(
+            key: _keys[index],
             clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: item.onTap,
@@ -119,7 +158,6 @@ class CalculatorShellScreen extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _GridItem {
